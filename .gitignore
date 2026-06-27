@@ -1,0 +1,40 @@
+# Dependencies
+/node_modules/
+
+# Build output
+/build/
+/.react-router/
+
+# Environment & secrets (keep .env.example)
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+**/serviceAccount*.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+Thumbs.db
+
+# Misc
+.cache/
+coverage/
+*.tsbuildinfo
