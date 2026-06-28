@@ -108,13 +108,17 @@ function InvoiceView({
                   Record payment
                 </Button>
               )}
-              <Button variant="ghost" onClick={send}>
-                <Icon name="send" size={16} />
-                Send
-              </Button>
-              <Button variant="ghost" onClick={cancel}>
-                Cancel invoice
-              </Button>
+              {invoice.status !== "Paid" && (
+                <Button variant="ghost" onClick={send}>
+                  <Icon name="send" size={16} />
+                  Send
+                </Button>
+              )}
+              {invoice.status !== "Paid" && (
+                <Button variant="ghost" onClick={cancel}>
+                  Cancel invoice
+                </Button>
+              )}
             </>
           )
         }
