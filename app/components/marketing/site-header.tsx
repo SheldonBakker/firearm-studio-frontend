@@ -26,7 +26,7 @@ const NAV = [
   { href: "/#how", label: "How it works" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   return (
     <header
       style={{
@@ -120,42 +120,66 @@ export function SiteHeader() {
             flexShrink: 0,
           }}
         >
-          <Link
-            to="/login"
-            className="mk-ghost"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              height: 34,
-              padding: "0 14px",
-              borderRadius: 9,
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: "#e6eaf0",
-              textDecoration: "none",
-            }}
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/signup"
-            className="mk-cta"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              height: 34,
-              padding: "0 16px",
-              borderRadius: 9,
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: "#1a1206",
-              background: "#e8973c",
-              boxShadow: "0 4px 14px rgba(232,151,60,.25)",
-              textDecoration: "none",
-            }}
-          >
-            Get started
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              to="/dashboard"
+              className="mk-cta"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                height: 34,
+                padding: "0 16px",
+                borderRadius: 9,
+                fontSize: 13.5,
+                fontWeight: 600,
+                color: "#1a1206",
+                background: "#e8973c",
+                boxShadow: "0 4px 14px rgba(232,151,60,.25)",
+                textDecoration: "none",
+              }}
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="mk-ghost"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 34,
+                  padding: "0 14px",
+                  borderRadius: 9,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: "#e6eaf0",
+                  textDecoration: "none",
+                }}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="mk-cta"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 34,
+                  padding: "0 16px",
+                  borderRadius: 9,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: "#1a1206",
+                  background: "#e8973c",
+                  boxShadow: "0 4px 14px rgba(232,151,60,.25)",
+                  textDecoration: "none",
+                }}
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

@@ -3,6 +3,12 @@ import type { Route } from "./+types/home";
 import { SiteHeader, MarketingLogo } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 import { organizationLd, pageMeta, websiteLd } from "~/lib/seo";
+import { getSessionUser } from "~/lib/auth";
+
+export async function clientLoader() {
+  const user = await getSessionUser();
+  return { isLoggedIn: !!user };
+}
 
 export function meta({ location }: Route.MetaArgs) {
   return [
@@ -195,10 +201,11 @@ function StatusPill({ inv, big = false }: { inv: Invoice; big?: boolean }) {
   );
 }
 
-export default function Home() {
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const { isLoggedIn } = loaderData;
   return (
     <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader />
+      <SiteHeader isLoggedIn={isLoggedIn} />
 
       <section id="top" style={{ position: "relative" }}>
         <div
@@ -264,48 +271,75 @@ export default function Home() {
               South African storage providers.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
-              <Link
-                to="/signup"
-                className="mk-cta-lg"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  height: 46,
-                  padding: "0 24px",
-                  borderRadius: 11,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#1a1206",
-                  background: "#e8973c",
-                  boxShadow: "0 8px 24px rgba(232,151,60,.28)",
-                  textDecoration: "none",
-                }}
-              >
-                Start Free
-                {arrow}
-              </Link>
-              <Link
-                to="/login"
-                className="mk-ghost-lg"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 46,
-                  padding: "0 24px",
-                  borderRadius: 11,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  textDecoration: "none",
-                }}
-              >
-                Sign in
-              </Link>
+              {isLoggedIn ? (
+                <Link
+                  to="/dashboard"
+                  className="mk-cta-lg"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    height: 46,
+                    padding: "0 24px",
+                    borderRadius: 11,
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#1a1206",
+                    background: "#e8973c",
+                    boxShadow: "0 8px 24px rgba(232,151,60,.28)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Go to Dashboard
+                  {arrow}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/signup"
+                    className="mk-cta-lg"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      height: 46,
+                      padding: "0 24px",
+                      borderRadius: 11,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "#1a1206",
+                      background: "#e8973c",
+                      boxShadow: "0 8px 24px rgba(232,151,60,.28)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Start Free
+                    {arrow}
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="mk-ghost-lg"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: 46,
+                      padding: "0 24px",
+                      borderRadius: 11,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "#e6eaf0",
+                      background: "#1a1f28",
+                      border: "1px solid #333b49",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Sign in
+                  </Link>
+                </>
+              )}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px", marginTop: 30 }}>
               <span style={{ fontSize: 12.5, color: "#5c6573" }}>
@@ -582,12 +616,20 @@ export default function Home() {
               the day is out.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 30 }}>
-              <Link to="/signup" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
-                Start Free
-              </Link>
-              <Link to="/login" className="mk-ghost-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#e6eaf0", background: "transparent", border: "1px solid #333b49", textDecoration: "none" }}>
-                Talk to sales
-              </Link>
+              {isLoggedIn ? (
+                <Link to="/dashboard" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link to="/signup" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
+                    Start Free
+                  </Link>
+                  <Link to="/login" className="mk-ghost-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#e6eaf0", background: "transparent", border: "1px solid #333b49", textDecoration: "none" }}>
+                    Talk to sales
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
