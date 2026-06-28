@@ -177,10 +177,6 @@ export interface StartStorageRequest {
   notes?: string | null;
 }
 
-export interface ReleaseStorageRequest {
-  storedUntil?: string | null;
-}
-
 export interface UpdateStorageRecordRequest {
   storedFrom?: string | null;
   storedUntil?: string | null;

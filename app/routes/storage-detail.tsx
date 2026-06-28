@@ -172,7 +172,8 @@ function StorageView({
           },
         ]}
         onSubmit={async (v) => {
-          await api.releaseStorage(record.id, {
+          await api.updateStorage(record.id, {
+            storageStatus: StorageStatus.Released,
             storedUntil: v.storedUntil || null,
           });
           toast.success("Storage released");

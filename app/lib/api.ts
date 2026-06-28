@@ -17,7 +17,6 @@ import type {
   InviteUserRequest,
   LicenceResponse,
   RecordPaymentRequest,
-  ReleaseStorageRequest,
   StartStorageRequest,
   StorageRecordResponse,
   UpdateCompanyRequest,
@@ -215,11 +214,6 @@ export const api = {
   startStorage: (firearmId: string, body: StartStorageRequest) =>
     request<void>(`/api/v1/firearms/${firearmId}/storage`, {
       method: "POST",
-      body,
-    }),
-  releaseStorage: (id: string, body: ReleaseStorageRequest) =>
-    request<void>(`/api/v1/storage-records/${id}/release`, {
-      method: "PATCH",
       body,
     }),
   updateStorage: (id: string, body: UpdateStorageRecordRequest) =>

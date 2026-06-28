@@ -179,7 +179,8 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     },
                   ]}
                   onSubmit={async (v) => {
-                    await api.releaseStorage(releasing.id, {
+                    await api.updateStorage(releasing.id, {
+                      storageStatus: StorageStatus.Released,
                       storedUntil: v.storedUntil || null,
                     });
                     toast.success("Storage released");
