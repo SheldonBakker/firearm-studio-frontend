@@ -33,6 +33,24 @@ export interface CustomerResponse {
   isActive: boolean;
 }
 
+export interface CustomerListItemDto {
+  id: string;
+  customerType: CustomerType;
+  fullName: string | null;
+  companyName: string | null;
+  email: string | null;
+  phone: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CustomerListItemDtoPaginatedResponse {
+  items: CustomerListItemDto[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
 export interface CreateCustomerRequest {
   customerType: CustomerType;
   fullName?: string | null;
@@ -235,10 +253,9 @@ export interface UserResponse {
 
 export interface AuditLogResponse {
   id: string;
-  occurredAt?: string | null;
-  userName?: string | null;
-  entityType?: string | null;
-  action?: string | null;
-  summary?: string | null;
-  [k: string]: unknown;
+  appUserId: string | null;
+  entityType: string | null;
+  entityId: string;
+  action: string | null;
+  createdAt: string;
 }

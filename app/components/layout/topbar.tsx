@@ -4,7 +4,7 @@ import { Icon } from "~/components/common/icon";
 import { api } from "~/lib/api";
 import { can, type SessionUser } from "~/lib/rbac";
 import { Button } from "~/components/ui/button";
-import type { CustomerResponse, FirearmResponse } from "~/lib/api-types";
+import type { CustomerListItemDto, FirearmResponse } from "~/lib/api-types";
 
 const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },
@@ -18,7 +18,7 @@ const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/settings", title: "Settings" },
 ];
 
-function customerName(c: CustomerResponse) {
+function customerName(c: CustomerListItemDto) {
   return c.fullName || c.companyName || "Unnamed";
 }
 
@@ -36,7 +36,7 @@ export function Topbar({
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [customers, setCustomers] = useState<CustomerResponse[]>([]);
+  const [customers, setCustomers] = useState<CustomerListItemDto[]>([]);
   const [firearms, setFirearms] = useState<FirearmResponse[]>([]);
   const loaded = useRef(false);
 
@@ -45,7 +45,7 @@ export function Topbar({
     if (loaded.current) return;
     loaded.current = true;
     try {
-      const [cs, fs] = await Promise.all([api.customers(), api.firearms()]);
+      const [cs, fs] = await Promise.all([api.allCustomers(), api.firearms()]);
       setCustomers(cs ?? []);
       setFirearms(fs ?? []);
     } catch {

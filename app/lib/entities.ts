@@ -1,10 +1,13 @@
 import type {
+  CustomerListItemDto,
   CustomerResponse,
   FirearmResponse,
   InvoiceResponse,
 } from "./api-types";
 
-export function customerLabel(c: CustomerResponse | undefined | null): string {
+type CustomerDisplay = CustomerResponse | CustomerListItemDto;
+
+export function customerLabel(c: CustomerDisplay | undefined | null): string {
   if (!c) return "—";
   return c.fullName || c.companyName || "Unnamed";
 }
@@ -16,7 +19,7 @@ export function firearmLabel(f: FirearmResponse | undefined | null): string {
 
 /** Map of customer id → display name. */
 export function customerNameMap(
-  customers: CustomerResponse[],
+  customers: CustomerDisplay[],
 ): Record<string, string> {
   const map: Record<string, string> = {};
   for (const c of customers) map[c.id] = customerLabel(c);

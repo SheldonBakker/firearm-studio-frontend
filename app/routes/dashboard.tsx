@@ -16,7 +16,7 @@ import {
   AttentionListSkeleton,
 } from "~/components/common/skeletons";
 import type {
-  CustomerResponse,
+  CustomerListItemDto,
   FirearmResponse,
   InvoiceResponse,
   LicenceResponse,
@@ -29,7 +29,9 @@ export function clientLoader() {
   const invoicesP = api.invoices().catch(() => [] as InvoiceResponse[]);
   const dueP = api.licencesDueRenewal().catch(() => [] as LicenceResponse[]);
   const expiredP = api.licencesExpired().catch(() => [] as LicenceResponse[]);
-  const customersP = api.customers().catch(() => [] as CustomerResponse[]);
+  const customersP = api
+    .allCustomers()
+    .catch(() => [] as CustomerListItemDto[]);
   return {
     stats: Promise.all([firearmsP, storageP, invoicesP, dueP, expiredP]),
     recent: Promise.all([invoicesP, customersP]),

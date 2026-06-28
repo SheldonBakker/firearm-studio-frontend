@@ -18,13 +18,29 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import type {
-  CustomerResponse,
+  CustomerListItemDto,
+  CustomerListItemDtoPaginatedResponse,
   CustomerType,
   FirearmResponse,
 } from "~/lib/api-types";
 
-export function clientLoader() {
-  const customersP = api.customers().catch(() => [] as CustomerResponse[]);
+const PAGE_SIZE = 20;
+
+export function clientLoader({ request }: Route.ClientLoaderArgs) {
+  const requestedPage = Number(new URL(request.url).searchParams.get("page"));
+  const pageNumber =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const customersP = api
+    .customers({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" })
+    .catch(
+      () =>
+        ({
+          items: [],
+          pageNumber,
+          pageSize: PAGE_SIZE,
+          totalCount: 0,
+        }) satisfies CustomerListItemDtoPaginatedResponse,
+    );
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([customersP, firearmsP]) };
 }
@@ -50,7 +66,8 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
         }
       />
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={6} />}>
-        {([customers, firearms]) => {
+        {([customerPage, firearms]) => {
+          const customers = customerPage.items ?? [];
           const fireCount = (id: string) =>
             firearms.filter((f) => f.customerId === id).length;
           const activeN = customers.filter((c) => c.isActive).length;
@@ -66,7 +83,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                 active={filter}
                 onChange={setFilter}
                 options={[
-                  { id: "all", label: "All", n: customers.length },
+                  { id: "all", label: "All", n: customerPage.totalCount },
                   {
                     id: "individual",
                     label: "Individuals",
@@ -86,7 +103,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                   },
                 ]}
               />
-              <DataTable<CustomerResponse>
+              <DataTable<CustomerListItemDto>
                 rows={rows}
                 onRowClick={(r) => navigate(`/customers/${r.id}`)}
                 empty="No customers match this filter."
@@ -167,6 +184,45 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           },
         ]}
               />
+              {customerPage.totalCount > customerPage.pageSize && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[12.5px] text-muted-foreground">
+                    Showing{" "}
+                    {(customerPage.pageNumber - 1) * customerPage.pageSize + 1}
+                    –
+                    {Math.min(
+                      customerPage.pageNumber * customerPage.pageSize,
+                      customerPage.totalCount,
+                    )}{" "}
+                    of {customerPage.totalCount}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={customerPage.pageNumber <= 1}
+                      onClick={() =>
+                        navigate(`/customers?page=${customerPage.pageNumber - 1}`)
+                      }
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={
+                        customerPage.pageNumber * customerPage.pageSize >=
+                        customerPage.totalCount
+                      }
+                      onClick={() =>
+                        navigate(`/customers?page=${customerPage.pageNumber + 1}`)
+                      }
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </>
           );
         }}

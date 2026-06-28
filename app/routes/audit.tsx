@@ -34,16 +34,16 @@ export default function Audit({ loaderData }: Route.ComponentProps) {
             header: "When",
             cell: (r) => (
               <Mono className="text-[12px] text-muted-foreground">
-                {fmtDate(r.occurredAt)}
+                {fmtDate(r.createdAt)}
               </Mono>
             ),
           },
           {
             key: "user",
-            header: "User",
+            header: "User ID",
             cell: (r) => (
               <span className="text-[12.5px] text-foreground">
-                {r.userName ?? "—"}
+                {r.appUserId ?? "—"}
               </span>
             ),
           },
@@ -66,11 +66,11 @@ export default function Audit({ loaderData }: Route.ComponentProps) {
             ),
           },
           {
-            key: "summary",
-            header: "Detail",
+            key: "entityId",
+            header: "Entity ID",
             cell: (r) => (
               <span className="text-[12.5px] text-muted-foreground">
-                {r.summary ?? "—"}
+                {r.entityId ?? "—"}
               </span>
             ),
           },

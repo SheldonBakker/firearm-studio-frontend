@@ -17,11 +17,13 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
-import type { CustomerResponse, InvoiceResponse } from "~/lib/api-types";
+import type { CustomerListItemDto, InvoiceResponse } from "~/lib/api-types";
 
 export function clientLoader() {
   const invoicesP = api.invoices().catch(() => [] as InvoiceResponse[]);
-  const customersP = api.customers().catch(() => [] as CustomerResponse[]);
+  const customersP = api
+    .allCustomers()
+    .catch(() => [] as CustomerListItemDto[]);
   return { data: Promise.all([invoicesP, customersP]) };
 }
 

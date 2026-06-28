@@ -16,11 +16,13 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
-import type { CustomerResponse, FirearmResponse } from "~/lib/api-types";
+import type { CustomerListItemDto, FirearmResponse } from "~/lib/api-types";
 
 export function clientLoader() {
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
-  const customersP = api.customers().catch(() => [] as CustomerResponse[]);
+  const customersP = api
+    .allCustomers()
+    .catch(() => [] as CustomerListItemDto[]);
   return { data: Promise.all([firearmsP, customersP]) };
 }
 
@@ -149,7 +151,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
               const results = await api.customers({
                 [searchType]: query,
               });
-              return results.map((c) => ({
+              return (results.items ?? []).map((c) => ({
                 value: c.id,
                 label: customerLabel(c),
                 description: [c.email, c.phone].filter(Boolean).join(" · "),

@@ -8,6 +8,8 @@ import type {
   CreateFirearmRequest,
   CreateLicenceRequest,
   CurrentUserResponse,
+  CustomerListItemDto,
+  CustomerListItemDtoPaginatedResponse,
   CustomerResponse,
   FirearmResponse,
   GenerateMonthlyInvoicesRequest,
@@ -102,6 +104,56 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   }
 }
 
+export interface CustomerListParams {
+  pageNumber?: number;
+  pageSize?: number;
+  sortOrder?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+async function getCustomers(
+  params: CustomerListParams = {},
+): Promise<CustomerListItemDtoPaginatedResponse> {
+  const response = await request<CustomerListItemDtoPaginatedResponse>(
+    "/api/v1/customers",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        sortOrder: params.sortOrder,
+        name: params.name,
+        email: params.email,
+        phone: params.phone,
+      },
+    },
+  );
+
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
+async function getAllCustomers(): Promise<CustomerListItemDto[]> {
+  const pageSize = 100;
+  const firstPage = await getCustomers({ pageNumber: 1, pageSize });
+  const customers = [...(firstPage.items ?? [])];
+  const totalPages = Math.ceil(
+    firstPage.totalCount / Math.max(1, firstPage.pageSize),
+  );
+
+  for (let pageNumber = 2; pageNumber <= totalPages; pageNumber += 1) {
+    const page = await getCustomers({ pageNumber, pageSize });
+    customers.push(...(page.items ?? []));
+  }
+
+  return customers;
+}
+
 export const api = {
   // ---- Me ----
   me: () => request<CurrentUserResponse>("/api/v1/me"),
@@ -117,21 +169,8 @@ export const api = {
     request<void>("/api/v1/company", { method: "PATCH", body }),
 
   // ---- Customers ----
-  customers: async (
-    filters: { name?: string; email?: string; phone?: string } = {},
-  ) => {
-    const response = await request<unknown>("/api/v1/customers", {
-      query: {
-        name: filters.name,
-        email: filters.email,
-        phone: filters.phone,
-      },
-    });
-
-    // Swagger declares an array response. Treat an empty/invalid runtime body
-    // as no results so a malformed 200/204 response cannot crash consumers.
-    return Array.isArray(response) ? (response as CustomerResponse[]) : [];
-  },
+  customers: getCustomers,
+  allCustomers: getAllCustomers,
   customer: (id: string) =>
     request<CustomerResponse>(`/api/v1/customers/${id}`),
   createCustomer: (body: CreateCustomerRequest) =>
