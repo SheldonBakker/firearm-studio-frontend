@@ -102,10 +102,12 @@ function InvoiceView({
         actions={
           writable && (
             <>
-              <Button variant="ghost" onClick={() => setPayOpen(true)}>
-                <Icon name="money" size={16} />
-                Record payment
-              </Button>
+              {invoice.status !== "Paid" && (
+                <Button variant="ghost" onClick={() => setPayOpen(true)}>
+                  <Icon name="money" size={16} />
+                  Record payment
+                </Button>
+              )}
               <Button variant="ghost" onClick={send}>
                 <Icon name="send" size={16} />
                 Send
@@ -204,7 +206,7 @@ function InvoiceView({
             defaultValue: "Eft",
             options: METHODS.map((m) => ({ value: m, label: m })),
           },
-          { name: "reference", label: "Reference", full: true },
+          { name: "reference", label: "Reference", required: true, full: true },
           { name: "notes", label: "Notes", type: "textarea", full: true },
         ]}
         onSubmit={async (v) => {
