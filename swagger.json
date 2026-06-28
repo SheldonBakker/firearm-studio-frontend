@@ -373,6 +373,29 @@
         "tags": [
           "Firearms"
         ],
+        "parameters": [
+          {
+            "name": "serialNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FirearmStatus"
+            }
+          },
+          {
+            "name": "customerName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -536,6 +559,29 @@
       "get": {
         "tags": [
           "Firearms"
+        ],
+        "parameters": [
+          {
+            "name": "serialNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storageStatus",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/StorageStatus"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1161,6 +1207,15 @@
         },
         "additionalProperties": false
       },
+      "AppRole": {
+        "enum": [
+          "Admin",
+          "Manager",
+          "Staff",
+          "Viewer"
+        ],
+        "type": "string"
+      },
       "AuditLogListItemDto": {
         "type": "object",
         "properties": {
@@ -1625,8 +1680,7 @@
             "nullable": true
           },
           "role": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/AppRole"
           }
         },
         "additionalProperties": false
@@ -1716,6 +1770,14 @@
           }
         },
         "additionalProperties": false
+      },
+      "StorageStatus": {
+        "enum": [
+          "Active",
+          "Released",
+          "Cancelled"
+        ],
+        "type": "string"
       },
       "UpdateCompanyRequest": {
         "type": "object",
@@ -1849,8 +1911,7 @@
         "type": "object",
         "properties": {
           "role": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/AppRole"
           }
         },
         "additionalProperties": false
@@ -1873,8 +1934,8 @@
   },
   "security": [
     {
-      "Bearer": [ ],
-      "ApiKey": [ ]
+      "Bearer": [],
+      "ApiKey": []
     }
   ]
 }

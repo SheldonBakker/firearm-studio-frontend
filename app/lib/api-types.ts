@@ -10,6 +10,7 @@ export type FirearmStatus =
 type LicenceStatus = "Valid" | "RenewalDue" | "Expired" | "Unknown";
 export type PaymentMethod = "Eft" | "Cash" | "Card" | "DebitOrder" | "Other";
 export type Role = "Admin" | "Manager" | "Staff" | "Viewer";
+export type StorageStatus = "Active" | "Released" | "Cancelled";
 
 export interface CurrentUserResponse {
   id: string;
@@ -226,6 +227,7 @@ export interface StorageRecordResponse {
   storageLocation?: string | null;
   rackNumber?: string | null;
   safeNumber?: string | null;
+  storageStatus?: StorageStatus | null;
   isActive?: boolean | null;
   [k: string]: unknown;
 }

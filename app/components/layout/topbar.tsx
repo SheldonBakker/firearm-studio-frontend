@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Icon } from "~/components/common/icon";
 import { api } from "~/lib/api";
@@ -22,6 +22,28 @@ function customerName(c: CustomerListItemDto) {
   return c.fullName || c.companyName || "Unnamed";
 }
 
+type CustomerSearchType = "name" | "email" | "phone";
+type FirearmSearchType = "serialNumber" | "customerName";
+
+const CUSTOMER_SEARCH_TYPES: {
+  value: CustomerSearchType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "name", label: "Name", placeholder: "Search customers by name…" },
+  { value: "email", label: "Email", placeholder: "Search customers by email…" },
+  { value: "phone", label: "Phone", placeholder: "Search customers by phone…" },
+];
+
+const FIREARM_SEARCH_TYPES: {
+  value: FirearmSearchType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "serialNumber", label: "Serial", placeholder: "Search firearms by serial number…" },
+  { value: "customerName", label: "Customer", placeholder: "Search firearms by customer name…" },
+];
+
 export function Topbar({
   user,
   onMenuClick,
@@ -34,44 +56,117 @@ export function Topbar({
   const title =
     TITLES.find((t) => pathname.startsWith(t.prefix))?.title ?? "Firearm Studio";
 
+  const isCustomers = pathname.startsWith("/customers");
+  const isFirearms = pathname.startsWith("/firearms");
+
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [customers, setCustomers] = useState<CustomerListItemDto[]>([]);
-  const [firearms, setFirearms] = useState<FirearmResponse[]>([]);
-  const loaded = useRef(false);
+  const [customerSearchType, setCustomerSearchType] = useState<CustomerSearchType>("name");
+  const [firearmSearchType, setFirearmSearchType] = useState<FirearmSearchType>("serialNumber");
 
-  // Lazy-load the searchable registry on first focus.
-  async function ensureData() {
-    if (loaded.current) return;
-    loaded.current = true;
+  // Cached registry for global (non-context) pages
+  const [cachedCustomers, setCachedCustomers] = useState<CustomerListItemDto[]>([]);
+  const [cachedFirearms, setCachedFirearms] = useState<FirearmResponse[]>([]);
+  const cacheLoaded = useRef(false);
+
+  // Live search results
+  const [liveCustomers, setLiveCustomers] = useState<CustomerListItemDto[]>([]);
+  const [liveFirearms, setLiveFirearms] = useState<FirearmResponse[]>([]);
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset on page navigation
+  useEffect(() => {
+    setQuery("");
+    setOpen(false);
+    setLiveCustomers([]);
+    setLiveFirearms([]);
+    setSearching(false);
+    cacheLoaded.current = false;
+  }, [pathname]);
+
+  // Live search — active on /customers and /firearms
+  useEffect(() => {
+    if (!isCustomers && !isFirearms) return;
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setLiveCustomers([]);
+      setLiveFirearms([]);
+      setSearching(false);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      return;
+    }
+    setSearching(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        if (isCustomers) {
+          const result = await api.customers({ [customerSearchType]: trimmed, pageSize: 6 });
+          setLiveCustomers(result.items ?? []);
+        } else {
+          const results = await api.firearms({ [firearmSearchType]: trimmed });
+          setLiveFirearms((results ?? []).slice(0, 6));
+        }
+      } catch {
+        setLiveCustomers([]);
+        setLiveFirearms([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 400);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, customerSearchType, firearmSearchType, isCustomers, isFirearms]);
+
+  // Lazy-load cache for global (non-context) pages
+  async function ensureCache() {
+    if (isCustomers || isFirearms) return;
+    if (cacheLoaded.current) return;
+    cacheLoaded.current = true;
     try {
       const [cs, fs] = await Promise.all([api.allCustomers(), api.firearms()]);
-      setCustomers(cs ?? []);
-      setFirearms(fs ?? []);
+      setCachedCustomers(cs ?? []);
+      setCachedFirearms(fs ?? []);
     } catch {
-      /* search is best-effort */
+      /* best-effort */
     }
   }
 
   const q = query.trim().toLowerCase();
-  const custMatches = q
-    ? customers
-        .filter((c) =>
-          (customerName(c) + " " + (c.email ?? "")).toLowerCase().includes(q),
-        )
-        .slice(0, 4)
-    : [];
-  const fireMatches = q
-    ? firearms
-        .filter((f) =>
-          `${f.make ?? ""} ${f.model ?? ""} ${f.serialNumber ?? ""}`
-            .toLowerCase()
-            .includes(q),
-        )
-        .slice(0, 4)
-    : [];
-  const showResults = open && q.length > 0;
+
+  const custMatches = isCustomers
+    ? liveCustomers
+    : !isFirearms && q
+      ? cachedCustomers
+          .filter((c) =>
+            (customerName(c) + " " + (c.email ?? "")).toLowerCase().includes(q),
+          )
+          .slice(0, 4)
+      : [];
+
+  const fireMatches = isFirearms
+    ? liveFirearms
+    : !isCustomers && q
+      ? cachedFirearms
+          .filter((f) =>
+            `${f.make ?? ""} ${f.model ?? ""} ${f.serialNumber ?? ""}`
+              .toLowerCase()
+              .includes(q),
+          )
+          .slice(0, 4)
+      : [];
+
+  const showDropdown = open && (!!query.trim() || isCustomers || isFirearms);
   const empty = custMatches.length + fireMatches.length === 0;
+
+  const activePlaceholder = isCustomers
+    ? (CUSTOMER_SEARCH_TYPES.find((s) => s.value === customerSearchType)?.placeholder ??
+        "Search customers…")
+    : isFirearms
+      ? (FIREARM_SEARCH_TYPES.find((s) => s.value === firearmSearchType)?.placeholder ??
+          "Search firearms…")
+      : "Search customers, firearms, serials…";
 
   function goto(to: string) {
     setOpen(false);
@@ -99,10 +194,10 @@ export function Topbar({
         </span>
         <input
           value={query}
-          placeholder="Search customers, firearms, serials…"
+          placeholder={activePlaceholder}
           onFocus={() => {
             setOpen(true);
-            ensureData();
+            ensureCache();
           }}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -111,36 +206,90 @@ export function Topbar({
           onBlur={() => setTimeout(() => setOpen(false), 160)}
           className="h-9.5 w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[13px] text-foreground outline-none focus:border-primary"
         />
-        {showResults && (
+        {showDropdown && (
           <div className="absolute left-0 right-0 top-11.5 z-50 max-h-105 animate-fade-in overflow-y-auto rounded-xl border border-border2 bg-card shadow-2xl">
-            {empty ? (
-              <div className="px-3.5 py-5 text-center text-[13px] text-dim">
-                No matches for “{query}”
+            {isCustomers && (
+              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+                {CUSTOMER_SEARCH_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      if (customerSearchType === t.value) return;
+                      setCustomerSearchType(t.value);
+                      setQuery("");
+                      setLiveCustomers([]);
+                    }}
+                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
+                      customerSearchType === t.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <>
-                <SearchSection
-                  label="Customers"
-                  items={custMatches.map((c) => ({
-                    icon: "users" as const,
-                    color: "var(--status-teal)",
-                    title: customerName(c),
-                    sub: c.email || c.phone || "",
-                    onClick: () => goto(`/customers/${c.id}`),
-                  }))}
-                />
-                <SearchSection
-                  label="Firearms"
-                  items={fireMatches.map((f) => ({
-                    icon: "target" as const,
-                    color: "var(--status-blue)",
-                    title: `${f.make ?? ""} ${f.model ?? ""}`.trim(),
-                    sub: `${f.serialNumber ?? ""} · ${f.calibre ?? ""}`,
-                    onClick: () => goto(`/firearms/${f.id}`),
-                  }))}
-                />
-              </>
             )}
+            {isFirearms && (
+              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+                {FIREARM_SEARCH_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      if (firearmSearchType === t.value) return;
+                      setFirearmSearchType(t.value);
+                      setQuery("");
+                      setLiveFirearms([]);
+                    }}
+                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
+                      firearmSearchType === t.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {query.trim() ? (
+              searching ? (
+                <div className="px-3.5 py-5 text-center text-[13px] text-dim">
+                  Searching…
+                </div>
+              ) : empty ? (
+                <div className="px-3.5 py-5 text-center text-[13px] text-dim">
+                  No matches for "{query}"
+                </div>
+              ) : (
+                <>
+                  <SearchSection
+                    label="Customers"
+                    items={custMatches.map((c) => ({
+                      icon: "users" as const,
+                      color: "var(--status-teal)",
+                      title: customerName(c),
+                      sub: c.email || c.phone || "",
+                      onClick: () => goto(`/customers/${c.id}`),
+                    }))}
+                  />
+                  <SearchSection
+                    label="Firearms"
+                    items={fireMatches.map((f) => ({
+                      icon: "target" as const,
+                      color: "var(--status-blue)",
+                      title: `${f.make ?? ""} ${f.model ?? ""}`.trim(),
+                      sub: `${f.serialNumber ?? ""} · ${f.calibre ?? ""}`,
+                      onClick: () => goto(`/firearms/${f.id}`),
+                    }))}
+                  />
+                </>
+              )
+            ) : null}
           </div>
         )}
       </div>

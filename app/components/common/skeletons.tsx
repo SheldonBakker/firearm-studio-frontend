@@ -112,8 +112,7 @@ export function KeyValueSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
-/** Card-wrapped key/value (detail tab / settings panel). */
-export function CardSkeleton({ rows = 6 }: { rows?: number }) {
+function CardSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <KeyValueSkeleton rows={rows} />
@@ -121,7 +120,6 @@ export function CardSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
-/** Detail-page header (title + badge) followed by a tab strip. */
 export function DetailSkeleton() {
   return (
     <div>

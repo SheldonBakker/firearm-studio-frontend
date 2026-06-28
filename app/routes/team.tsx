@@ -64,7 +64,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
             header: "Member",
             cell: (r) => (
               <div className="flex items-center gap-3">
-                <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-raised font-mono text-[12px] font-bold text-foreground">
+                <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg bg-raised font-mono text-[12px] font-bold text-foreground">
                   {initials(r.fullName || r.email)}
                 </div>
                 <div>

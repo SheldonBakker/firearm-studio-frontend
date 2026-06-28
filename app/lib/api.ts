@@ -183,7 +183,8 @@ export const api = {
     request<InvoiceResponse[]>(`/api/v1/customers/${id}/invoices`),
 
   // ---- Firearms ----
-  firearms: () => request<FirearmResponse[]>("/api/v1/firearms"),
+  firearms: (params?: { serialNumber?: string; status?: string; customerName?: string }) =>
+    request<FirearmResponse[]>("/api/v1/firearms", { query: params }),
   firearm: (id: string) => request<FirearmResponse>(`/api/v1/firearms/${id}`),
   createFirearm: (body: CreateFirearmRequest) =>
     request<FirearmResponse>("/api/v1/firearms", { method: "POST", body }),
@@ -191,8 +192,8 @@ export const api = {
     request<void>(`/api/v1/firearms/${id}`, { method: "PATCH", body }),
   firearmLicences: (id: string) =>
     request<LicenceResponse[]>(`/api/v1/firearms/${id}/licences`),
-  activeStorage: () =>
-    request<StorageRecordResponse[]>("/api/v1/firearms/storage/active"),
+  activeStorage: (params?: { serialNumber?: string; customerName?: string; storageStatus?: string }) =>
+    request<StorageRecordResponse[]>("/api/v1/firearms/storage/active", { query: params }),
 
   // ---- Licences ----
   licencesDueRenewal: () =>
