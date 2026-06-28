@@ -21,7 +21,7 @@ import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
 const STORAGE_STATUSES = ["Active", "Released", "Cancelled"] as const;
 
 export function clientLoader() {
-  const storageP = api.activeStorage().catch(() => [] as StorageRecordResponse[]);
+  const storageP = api.storageActive().catch(() => [] as StorageRecordResponse[]);
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([storageP, firearmsP]) };
 }

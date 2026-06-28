@@ -193,9 +193,6 @@ export const api = {
     request<void>(`/api/v1/firearms/${id}`, { method: "PATCH", body }),
   firearmLicences: (id: string) =>
     request<LicenceResponse[]>(`/api/v1/firearms/${id}/licences`),
-  activeStorage: (params?: { serialNumber?: string; customerName?: string; storageStatus?: string }) =>
-    request<StorageRecordResponse[]>("/api/v1/firearms/storage/active", { query: params }),
-
   // ---- Licences ----
   licencesDueRenewal: () =>
     request<LicenceResponse[]>("/api/v1/licences/due-renewal"),
@@ -210,8 +207,8 @@ export const api = {
     request<void>(`/api/v1/licences/${id}`, { method: "PATCH", body }),
 
   // ---- Storage ----
-  storageActive: () =>
-    request<StorageRecordResponse[]>("/api/v1/storage/active"),
+  storageActive: (params?: { serialNumber?: string; customerName?: string; storageStatus?: string }) =>
+    request<StorageRecordResponse[]>("/api/v1/storage/active", { query: params }),
   storageByCustomer: (customerId: string) =>
     request<StorageRecordResponse[]>(`/api/v1/storage/customer/${customerId}`),
   startStorage: (firearmId: string, body: StartStorageRequest) =>
