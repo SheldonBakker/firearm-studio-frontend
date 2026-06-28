@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { Link, redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/signup";
 import { supabase } from "~/lib/supabase";
@@ -8,6 +9,7 @@ import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { requiredEmailSchema, requiredTextSchema } from "~/lib/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -29,6 +31,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
@@ -36,11 +39,32 @@ export default function Signup() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const result = z
+      .object({
+        fullName: requiredTextSchema("Full name"),
+        email: requiredEmailSchema,
+        password: z.string().min(6, "Password must be at least 6 characters."),
+      })
+      .safeParse({ fullName, email, password });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const fieldName = issue.path[0];
+        if (typeof fieldName === "string" && !errors[fieldName]) {
+          errors[fieldName] = issue.message;
+        }
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
+      email: result.data.email,
+      password: result.data.password,
+      options: { data: { full_name: result.data.fullName } },
     });
     setLoading(false);
     if (error) {
@@ -93,16 +117,33 @@ export default function Signup() {
         </>
       }
     >
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="fullName">Full name</Label>
           <Input
             id="fullName"
             required
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value);
+              setFieldErrors((previous) => {
+                if (!previous.fullName) return previous;
+                const next = { ...previous };
+                delete next.fullName;
+                return next;
+              });
+            }}
             placeholder="Marius Steyn"
+            aria-invalid={Boolean(fieldErrors.fullName)}
+            aria-describedby={
+              fieldErrors.fullName ? "signup-name-error" : undefined
+            }
           />
+          {fieldErrors.fullName && (
+            <p id="signup-name-error" className="text-[12px] font-medium text-destructive">
+              {fieldErrors.fullName}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email">Email</Label>
@@ -112,9 +153,36 @@ export default function Signup() {
             autoComplete="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setFieldErrors((previous) => {
+                if (!previous.email) return previous;
+                const next = { ...previous };
+                delete next.email;
+                return next;
+              });
+            }}
+            onBlur={() => {
+              const result = requiredEmailSchema.safeParse(email);
+              setFieldErrors((previous) => {
+                const next = { ...previous };
+                if (!result.success) {
+                  next.email = result.error.issues[0]?.message;
+                } else delete next.email;
+                return next;
+              });
+            }}
             placeholder="you@company.co.za"
+            aria-invalid={Boolean(fieldErrors.email)}
+            aria-describedby={
+              fieldErrors.email ? "signup-email-error" : undefined
+            }
           />
+          {fieldErrors.email && (
+            <p id="signup-email-error" className="text-[12px] font-medium text-destructive">
+              {fieldErrors.email}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">Password</Label>
@@ -125,9 +193,26 @@ export default function Signup() {
             required
             minLength={6}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setFieldErrors((previous) => {
+                if (!previous.password) return previous;
+                const next = { ...previous };
+                delete next.password;
+                return next;
+              });
+            }}
             placeholder="At least 6 characters"
+            aria-invalid={Boolean(fieldErrors.password)}
+            aria-describedby={
+              fieldErrors.password ? "signup-password-error" : undefined
+            }
           />
+          {fieldErrors.password && (
+            <p id="signup-password-error" className="text-[12px] font-medium text-destructive">
+              {fieldErrors.password}
+            </p>
+          )}
         </div>
         {error && (
           <p className="text-[13px] font-medium text-destructive">{error}</p>

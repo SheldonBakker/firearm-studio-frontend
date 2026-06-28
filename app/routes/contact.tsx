@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { z } from "zod";
 import { Link } from "react-router";
 import type { Route } from "./+types/contact";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 import { pageMeta } from "~/lib/seo";
+import { requiredEmailSchema, requiredTextSchema } from "~/lib/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -43,9 +45,36 @@ const labelText: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const result = z
+      .object({
+        fullName: requiredTextSchema("Full name"),
+        email: requiredEmailSchema,
+      })
+      .safeParse({
+        fullName: formData.get("fullName"),
+        email: formData.get("email"),
+      });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const fieldName = issue.path[0];
+        if (typeof fieldName === "string" && !errors[fieldName]) {
+          errors[fieldName] = issue.message;
+        }
+      }
+      setFieldErrors(errors);
+      setSent(false);
+      return;
+    }
+
+    setFieldErrors({});
     setSent(true);
   }
 
@@ -97,7 +126,7 @@ export default function Contact() {
         </div>
 
         <div style={{ flex: "1.4 1 380px", minWidth: 300 }}>
-          <form onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
+          <form noValidate onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
             <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", color: "#e6eaf0" }}>Send us a message</div>
             <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8a93a2" }}>We typically reply within one business day.</p>
 
@@ -115,11 +144,69 @@ export default function Contact() {
             <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14 }}>
               <label style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 <span style={labelText}>Full name</span>
-                <input className="mk-input" type="text" required placeholder="Jane Mokoena" style={inputStyle} />
+                <input
+                  id="contact-full-name"
+                  name="fullName"
+                  className="mk-input"
+                  type="text"
+                  required
+                  placeholder="Jane Mokoena"
+                  style={inputStyle}
+                  aria-invalid={Boolean(fieldErrors.fullName)}
+                  aria-describedby={fieldErrors.fullName ? "contact-name-error" : undefined}
+                  onChange={() => {
+                    setFieldErrors((previous) => {
+                      if (!previous.fullName) return previous;
+                      const next = { ...previous };
+                      delete next.fullName;
+                      return next;
+                    });
+                  }}
+                />
+                {fieldErrors.fullName && (
+                  <span id="contact-name-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                    {fieldErrors.fullName}
+                  </span>
+                )}
               </label>
               <label style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 <span style={labelText}>Work email</span>
-                <input className="mk-input" type="email" required placeholder="you@company.co.za" style={inputStyle} />
+                <input
+                  id="contact-email"
+                  name="email"
+                  className="mk-input"
+                  type="email"
+                  required
+                  placeholder="you@company.co.za"
+                  style={inputStyle}
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    setFieldErrors((previous) => {
+                      if (!previous.email) return previous;
+                      const next = { ...previous };
+                      delete next.email;
+                      return next;
+                    });
+                  }}
+                  onBlur={() => {
+                    const result = requiredEmailSchema.safeParse(email);
+                    setFieldErrors((previous) => {
+                      const next = { ...previous };
+                      if (!result.success) {
+                        next.email = result.error.issues[0]?.message;
+                      } else delete next.email;
+                      return next;
+                    });
+                  }}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
+                />
+                {fieldErrors.email && (
+                  <span id="contact-email-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                    {fieldErrors.email}
+                  </span>
+                )}
               </label>
             </div>
             <label style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>

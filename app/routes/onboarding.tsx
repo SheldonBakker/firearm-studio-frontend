@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/onboarding";
 import { api, ApiError } from "~/lib/api";
@@ -10,10 +11,16 @@ import {
 } from "~/lib/auth";
 import { pageMeta } from "~/lib/seo";
 import { BrandMark } from "~/components/common/brand";
+import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { CreateCompanyRequest } from "~/lib/api-types";
+import {
+  getSouthAfricanPhoneError,
+  optionalSouthAfricanPhoneSchema,
+} from "~/lib/phone";
+import { optionalEmailSchema, requiredTextSchema } from "~/lib/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -41,8 +48,8 @@ const FIELDS: {
   { key: "name", label: "Company name", required: true, full: true },
   { key: "registrationNumber", label: "Registration number" },
   { key: "vatNumber", label: "VAT number" },
-  { key: "email", label: "Email", type: "email" },
-  { key: "phone", label: "Phone" },
+  { key: "email", label: "Email", type: "email", full: true },
+  { key: "phone", label: "Phone", type: "tel", full: true },
   { key: "addressLine1", label: "Address line 1", full: true },
   { key: "addressLine2", label: "Address line 2", full: true },
   { key: "city", label: "City" },
@@ -54,18 +61,53 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const [values, setValues] = useState<CreateCompanyRequest>({});
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   function set(key: keyof CreateCompanyRequest, v: string) {
     setValues((prev) => ({ ...prev, [key]: v }));
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const result = z
+      .object({
+        name: requiredTextSchema("Company name"),
+        email: optionalEmailSchema,
+        phone: optionalSouthAfricanPhoneSchema,
+      })
+      .safeParse({
+        name: values.name ?? "",
+        email: values.email ?? "",
+        phone: values.phone ?? "",
+      });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const fieldName = issue.path[0];
+        if (typeof fieldName === "string" && !errors[fieldName]) {
+          errors[fieldName] = issue.message;
+        }
+      }
+      setFieldErrors(errors);
+      return;
+    }
     setLoading(true);
     try {
-      await api.createCompany(values);
+      await api.createCompany({
+        ...values,
+        name: result.data.name,
+        email: result.data.email || undefined,
+        phone: result.data.phone || undefined,
+      });
       // New company joined → refresh the session so the JWT carries the new
       // company/role claims, then enter the dashboard.
       await refreshSession();
@@ -103,6 +145,7 @@ export default function Onboarding() {
           </p>
         </div>
         <form
+          noValidate
           onSubmit={onSubmit}
           className="rounded-2xl border border-border bg-card p-6"
         >
@@ -116,13 +159,65 @@ export default function Onboarding() {
                   {f.label}
                   {f.required && <span className="text-destructive"> *</span>}
                 </Label>
-                <Input
-                  id={f.key}
-                  type={f.type ?? "text"}
-                  required={f.required}
-                  value={(values[f.key] as string) ?? ""}
-                  onChange={(e) => set(f.key, e.target.value)}
-                />
+                {f.key === "phone" ? (
+                  <SouthAfricanPhoneInput
+                    id={f.key}
+                    value={values.phone ?? ""}
+                    onValueChange={(value) => set("phone", value)}
+                    onBlur={() => {
+                      const phoneError = getSouthAfricanPhoneError(
+                        values.phone ?? "",
+                      );
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        if (phoneError) next.phone = phoneError;
+                        else delete next.phone;
+                        return next;
+                      });
+                    }}
+                    autoComplete="tel-national"
+                    placeholder="68 150 1196"
+                    aria-invalid={Boolean(fieldErrors.phone)}
+                    aria-describedby={
+                      fieldErrors.phone ? "onboarding-phone-error" : undefined
+                    }
+                  />
+                ) : (
+                  <Input
+                    id={f.key}
+                    type={f.type ?? "text"}
+                    required={f.required}
+                    value={(values[f.key] as string) ?? ""}
+                    onChange={(e) => set(f.key, e.target.value)}
+                    onBlur={() => {
+                      if (f.key !== "email") return;
+                      const result = optionalEmailSchema.safeParse(
+                        values.email ?? "",
+                      );
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        if (!result.success) {
+                          next.email = result.error.issues[0]?.message;
+                        } else delete next.email;
+                        return next;
+                      });
+                    }}
+                    aria-invalid={Boolean(fieldErrors[f.key])}
+                    aria-describedby={
+                      fieldErrors[f.key]
+                        ? `onboarding-${f.key}-error`
+                        : undefined
+                    }
+                  />
+                )}
+                {fieldErrors[f.key] && (
+                  <p
+                    id={`onboarding-${f.key}-error`}
+                    className="text-[12px] font-medium text-destructive"
+                  >
+                    {fieldErrors[f.key]}
+                  </p>
+                )}
               </div>
             ))}
           </div>

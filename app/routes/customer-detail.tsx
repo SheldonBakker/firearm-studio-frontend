@@ -273,7 +273,13 @@ function CustomerView({
           { name: "fullName", label: "Full name", full: true, defaultValue: customer.fullName ?? "" },
           { name: "companyName", label: "Company name", full: true, defaultValue: customer.companyName ?? "" },
           { name: "email", label: "Email", type: "email", defaultValue: customer.email ?? "" },
-          { name: "phone", label: "Phone", defaultValue: customer.phone ?? "" },
+          {
+            name: "phone",
+            label: "Phone",
+            type: "tel",
+            placeholder: "68 150 1196",
+            defaultValue: customer.phone ?? "",
+          },
           {
             name: "isActive",
             label: "Status",

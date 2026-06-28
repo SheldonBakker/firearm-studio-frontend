@@ -133,12 +133,19 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
           {
             name: "customerId",
             label: "Customer",
-            type: "select",
+            type: "search-select",
             required: true,
             full: true,
+            placeholder: "Search by name, email, or phone…",
+            searchDebounceMs: 600,
+            searchMinChars: 3,
             options: customers.map((c) => ({
               value: c.id,
               label: customerLabel(c),
+              description: [c.email, c.phone].filter(Boolean).join(" · "),
+              searchText: [customerLabel(c), c.email, c.phone]
+                .filter(Boolean)
+                .join(" "),
             })),
           },
           { name: "make", label: "Make", required: true },

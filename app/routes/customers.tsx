@@ -97,7 +97,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
             cell: (r) => (
               <div className="flex items-center gap-3">
                 <div
-                  className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
+                  className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
                   style={{
                     color:
                       r.customerType === "Company"
@@ -193,7 +193,12 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           { name: "fullName", label: "Full name", full: true },
           { name: "companyName", label: "Company name", full: true },
           { name: "email", label: "Email", type: "email" },
-          { name: "phone", label: "Phone" },
+          {
+            name: "phone",
+            label: "Phone",
+            type: "tel",
+            placeholder: "68 150 1196",
+          },
           { name: "addressLine1", label: "Address", full: true },
           { name: "city", label: "City" },
           { name: "province", label: "Province" },
