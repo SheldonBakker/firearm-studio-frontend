@@ -96,10 +96,12 @@ function FirearmView({
         actions={
           writable && (
             <>
-              <Button variant="ghost" onClick={() => setStorageOpen(true)}>
-                <Icon name="box" size={16} />
-                Start storage
-              </Button>
+              {firearm.status !== "InStorage" && (
+                <Button variant="ghost" onClick={() => setStorageOpen(true)}>
+                  <Icon name="box" size={16} />
+                  Start storage
+                </Button>
+              )}
               <Button variant="ghost" onClick={() => setEditOpen(true)}>
                 <Icon name="edit" size={16} />
                 Edit
