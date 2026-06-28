@@ -256,7 +256,7 @@ export default function Home() {
                 textWrap: "balance",
               }}
             >
-              Run a compliant firearm storage business — without the paperwork.
+              Run a compliant firearm storage business - without the paperwork.
             </h1>
             <p style={{ ...lede, maxWidth: 540, fontSize: "clamp(15px,1.7vw,18px)", margin: "22px 0 0" }}>
               Firearm Studio keeps your registry, storage records, licences, and

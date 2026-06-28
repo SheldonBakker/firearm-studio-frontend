@@ -1,36 +1,18 @@
-/** Firearm Studio shield logo mark + wordmark. */
 export function BrandMark({ size = 34 }: { size?: number }) {
   return (
-    <div
-      className="flex items-center justify-center rounded-[9px]"
+    <img
+      src="/icon-192.png"
+      alt="Firearm Studio"
+      width={size}
+      height={size}
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(135deg,#E8973C,#C9742A)",
-        boxShadow: "0 4px 14px rgba(232,151,60,.3)",
+        borderRadius: Math.round(size * 0.26),
+        boxShadow: "0 4px 14px rgba(0,0,0,.35)",
+        display: "block",
       }}
-    >
-      <svg
-        width={size * 0.56}
-        height={size * 0.56}
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="M12 2l8 4v5c0 4.7-3.3 8-8 9.5C7.3 19 4 15.7 4 11V6l8-4z"
-          stroke="#1a1206"
-          strokeWidth={1.8}
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 11.5l2 2 4-4.5"
-          stroke="#1a1206"
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
+    />
   );
 }
 
