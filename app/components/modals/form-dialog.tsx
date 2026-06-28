@@ -54,6 +54,12 @@ export interface FormField {
   defaultValue?: string;
   searchDebounceMs?: number;
   searchMinChars?: number;
+  searchTypes?: { value: string; label: string }[];
+  defaultSearchType?: string;
+  onSearch?: (
+    query: string,
+    searchType: string,
+  ) => Promise<NonNullable<FormField["options"]>>;
 }
 
 function SearchSelectField({
@@ -63,6 +69,9 @@ function SearchSelectField({
   placeholder,
   debounceMs = 600,
   minChars = 3,
+  searchTypes = [],
+  defaultSearchType,
+  onSearch,
   invalid,
   describedBy,
   onChange,
@@ -73,15 +82,28 @@ function SearchSelectField({
   placeholder?: string;
   debounceMs?: number;
   minChars?: number;
+  searchTypes?: NonNullable<FormField["searchTypes"]>;
+  defaultSearchType?: string;
+  onSearch?: FormField["onSearch"];
   invalid: boolean;
   describedBy?: string;
   onChange: (value: string) => void;
 }) {
-  const selectedOption = options.find((option) => option.value === value);
+  const [remoteMatches, setRemoteMatches] = useState<
+    NonNullable<FormField["options"]>
+  >([]);
+  const selectedOption = [...options, ...remoteMatches].find(
+    (option) => option.value === value,
+  );
   const [query, setQuery] = useState(selectedOption?.label ?? "");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [isDebouncing, setIsDebouncing] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchType, setSearchType] = useState(
+    defaultSearchType ?? searchTypes[0]?.value ?? "",
+  );
 
   useEffect(() => {
     const trimmedQuery = query.trim();
@@ -91,19 +113,40 @@ function SearchSelectField({
     if (trimmedQuery.length < minChars || isSelected) {
       setDebouncedQuery("");
       setIsDebouncing(false);
+      setIsSearching(false);
+      setSearchError(null);
       return;
     }
 
+    let cancelled = false;
     setIsDebouncing(true);
-    const timer = window.setTimeout(() => {
+    setSearchError(null);
+    const timer = window.setTimeout(async () => {
       setDebouncedQuery(trimmedQuery);
       setIsDebouncing(false);
+      if (!onSearch) return;
+
+      setIsSearching(true);
+      try {
+        const results = await onSearch(trimmedQuery, searchType);
+        if (!cancelled) setRemoteMatches(results);
+      } catch {
+        if (!cancelled) {
+          setRemoteMatches([]);
+          setSearchError("Could not search customers. Please try again.");
+        }
+      } finally {
+        if (!cancelled) setIsSearching(false);
+      }
     }, debounceMs);
 
-    return () => window.clearTimeout(timer);
-  }, [debounceMs, minChars, query, selectedOption]);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [debounceMs, minChars, onSearch, query, searchType, selectedOption]);
 
-  const matches = useMemo(() => {
+  const localMatches = useMemo(() => {
     const normalizedQuery = debouncedQuery.toLocaleLowerCase();
     if (!normalizedQuery) return [];
 
@@ -113,6 +156,7 @@ function SearchSelectField({
         .includes(normalizedQuery),
     );
   }, [debouncedQuery, options]);
+  const matches = onSearch ? remoteMatches : localMatches;
 
   const hasSearchQuery = query.trim().length >= minChars && !selectedOption;
   const showResults = focused && hasSearchQuery;
@@ -127,33 +171,63 @@ function SearchSelectField({
         }
       }}
     >
-      <Input
-        id={id}
-        type="search"
-        role="combobox"
-        autoComplete="off"
-        placeholder={placeholder ?? `Type at least ${minChars} characters…`}
-        value={query}
-        onFocus={() => setFocused(true)}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          onChange("");
-        }}
-        aria-autocomplete="list"
-        aria-expanded={showResults}
-        aria-controls={listboxId}
-        aria-invalid={invalid}
-        aria-describedby={describedBy}
-      />
+      <div className="flex gap-2">
+        {searchTypes.length > 0 && (
+          <Select
+            value={searchType}
+            onValueChange={(nextSearchType) => {
+              setSearchType(nextSearchType);
+              setQuery("");
+              setDebouncedQuery("");
+              setRemoteMatches([]);
+              setSearchError(null);
+              onChange("");
+            }}
+          >
+            <SelectTrigger className="w-28 shrink-0" aria-label="Search by">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {searchTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <Input
+          id={id}
+          type="search"
+          role="combobox"
+          autoComplete="off"
+          placeholder={placeholder ?? `Type at least ${minChars} characters…`}
+          value={query}
+          onFocus={() => setFocused(true)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            onChange("");
+          }}
+          aria-autocomplete="list"
+          aria-expanded={showResults}
+          aria-controls={listboxId}
+          aria-invalid={invalid}
+          aria-describedby={describedBy}
+        />
+      </div>
       {showResults && (
         <div
           id={listboxId}
           role="listbox"
           className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-input bg-popover p-1 text-popover-foreground shadow-md"
         >
-          {isDebouncing || !debouncedQuery ? (
+          {isDebouncing || isSearching || !debouncedQuery ? (
             <p className="px-2.5 py-2 text-[12px] text-muted-foreground">
               Searching…
+            </p>
+          ) : searchError ? (
+            <p className="px-2.5 py-2 text-[12px] text-destructive">
+              {searchError}
             </p>
           ) : matches.length > 0 ? (
             matches.map((option) => (
@@ -325,6 +399,9 @@ export function FormDialog({
                   placeholder={f.placeholder}
                   debounceMs={f.searchDebounceMs}
                   minChars={f.searchMinChars}
+                  searchTypes={f.searchTypes}
+                  defaultSearchType={f.defaultSearchType}
+                  onSearch={f.onSearch}
                   invalid={Boolean(fieldErrors[f.name])}
                   describedBy={
                     fieldErrors[f.name] ? `${f.name}-error` : undefined

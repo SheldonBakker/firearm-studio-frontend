@@ -117,7 +117,16 @@ export const api = {
     request<void>("/api/v1/company", { method: "PATCH", body }),
 
   // ---- Customers ----
-  customers: () => request<CustomerResponse[]>("/api/v1/customers"),
+  customers: (
+    filters: { name?: string; email?: string; phone?: string } = {},
+  ) =>
+    request<CustomerResponse[]>("/api/v1/customers", {
+      query: {
+        name: filters.name,
+        email: filters.email,
+        phone: filters.phone,
+      },
+    }),
   customer: (id: string) =>
     request<CustomerResponse>(`/api/v1/customers/${id}`),
   createCustomer: (body: CreateCustomerRequest) =>

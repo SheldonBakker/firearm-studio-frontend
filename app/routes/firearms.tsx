@@ -139,6 +139,22 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
             placeholder: "Search by name, email, or phone…",
             searchDebounceMs: 600,
             searchMinChars: 3,
+            defaultSearchType: "name",
+            searchTypes: [
+              { value: "name", label: "Name" },
+              { value: "email", label: "Email" },
+              { value: "phone", label: "Phone" },
+            ],
+            onSearch: async (query, searchType) => {
+              const results = await api.customers({
+                [searchType]: query,
+              });
+              return results.map((c) => ({
+                value: c.id,
+                label: customerLabel(c),
+                description: [c.email, c.phone].filter(Boolean).join(" · "),
+              }));
+            },
             options: customers.map((c) => ({
               value: c.id,
               label: customerLabel(c),
