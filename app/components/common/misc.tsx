@@ -61,7 +61,7 @@ export function ErrorState({ message }: { message: string }) {
 
 export function PageWrap({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-[1280px] animate-fade-up px-7 pb-16 pt-7">
+    <div className="mx-auto max-w-7xl animate-fade-up px-4 pb-12 pt-5 sm:px-6 sm:pt-6 lg:px-7 lg:pb-16">
       {children}
     </div>
   );

@@ -22,7 +22,13 @@ function customerName(c: CustomerResponse) {
   return c.fullName || c.companyName || "Unnamed";
 }
 
-export function Topbar({ user }: { user: SessionUser }) {
+export function Topbar({
+  user,
+  onMenuClick,
+}: {
+  user: SessionUser;
+  onMenuClick: () => void;
+}) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const title =
@@ -74,12 +80,20 @@ export function Topbar({ user }: { user: SessionUser }) {
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-card/70 px-6 backdrop-blur">
-      <div className="text-[17px] font-bold tracking-tight text-foreground">
+    <header className="flex h-16 shrink-0 items-center gap-2.5 border-b border-border bg-card/70 px-4 backdrop-blur sm:gap-4 sm:px-6">
+      <button
+        type="button"
+        onClick={onMenuClick}
+        aria-label="Open navigation"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border2 bg-secondary text-muted-foreground hover:text-foreground lg:hidden"
+      >
+        <Icon name="list" size={18} />
+      </button>
+      <div className="hidden truncate text-[17px] font-bold tracking-tight text-foreground md:block">
         {title}
       </div>
 
-      <div className="relative ml-auto w-[340px]">
+      <div className="relative ml-auto w-full min-w-0 sm:w-85">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
           <Icon name="search" size={16} />
         </span>
@@ -95,10 +109,10 @@ export function Topbar({ user }: { user: SessionUser }) {
             setOpen(true);
           }}
           onBlur={() => setTimeout(() => setOpen(false), 160)}
-          className="h-[38px] w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[13px] text-foreground outline-none focus:border-primary"
+          className="h-9.5 w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[13px] text-foreground outline-none focus:border-primary"
         />
         {showResults && (
-          <div className="absolute left-0 right-0 top-[46px] z-50 max-h-[420px] animate-fade-in overflow-y-auto rounded-xl border border-border2 bg-card shadow-2xl">
+          <div className="absolute left-0 right-0 top-11.5 z-50 max-h-105 animate-fade-in overflow-y-auto rounded-xl border border-border2 bg-card shadow-2xl">
             {empty ? (
               <div className="px-3.5 py-5 text-center text-[13px] text-dim">
                 No matches for “{query}”
@@ -135,17 +149,20 @@ export function Topbar({ user }: { user: SessionUser }) {
         type="button"
         onClick={() => navigate("/licences")}
         title="Alerts"
-        className="relative flex h-[38px] w-[38px] items-center justify-center rounded-[9px] border border-border2 bg-secondary text-muted-foreground hover:text-foreground"
+        className="relative flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-[9px] border border-border2 bg-secondary text-muted-foreground hover:text-foreground"
       >
         <Icon name="bell" size={17} />
         <span
-          className="absolute right-2.5 top-2 h-[7px] w-[7px] rounded-full"
+          className="absolute right-2.5 top-2 h-1.75 w-1.75 rounded-full"
           style={{ background: "var(--status-red)", border: "2px solid var(--secondary)" }}
         />
       </button>
 
       {can(user, "team:manage") && (
-        <Button onClick={() => navigate("/team")}>
+        <Button
+          onClick={() => navigate("/team")}
+          className="hidden shrink-0 sm:inline-flex"
+        >
           <Icon name="plus" size={16} />
           Invite user
         </Button>

@@ -75,16 +75,16 @@ export function FormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[560px]">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-[560px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <form onSubmit={submit} className="grid grid-cols-2 gap-4 py-1">
+        <form onSubmit={submit} className="grid grid-cols-1 gap-4 py-1 sm:grid-cols-2">
           {fields.map((f) => (
             <div
               key={f.name}
-              className={`flex flex-col gap-2 ${f.full ? "col-span-2" : ""}`}
+              className={`flex flex-col gap-2 ${f.full ? "sm:col-span-2" : ""}`}
             >
               <Label htmlFor={f.name}>
                 {f.label}
@@ -129,11 +129,11 @@ export function FormDialog({
             </div>
           ))}
           {error && (
-            <p className="col-span-2 text-[13px] font-medium text-destructive">
+            <p className="text-[13px] font-medium text-destructive sm:col-span-2">
               {error}
             </p>
           )}
-          <DialogFooter className="col-span-2 mt-1">
+          <DialogFooter className="mt-1 sm:col-span-2">
             <Button
               type="button"
               variant="ghost"

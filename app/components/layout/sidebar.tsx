@@ -5,6 +5,7 @@ import { signOut } from "~/lib/auth";
 import { canSeeNav, primaryRole, type NavKey, type SessionUser } from "~/lib/rbac";
 import { initials } from "~/lib/format";
 import { cn } from "~/lib/utils";
+import { Sheet, SheetContent, SheetTitle } from "~/components/ui/sheet";
 
 interface NavItem {
   key: NavKey;
@@ -45,7 +46,14 @@ const GROUPS: NavGroup[] = [
   },
 ];
 
-export function Sidebar({ user }: { user: SessionUser }) {
+/** Brand + nav + user footer. Shared by the desktop aside and the mobile drawer. */
+function SidebarBody({
+  user,
+  onNavigate,
+}: {
+  user: SessionUser;
+  onNavigate?: () => void;
+}) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -53,13 +61,14 @@ export function Sidebar({ user }: { user: SessionUser }) {
     pathname === to || pathname.startsWith(to + "/");
 
   async function logout() {
+    onNavigate?.();
     await signOut();
     navigate("/login", { replace: true });
   }
 
   return (
-    <aside className="flex h-screen w-[248px] shrink-0 flex-col border-r border-border bg-sidebar">
-      <div className="px-[18px] pb-[18px] pt-5">
+    <div className="flex h-full flex-col bg-sidebar">
+      <div className="px-4.5 pb-4.5 pt-5">
         <BrandLockup />
       </div>
 
@@ -81,6 +90,7 @@ export function Sidebar({ user }: { user: SessionUser }) {
                     <Link
                       key={it.key}
                       to={it.to}
+                      onClick={onNavigate}
                       className={cn(
                         "relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-[13.5px] transition-colors",
                         on
@@ -89,7 +99,7 @@ export function Sidebar({ user }: { user: SessionUser }) {
                       )}
                     >
                       {on && (
-                        <span className="absolute -left-px bottom-2.5 top-2.5 w-[3px] rounded-sm bg-primary" />
+                        <span className="absolute -left-px bottom-2.5 top-2.5 w-0.75 rounded-sm bg-primary" />
                       )}
                       <span className={on ? "text-primary" : ""}>
                         <Icon name={it.icon} size={18} />
@@ -106,7 +116,7 @@ export function Sidebar({ user }: { user: SessionUser }) {
 
       <div className="border-t border-border p-3">
         <div className="flex items-center gap-2.5 rounded-[9px] border border-border bg-secondary px-2.5 py-2.5">
-          <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-raised text-xs font-bold text-foreground">
+          <div className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-raised text-xs font-bold text-foreground">
             {initials(user.email)}
           </div>
           <div className="min-w-0 flex-1">
@@ -127,6 +137,38 @@ export function Sidebar({ user }: { user: SessionUser }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Persistent sidebar — visible from `lg` up. */
+export function Sidebar({ user }: { user: SessionUser }) {
+  return (
+    <aside className="hidden h-screen w-62 shrink-0 border-r border-border lg:block">
+      <SidebarBody user={user} />
     </aside>
+  );
+}
+
+/** Slide-in drawer for tablet/mobile (below `lg`). */
+export function MobileSidebar({
+  user,
+  open,
+  onOpenChange,
+}: {
+  user: SessionUser;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="left"
+        className="w-62 border-border bg-sidebar p-0 lg:hidden"
+      >
+        <SheetTitle className="sr-only">Navigation</SheetTitle>
+        <SidebarBody user={user} onNavigate={() => onOpenChange(false)} />
+      </SheetContent>
+    </Sheet>
   );
 }

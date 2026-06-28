@@ -118,7 +118,7 @@ function InvoiceView({
         }
       />
 
-      <div className="grid grid-cols-[1fr_1.4fr] gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]">
         <div className="rounded-2xl border border-border bg-card p-6">
           <SectionTitle>Summary</SectionTitle>
           <KeyValue

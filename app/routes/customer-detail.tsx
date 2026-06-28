@@ -99,7 +99,7 @@ function CustomerView({
       />
 
       <Tabs defaultValue="firearms">
-        <TabsList>
+        <TabsList className="max-w-full overflow-x-auto">
           <TabsTrigger value="firearms">
             Firearms ({firearms.length})
           </TabsTrigger>

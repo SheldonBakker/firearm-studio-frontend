@@ -10,9 +10,9 @@ export interface KVPair {
 /** Two-column key/value grid used on detail panels. */
 export function KeyValue({ pairs }: { pairs: KVPair[] }) {
   return (
-    <div className="grid grid-cols-2 gap-x-7 gap-y-4">
+    <div className="grid grid-cols-1 gap-x-7 gap-y-4 sm:grid-cols-2">
       {pairs.map((p, i) => (
-        <div key={i} className={cn(p.full && "col-span-2")}>
+        <div key={i} className={cn(p.full && "sm:col-span-2")}>
           <div className="mb-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-dim">
             {p.k}
           </div>

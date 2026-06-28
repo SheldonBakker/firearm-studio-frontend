@@ -33,7 +33,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
         subtitle="Manage your company profile and account"
       />
 
-      <div className="grid grid-cols-[1.6fr_1fr] gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="rounded-2xl border border-border bg-card p-6">
           <Resolve
             resolve={loaderData.company}

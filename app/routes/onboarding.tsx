@@ -96,11 +96,11 @@ export default function Onboarding() {
           onSubmit={onSubmit}
           className="rounded-2xl border border-border bg-card p-6"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {FIELDS.map((f) => (
               <div
                 key={f.key}
-                className={`flex flex-col gap-2 ${f.full ? "col-span-2" : ""}`}
+                className={`flex flex-col gap-2 ${f.full ? "sm:col-span-2" : ""}`}
               >
                 <Label htmlFor={f.key}>
                   {f.label}

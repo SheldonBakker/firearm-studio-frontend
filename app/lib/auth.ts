@@ -53,23 +53,27 @@ export function resetCompanyAccess() {
 }
 
 /**
- * Whether the user can access company resources. The freshly-issued JWT after
- * signup carries no company claims, so a protected call returns 403 until the
- * session is refreshed. We probe, and on 403 refresh once and retry before
- * concluding the user still needs onboarding.
- *
- * Connectivity/other errors return `true` so a transient API outage doesn't
- * trap the user on the onboarding screen.
+ * Whether the signed-in user already belongs to a company. Reads the canonical
+ * GET /api/v1/company endpoint:
+ *   - 200 with a company  → onboarded
+ *   - 404 / no company    → needs onboarding
+ *   - 403                 → JWT lacks company claims (fresh signup): refresh the
+ *                           session once and retry before deciding
+ *   - other/connectivity  → returns `true` so a transient API outage doesn't
+ *                           trap the user on the onboarding screen
  */
 export async function hasCompanyAccess(): Promise<boolean> {
   if (companyAccess) return true;
 
-  const probe = async (): Promise<"ok" | "forbidden" | "error"> => {
+  const probe = async (): Promise<"ok" | "forbidden" | "missing" | "error"> => {
     try {
-      await api.customers();
-      return "ok";
+      const company = await api.company();
+      return company && company.id ? "ok" : "missing";
     } catch (err) {
-      if (err instanceof ApiError && err.status === 403) return "forbidden";
+      if (err instanceof ApiError) {
+        if (err.status === 403) return "forbidden";
+        if (err.status === 404) return "missing";
+      }
       return "error";
     }
   };
@@ -84,7 +88,7 @@ export async function hasCompanyAccess(): Promise<boolean> {
     companyAccess = true;
     return true;
   }
-  if (result === "forbidden") return false;
+  if (result === "forbidden" || result === "missing") return false;
   return true; // connectivity error — don't trap in onboarding
 }
 

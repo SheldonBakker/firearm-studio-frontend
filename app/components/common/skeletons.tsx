@@ -78,11 +78,11 @@ export function ListSkeleton({ cols = 5 }: { cols?: number }) {
 /** Dashboard stat-card grid. */
 export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-4 gap-3.5">
+    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-col gap-3.5 rounded-2xl border border-border bg-card p-[18px]"
+          className="flex flex-col gap-3.5 rounded-2xl border border-border bg-card p-4.5"
         >
           <div className="flex items-center justify-between">
             <Skeleton className="h-3 w-24" />
@@ -101,7 +101,7 @@ export function StatGridSkeleton({ count = 4 }: { count?: number }) {
 /** Two-column key/value detail panel. */
 export function KeyValueSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-x-7 gap-y-4">
+    <div className="grid grid-cols-1 gap-x-7 gap-y-4 sm:grid-cols-2">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="space-y-2">
           <Skeleton className="h-2.5 w-20" />
@@ -164,20 +164,21 @@ export function AttentionListSkeleton({ rows = 4 }: { rows?: number }) {
 export function AppShellSkeleton() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
-      <aside className="flex w-[248px] shrink-0 flex-col gap-2 border-r border-border bg-sidebar p-4">
+      <aside className="hidden w-62 shrink-0 flex-col gap-2 border-r border-border bg-sidebar p-4 lg:flex">
         <Skeleton className="mb-4 h-9 w-40" />
         {Array.from({ length: 9 }).map((_, i) => (
           <Skeleton key={i} className="h-9 w-full rounded-lg" />
         ))}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-16 items-center gap-4 border-b border-border px-6">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="ml-auto h-9 w-[340px] rounded-[9px]" />
-          <Skeleton className="h-9 w-28 rounded-[9px]" />
+        <div className="flex h-16 items-center gap-3 border-b border-border px-4 sm:gap-4 sm:px-6">
+          <Skeleton className="h-9 w-9 rounded-lg lg:hidden" />
+          <Skeleton className="hidden h-5 w-32 md:block" />
+          <Skeleton className="ml-auto h-9 w-full min-w-0 rounded-[9px] sm:w-85" />
+          <Skeleton className="hidden h-9 w-28 shrink-0 rounded-[9px] sm:block" />
         </div>
-        <div className="flex-1 p-7">
-          <div className="mx-auto max-w-[1280px] space-y-6">
+        <div className="flex-1 p-4 sm:p-6 lg:p-7">
+          <div className="mx-auto max-w-7xl space-y-6">
             <Skeleton className="h-7 w-56" />
             <StatGridSkeleton />
             <TableSkeleton />

@@ -74,7 +74,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
               (i) => inv.status(i) === "Overdue",
             ).length;
             return (
-              <div className="grid grid-cols-4 gap-3.5">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   label="Firearms in storage"
                   value={storage.length}
@@ -113,7 +113,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
         </Resolve>
       </div>
 
-      <div className="grid grid-cols-[1.55fr_1fr] gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.55fr_1fr]">
         <div>
           <SectionTitle
             right={
