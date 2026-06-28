@@ -117,16 +117,21 @@ export const api = {
     request<void>("/api/v1/company", { method: "PATCH", body }),
 
   // ---- Customers ----
-  customers: (
+  customers: async (
     filters: { name?: string; email?: string; phone?: string } = {},
-  ) =>
-    request<CustomerResponse[]>("/api/v1/customers", {
+  ) => {
+    const response = await request<unknown>("/api/v1/customers", {
       query: {
         name: filters.name,
         email: filters.email,
         phone: filters.phone,
       },
-    }),
+    });
+
+    // Swagger declares an array response. Treat an empty/invalid runtime body
+    // as no results so a malformed 200/204 response cannot crash consumers.
+    return Array.isArray(response) ? (response as CustomerResponse[]) : [];
+  },
   customer: (id: string) =>
     request<CustomerResponse>(`/api/v1/customers/${id}`),
   createCustomer: (body: CreateCustomerRequest) =>
