@@ -50,7 +50,41 @@ Built with **React Router v7 (framework mode, SPA)**, **Supabase auth**,
 ## Scripts
 
 ```bash
-npm run dev        # dev server (HMR)
-npm run build      # production SPA build
-npm run typecheck  # react-router typegen + tsc
+npm run dev        # Vite dev server (HMR), proxies /api → VITE_API_PROXY_TARGET
+npm run build      # production SPA build → build/client
+npm run typecheck  # react-router typegen + wrangler types + tsc (app & worker)
+npm run preview    # build + wrangler dev (preview the Worker locally)
+npm run deploy     # build + wrangler deploy
+npm run cf-typegen # regenerate worker-configuration.d.ts from wrangler.jsonc
 ```
+
+## Deploy to Cloudflare Workers
+
+The app deploys as a **Worker serving static assets** (the SPA) with a tiny
+Worker script (`workers/app.ts`) that **proxies `/api/*` to the backend** so
+the API is same-origin in production (no CORS) — mirroring the dev proxy.
+Config lives in `wrangler.jsonc`:
+
+- `assets` → serves `build/client` with SPA fallback (`not_found_handling: single-page-application`).
+- `run_worker_first: ["/api/*"]` → the Worker handles API routes; assets serve everything else.
+- `vars.API_BASE_URL` → where `/api/*` is proxied.
+
+Steps:
+
+1. **Set the production API URL** in `wrangler.jsonc` → `vars.API_BASE_URL`
+   (e.g. `https://api.your-domain.co.za`). For local `wrangler dev`, it's read
+   from `.dev.vars` (git-ignored).
+2. Keep `VITE_API_BASE_URL` **empty** in `.env` so the client calls same-origin
+   `/api` (which the Worker proxies). `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
+   are baked into the client bundle at build time.
+3. Authenticate and deploy:
+
+   ```bash
+   npx wrangler login
+   npm run deploy
+   ```
+
+> Note: the backend at `API_BASE_URL` must accept the proxied requests
+> (forwarded with the original method, headers incl. `Authorization`, and body).
+> `wrangler types` regenerates `worker-configuration.d.ts` (git-ignored) — rerun
+> it after editing `wrangler.jsonc`.

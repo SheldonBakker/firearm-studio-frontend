@@ -5,6 +5,12 @@
 /build/
 /.react-router/
 
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+worker-configuration.d.ts
+
 # Environment & secrets (keep .env.example)
 .env
 .env.*
