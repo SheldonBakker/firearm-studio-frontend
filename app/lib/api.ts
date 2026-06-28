@@ -84,6 +84,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
       body = await res.json();
       if (body && typeof body === "object") {
         const m =
+          (body as Record<string, unknown>).detail ??
           (body as Record<string, unknown>).message ??
           (body as Record<string, unknown>).title;
         if (typeof m === "string") message = m;
