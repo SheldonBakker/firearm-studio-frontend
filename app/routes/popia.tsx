@@ -1,15 +1,14 @@
 import type { Route } from "./+types/popia";
 import { LegalDoc, type LegalSection } from "~/components/marketing/legal-doc";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "POPIA Compliance — Firearm Studio" },
-    {
-      name: "description",
-      content:
-        "How Firearm Studio applies the eight processing conditions of South Africa's Protection of Personal Information Act.",
-    },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "POPIA Compliance — Firearm Studio",
+    description:
+      "How Firearm Studio applies the eight processing conditions of South Africa's Protection of Personal Information Act.",
+    pathname: location.pathname,
+  });
 }
 
 const sections: LegalSection[] = [

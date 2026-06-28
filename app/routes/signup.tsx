@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { Link, redirect, useNavigate } from "react-router";
+import type { Route } from "./+types/signup";
 import { supabase } from "~/lib/supabase";
 import { getSessionUser } from "~/lib/auth";
+import { pageMeta } from "~/lib/seo";
 import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Create your account — Firearm Studio",
+    description: "Set up Firearm Studio for your business.",
+    pathname: location.pathname,
+    noIndex: true,
+  });
+}
 
 export async function clientLoader() {
   const user = await getSessionUser();

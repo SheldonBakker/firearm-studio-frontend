@@ -8,11 +8,21 @@ import {
   refreshSession,
   requireAuth,
 } from "~/lib/auth";
+import { pageMeta } from "~/lib/seo";
 import { BrandMark } from "~/components/common/brand";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { CreateCompanyRequest } from "~/lib/api-types";
+
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Set up your company — Firearm Studio",
+    description: "Set up your company to start using Firearm Studio.",
+    pathname: location.pathname,
+    noIndex: true,
+  });
+}
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAuth(request);
@@ -81,7 +91,7 @@ export default function Onboarding() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-[620px] animate-fade-up">
+      <div className="w-full max-w-155 animate-fade-up">
         <div className="mb-7 flex flex-col items-center text-center">
           <BrandMark size={46} />
           <h1 className="mt-4 text-xl font-bold tracking-tight text-foreground">

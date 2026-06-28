@@ -12,8 +12,6 @@ import "./app.css";
 import { Toaster } from "~/components/ui/sonner";
 import { AppShellSkeleton } from "~/components/common/skeletons";
 
-// Default document title; route-level `meta` (e.g. the marketing home page)
-// overrides it via <Meta />.
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
 export const links: Route.LinksFunction = () => [
@@ -31,10 +29,15 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en-ZA" className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#0e1116" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <Meta />
         <Links />
       </head>

@@ -7,13 +7,13 @@ import {
 
 export default [
   index("routes/home.tsx"),
-  // Public marketing + legal pages (SSR, linked from the site footer).
   route("about", "routes/about.tsx"),
   route("contact", "routes/contact.tsx"),
   route("privacy", "routes/privacy.tsx"),
   route("terms", "routes/terms.tsx"),
   route("popia", "routes/popia.tsx"),
   route("fca-notice", "routes/fca-notice.tsx"),
+  route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
   route("onboarding", "routes/onboarding.tsx"),

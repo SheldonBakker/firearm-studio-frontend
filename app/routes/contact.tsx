@@ -3,17 +3,15 @@ import { Link } from "react-router";
 import type { Route } from "./+types/contact";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  const title = "Contact — Firearm Studio";
-  const description =
-    "Questions about getting set up, migrating your registry, or how Firearm Studio handles SAPS requirements? Our team is here to help.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Contact — Firearm Studio",
+    description:
+      "Questions about getting set up, migrating your registry, or how Firearm Studio handles SAPS requirements? Our team is here to help.",
+    pathname: location.pathname,
+  });
 }
 
 const GREEN = "#3fb68b";
@@ -83,7 +81,6 @@ export default function Contact() {
       </section>
 
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(24px,3vw,32px) clamp(18px,5vw,40px) clamp(56px,8vw,96px)", display: "flex", flexWrap: "wrap", gap: "clamp(28px,4vw,48px)", alignItems: "flex-start" }}>
-        {/* METHODS */}
         <div style={{ flex: "1 1 300px", minWidth: 280, display: "flex", flexDirection: "column", gap: 14 }}>
           {methods.map((m) => (
             <div key={m.title} className="mk-method" style={{ border: "1px solid #262d38", borderRadius: 16, background: "#14181f", padding: 18, display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -99,7 +96,6 @@ export default function Contact() {
           ))}
         </div>
 
-        {/* FORM */}
         <div style={{ flex: "1.4 1 380px", minWidth: 300 }}>
           <form onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
             <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", color: "#e6eaf0" }}>Send us a message</div>

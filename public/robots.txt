@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Auth-gated application — keep out of search indexes.
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /dashboard
+Disallow: /customers
+Disallow: /firearms
+Disallow: /storage
+Disallow: /licences
+Disallow: /invoices
+Disallow: /team
+Disallow: /audit
+Disallow: /settings
+
+Sitemap: https://firearmstudio.com/sitemap.xml

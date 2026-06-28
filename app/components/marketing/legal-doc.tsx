@@ -17,13 +17,11 @@ export type LegalDocProps = {
   sections: LegalSection[];
 };
 
-/** Shared layout for the legal/policy pages — translated from LegalDoc.dc.html. */
 export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocProps) {
   return (
     <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
       <SiteHeader />
 
-      {/* TITLE BAND */}
       <section style={{ borderBottom: "1px solid #1f252e", background: "#0b0e12" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "clamp(40px,6vw,72px) clamp(18px,5vw,40px)" }}>
           <div
@@ -83,7 +81,6 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
         </div>
       </section>
 
-      {/* BODY */}
       <section
         style={{
           maxWidth: 1040,
@@ -95,7 +92,6 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
           alignItems: "flex-start",
         }}
       >
-        {/* TOC */}
         <aside style={{ flex: "1 1 200px", minWidth: 200, position: "sticky", top: 88 }}>
           <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#5c6573" }}>
             On this page
@@ -123,7 +119,6 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
           </nav>
         </aside>
 
-        {/* CONTENT */}
         <div style={{ flex: "3 1 460px", minWidth: 300 }}>
           {sections.map((s) => (
             <div key={s.id} id={s.id} style={{ scrollMarginTop: 90, marginBottom: 36 }}>

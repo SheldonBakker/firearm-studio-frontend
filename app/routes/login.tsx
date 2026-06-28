@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { Link, redirect, useNavigate, useSearchParams } from "react-router";
+import type { Route } from "./+types/login";
 import { supabase } from "~/lib/supabase";
 import { getSessionUser } from "~/lib/auth";
+import { pageMeta } from "~/lib/seo";
 import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Sign in — Firearm Studio",
+    description: "Sign in to your Firearm Studio account.",
+    pathname: location.pathname,
+    noIndex: true,
+  });
+}
 
 export async function clientLoader() {
   // Already signed in? Skip the form.

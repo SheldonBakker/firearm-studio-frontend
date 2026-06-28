@@ -3,8 +3,6 @@ import { ServerRouter } from "react-router";
 import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
 
-// Workers-compatible SSR entry: uses the Web Streams renderer (renderToReadableStream)
-// rather than the Node renderer, since the app runs on Cloudflare Workers / workerd.
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -20,7 +18,6 @@ export default async function handleRequest(
     {
       onError(error: unknown) {
         responseStatusCode = 500;
-        // Log render errors that happen after the shell has flushed.
         if (shellRendered) {
           console.error(error);
         }
@@ -29,7 +26,6 @@ export default async function handleRequest(
   );
   shellRendered = true;
 
-  // Bots and SPA-mode renders need the full document, so wait for everything.
   if ((userAgent && isbot(userAgent)) || routerContext.isSpaMode) {
     await body.allReady;
   }

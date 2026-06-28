@@ -2,17 +2,15 @@ import { Link } from "react-router";
 import type { Route } from "./+types/about";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  const title = "About — Firearm Studio";
-  const description =
-    "Firearm Studio is built by storage operators, for storage operators — taking the friction out of compliant firearm storage in South Africa.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "About — Firearm Studio",
+    description:
+      "Firearm Studio is built by storage operators, for storage operators — taking the friction out of compliant firearm storage in South Africa.",
+    pathname: location.pathname,
+  });
 }
 
 const BLUE = "#4c8df0";
@@ -72,7 +70,6 @@ export default function About() {
     <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
       <SiteHeader />
 
-      {/* HERO */}
       <section style={{ position: "relative" }}>
         <div
           style={{
@@ -98,7 +95,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* STORY */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(40px,6vw,72px) clamp(18px,5vw,40px)", display: "flex", flexWrap: "wrap", gap: "clamp(32px,5vw,56px)", alignItems: "center" }}>
         <div style={{ flex: "1 1 380px", minWidth: 300 }}>
           <div style={eyebrow}>Our story</div>
@@ -136,7 +132,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* VALUES */}
       <section style={{ background: "#0b0e12", borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(48px,7vw,84px) clamp(18px,5vw,40px)" }}>
           <div style={{ maxWidth: 600 }}>
@@ -159,7 +154,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* METRICS */}
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(40px,5vw,64px) clamp(18px,5vw,40px)" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 24, textAlign: "center" }}>
           {metrics.map((m) => (
@@ -171,7 +165,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* CTA */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(24px,4vw,48px) clamp(18px,5vw,40px) clamp(56px,8vw,96px)" }}>
         <div style={{ position: "relative", border: "1px solid #333b49", borderRadius: 24, background: "linear-gradient(135deg,#1a1f28,#14181f)", padding: "clamp(36px,6vw,56px) clamp(24px,5vw,48px)", textAlign: "center", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", width: 560, height: 340, background: "radial-gradient(ellipse at center, rgba(232,151,60,0.16), rgba(232,151,60,0) 70%)", pointerEvents: "none" }} />

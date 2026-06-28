@@ -9,6 +9,7 @@
   "assets": {
     "directory": "./build/client",
     "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
     "run_worker_first": ["/api/*"]
   },
   "vars": {

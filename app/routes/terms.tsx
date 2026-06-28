@@ -1,15 +1,14 @@
 import type { Route } from "./+types/terms";
 import { LegalDoc, type LegalSection } from "~/components/marketing/legal-doc";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Terms of Service — Firearm Studio" },
-    {
-      name: "description",
-      content:
-        "The terms governing your access to and use of Firearm Studio, governed by the laws of South Africa.",
-    },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Terms of Service — Firearm Studio",
+    description:
+      "The terms governing your access to and use of Firearm Studio, governed by the laws of South Africa.",
+    pathname: location.pathname,
+  });
 }
 
 const sections: LegalSection[] = [

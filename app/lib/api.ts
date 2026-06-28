@@ -30,8 +30,6 @@ const BASE_URL = (
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
 ).replace(/\/$/, "");
 
-// Shared API key required on every /api endpoint (X-Api-Key header), in
-// addition to the per-user Supabase JWT (Authorization: Bearer …).
 const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
 
 export class ApiError extends Error {

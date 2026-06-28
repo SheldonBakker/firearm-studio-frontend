@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 
-/** Brand shield-check mark used across the marketing site. */
 export function MarketingLogo({ size = 19 }: { size?: number }) {
   const box = Math.round((size / 19) * 34);
   return (
@@ -42,7 +41,6 @@ const NAV = [
   { href: "/#how", label: "How it works" },
 ];
 
-/** Sticky public-site header — translated from Header.dc.html. */
 export function SiteHeader() {
   return (
     <header

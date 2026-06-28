@@ -7,6 +7,13 @@ import { Sidebar, MobileSidebar } from "~/components/layout/sidebar";
 import { Topbar } from "~/components/layout/topbar";
 import { AppShellSkeleton } from "~/components/common/skeletons";
 
+export function meta() {
+  return [
+    { title: "Dashboard — Firearm Studio" },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
+}
+
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAuth(request);
 
@@ -16,9 +23,6 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   return { user };
 }
 
-// The dashboard is auth-gated and depends on the client-only Supabase session,
-// so it never server-renders: SSR emits this skeleton, then the clientLoader
-// guard runs on hydration and the real layout renders.
 export function HydrateFallback() {
   return <AppShellSkeleton />;
 }

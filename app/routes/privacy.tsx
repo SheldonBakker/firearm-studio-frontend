@@ -1,15 +1,14 @@
 import type { Route } from "./+types/privacy";
 import { LegalDoc, type LegalSection } from "~/components/marketing/legal-doc";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Privacy Policy — Firearm Studio" },
-    {
-      name: "description",
-      content:
-        "How Firearm Studio collects, uses, and protects personal information, in line with South Africa's POPIA.",
-    },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Privacy Policy — Firearm Studio",
+    description:
+      "How Firearm Studio collects, uses, and protects personal information, in line with South Africa's POPIA.",
+    pathname: location.pathname,
+  });
 }
 
 const sections: LegalSection[] = [

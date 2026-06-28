@@ -1,15 +1,14 @@
 import type { Route } from "./+types/fca-notice";
 import { LegalDoc, type LegalSection } from "~/components/marketing/legal-doc";
+import { pageMeta } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Firearms Control Act Notice — Firearm Studio" },
-    {
-      name: "description",
-      content:
-        "How Firearm Studio supports compliance with South Africa's Firearms Control Act, and where your responsibilities remain.",
-    },
-  ];
+export function meta({ location }: Route.MetaArgs) {
+  return pageMeta({
+    title: "Firearms Control Act Notice — Firearm Studio",
+    description:
+      "How Firearm Studio supports compliance with South Africa's Firearms Control Act, and where your responsibilities remain.",
+    pathname: location.pathname,
+  });
 }
 
 const sections: LegalSection[] = [

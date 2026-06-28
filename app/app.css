@@ -167,9 +167,6 @@
   animation: fadeIn 0.12s ease-out;
 }
 
-/* ---- Marketing site (public SSR pages) ----
-   Self-contained styles for the landing/legal pages so they need no client JS
-   for hover/animation. Palette matches the design tokens above. */
 @keyframes mkFadeUp {
   from {
     opacity: 0;

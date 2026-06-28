@@ -52,7 +52,6 @@ function FootLink({ link }: { link: FooterLink }) {
   );
 }
 
-/** Public-site footer — translated from Footer.dc.html. */
 export function SiteFooter() {
   const year = new Date().getFullYear();
   return (

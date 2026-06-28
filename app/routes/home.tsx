@@ -2,22 +2,21 @@ import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { SiteHeader, MarketingLogo } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
+import { organizationLd, pageMeta, websiteLd } from "~/lib/seo";
 
-export function meta(_: Route.MetaArgs) {
-  const title =
-    "Firearm Studio — Storage & compliance for SA firearm providers";
-  const description =
-    "Firearm Studio keeps your registry, storage records, licences, and invoicing in one secure, audit-ready system — purpose-built for South African firearm storage providers.";
+export function meta({ location }: Route.MetaArgs) {
   return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:type", content: "website" },
+    ...pageMeta({
+      title: "Firearm Studio — Storage & compliance for SA firearm providers",
+      description:
+        "Firearm Studio keeps your registry, storage records, licences, and invoicing in one secure, audit-ready system — purpose-built for South African firearm storage providers.",
+      pathname: location.pathname,
+    }),
+    { "script:ld+json": organizationLd() },
+    { "script:ld+json": websiteLd() },
   ];
 }
 
-/* ---- palette (mirrors Home.dc.html) ---- */
 const BLUE = "#4c8df0";
 const GREEN = "#3fb68b";
 const RED = "#e5484d";
@@ -32,7 +31,6 @@ const statusPill = (c: string) => ({
   bd: chip(c, 28),
 });
 
-/* ---- icon path data ---- */
 const ic = {
   box: '<path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path>',
   money:
@@ -63,7 +61,6 @@ function Glyph({ d, size = 24, sw = 1.7 }: { d: string; size?: number; sw?: numb
   );
 }
 
-/* ---- content ---- */
 type Stat = { label: string; value: string; sub: string; color: string; svg: string };
 type Invoice = {
   num: string;
@@ -145,7 +142,6 @@ const steps = [
   { n: "4", title: "Invoice & get paid", body: "Bill clients monthly and monitor outstanding balances at a glance.", svg: ic.send },
 ];
 
-/* ---- shared bits ---- */
 const eyebrow: React.CSSProperties = {
   fontFamily: "'IBM Plex Mono',monospace",
   fontSize: 12,
@@ -204,7 +200,6 @@ export default function Home() {
     <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
       <SiteHeader />
 
-      {/* ===== HERO ===== */}
       <section id="top" style={{ position: "relative" }}>
         <div
           style={{
@@ -329,7 +324,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* HERO MOCKUP */}
           <div className="mk-fade-up-delayed" style={{ flex: "1 1 440px", minWidth: 300 }}>
             <div style={{ border: "1px solid #262d38", borderRadius: 16, background: "#14181f", boxShadow: "0 30px 80px rgba(0,0,0,.55)", overflow: "hidden" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
@@ -380,7 +374,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== TRUST STRIP ===== */}
       <section style={{ borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e", background: "#0b0e12" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(24px,4vw,36px) clamp(18px,5vw,40px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 24, textAlign: "center" }}>
           {metrics.map((m) => (
@@ -392,7 +385,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== FEATURES ===== */}
       <section id="features" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
         <div style={{ maxWidth: 640 }}>
           <div style={eyebrow}>Everything in one place</div>
@@ -416,7 +408,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== PRODUCT PREVIEW ===== */}
       <section style={{ background: "#0b0e12", borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
           <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto" }}>
@@ -501,7 +492,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== COMPLIANCE ===== */}
       <section id="compliance" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)", display: "flex", flexWrap: "wrap", gap: "clamp(36px,5vw,64px)", alignItems: "center" }}>
         <div style={{ flex: "1 1 360px", minWidth: 300 }}>
           <div style={eyebrow}>Compliance &amp; security</div>
@@ -558,7 +548,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== HOW IT WORKS ===== */}
       <section id="how" style={{ background: "#0b0e12", borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
           <div style={{ maxWidth: 620 }}>
@@ -582,7 +571,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
         <div style={{ position: "relative", border: "1px solid #333b49", borderRadius: 24, background: "linear-gradient(135deg,#1a1f28,#14181f)", padding: "clamp(36px,6vw,64px) clamp(24px,5vw,56px)", textAlign: "center", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", width: 600, height: 360, background: "radial-gradient(ellipse at center, rgba(232,151,60,0.18), rgba(232,151,60,0) 70%)", pointerEvents: "none" }} />
