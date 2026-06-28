@@ -7,6 +7,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const { data } = await supabase.auth.getSession();
   if (!data.session) return null;
 
+  const u = data.session.user;
+  const jwtRoles = u.app_metadata?.roles as string[] | undefined;
+
+  if (jwtRoles?.length) {
+    return {
+      id: u.id,
+      email: u.email ?? null,
+      roles: normalizeRoles(jwtRoles),
+    };
+  }
+
+  // Fallback: JWT has no roles claim — fetch from API
   try {
     const me = await api.me();
     return {
@@ -16,7 +28,6 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     };
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) return null;
-    const u = data.session.user;
     return { id: u.id, email: u.email ?? null, roles: ["Viewer"] };
   }
 }
