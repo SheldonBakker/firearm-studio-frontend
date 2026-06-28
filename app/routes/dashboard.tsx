@@ -222,7 +222,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                 <div className="flex flex-col gap-2.5">
                   {attention.length === 0 && (
                     <div className="rounded-xl border border-border bg-card px-3.5 py-8 text-center text-[13px] text-dim">
-                      All clear — nothing needs attention.
+                      All clear - nothing needs attention.
                     </div>
                   )}
                   {attention.map((a, i) => (

@@ -7,7 +7,7 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Contact — Firearm Studio",
+    title: "Contact - Firearm Studio",
     description:
       "Questions about getting set up, migrating your registry, or how Firearm Studio handles SAPS requirements? Our team is here to help.",
     pathname: location.pathname,
@@ -107,7 +107,7 @@ export default function Contact() {
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
                 <span style={{ fontSize: 14, color: "#e6eaf0" }}>
-                  Thanks — your message is on its way. We'll be in touch shortly.
+                  Thanks - your message is on its way. We'll be in touch shortly.
                 </span>
               </div>
             )}

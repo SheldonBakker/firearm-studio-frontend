@@ -4,7 +4,7 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Firearms Control Act Notice — Firearm Studio",
+    title: "Firearms Control Act Notice - Firearm Studio",
     description:
       "How Firearm Studio supports compliance with South Africa's Firearms Control Act, and where your responsibilities remain.",
     pathname: location.pathname,
@@ -26,10 +26,10 @@ const sections: LegalSection[] = [
       "The platform structures custody and storage records around what the FCA and SAPS expect, helping you maintain a complete and accurate registry:",
     ],
     bullets: [
-      "Firearm identification — make, model, serial number, and calibre.",
-      "Licence linkage — association of firearms with valid licences and holders.",
-      "Custody chain — records of receipt, storage location, and release.",
-      "Storage records — bay or location assignment and movement history.",
+      "Firearm identification - make, model, serial number, and calibre.",
+      "Licence linkage - association of firearms with valid licences and holders.",
+      "Custody chain - records of receipt, storage location, and release.",
+      "Storage records - bay or location assignment and movement history.",
     ],
   },
   {

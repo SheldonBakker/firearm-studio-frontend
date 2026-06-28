@@ -107,7 +107,7 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
           open={!!releasing}
           onOpenChange={(v) => !v && setReleasing(null)}
           title="Release from storage"
-          description={`${firearmLabel(fireMap[releasing.firearmId ?? ""])} — confirm release date.`}
+          description={`${firearmLabel(fireMap[releasing.firearmId ?? ""])} - confirm release date.`}
           submitLabel="Release"
           fields={[
             {

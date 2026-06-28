@@ -9,7 +9,7 @@ import { AppShellSkeleton } from "~/components/common/skeletons";
 
 export function meta() {
   return [
-    { title: "Dashboard — Firearm Studio" },
+    { title: "Dashboard - Firearm Studio" },
     { name: "robots", content: "noindex, nofollow" },
   ];
 }

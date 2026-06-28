@@ -4,7 +4,7 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "POPIA Compliance — Firearm Studio",
+    title: "POPIA Compliance - Firearm Studio",
     description:
       "How Firearm Studio applies the eight processing conditions of South Africa's Protection of Personal Information Act.",
     pathname: location.pathname,
@@ -24,14 +24,14 @@ const sections: LegalSection[] = [
     h: "2. The eight conditions",
     body: ["We align our processing with POPIA's conditions for lawful processing:"],
     bullets: [
-      "Accountability — a designated Information Officer oversees compliance.",
-      "Processing limitation — we collect only what is necessary, with a lawful basis.",
-      "Purpose specification — data is collected for clear, compliance-related purposes.",
-      "Further processing limitation — data is not used in ways incompatible with those purposes.",
-      "Information quality — tools help you keep records accurate and current.",
-      "Openness — we document and disclose our processing in this notice.",
-      "Security safeguards — encryption, access control, and audit logging protect data.",
-      "Data subject participation — individuals can exercise their rights (see below).",
+      "Accountability - a designated Information Officer oversees compliance.",
+      "Processing limitation - we collect only what is necessary, with a lawful basis.",
+      "Purpose specification - data is collected for clear, compliance-related purposes.",
+      "Further processing limitation - data is not used in ways incompatible with those purposes.",
+      "Information quality - tools help you keep records accurate and current.",
+      "Openness - we document and disclose our processing in this notice.",
+      "Security safeguards - encryption, access control, and audit logging protect data.",
+      "Data subject participation - individuals can exercise their rights (see below).",
     ],
   },
   {

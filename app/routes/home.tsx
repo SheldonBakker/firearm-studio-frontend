@@ -7,9 +7,9 @@ import { organizationLd, pageMeta, websiteLd } from "~/lib/seo";
 export function meta({ location }: Route.MetaArgs) {
   return [
     ...pageMeta({
-      title: "Firearm Studio — Storage & compliance for SA firearm providers",
+      title: "Firearm Studio - Storage & compliance for SA firearm providers",
       description:
-        "Firearm Studio keeps your registry, storage records, licences, and invoicing in one secure, audit-ready system — purpose-built for South African firearm storage providers.",
+        "Firearm Studio keeps your registry, storage records, licences, and invoicing in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
       pathname: location.pathname,
     }),
     { "script:ld+json": organizationLd() },
@@ -93,10 +93,10 @@ const metrics = [
 ];
 
 const features = [
-  { title: "Storage registry", body: "Track every firearm in your custody — make, model, serial, calibre, and exact storage location — on one searchable registry.", color: BLUE, svg: ic.box },
+  { title: "Storage registry", body: "Track every firearm in your custody - make, model, serial, calibre, and exact storage location - on one searchable registry.", color: BLUE, svg: ic.box },
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
   { title: "Invoicing", body: "Generate monthly storage invoices, track outstanding balances, and flag overdue accounts automatically.", color: GREEN, svg: ic.money },
-  { title: "Audit trail", body: "Every action logged with who, what, and when — a complete, tamper-evident history for inspections.", color: PURPLE, svg: ic.list },
+  { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: PURPLE, svg: ic.list },
 ];
 
 const stats: Stat[] = [
@@ -121,7 +121,7 @@ const attention = [
 ];
 
 const trust = [
-  { title: "Firearms Control Act aligned", body: "Record structure mirrors what SAPS expects — serial, calibre, licence linkage, and custody chain." },
+  { title: "Firearms Control Act aligned", body: "Record structure mirrors what SAPS expects - serial, calibre, licence linkage, and custody chain." },
   { title: "Tamper-evident audit log", body: "Every create, edit, and deletion is recorded with the user, timestamp, and affected record." },
   { title: "Role-based access control", body: "Owner, Admin, Clerk, and Viewer roles keep sensitive actions in the right hands." },
   { title: "POPIA-compliant & encrypted", body: "Customer and firearm data is encrypted in transit and at rest, hosted in-region." },
@@ -260,7 +260,7 @@ export default function Home() {
             </h1>
             <p style={{ ...lede, maxWidth: 540, fontSize: "clamp(15px,1.7vw,18px)", margin: "22px 0 0" }}>
               Firearm Studio keeps your registry, storage records, licences, and
-              invoicing in one secure, audit-ready system — purpose-built for
+              invoicing in one secure, audit-ready system - purpose-built for
               South African storage providers.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
@@ -414,8 +414,7 @@ export default function Home() {
             <div style={eyebrow}>The dashboard</div>
             <h2 style={h2}>Your whole operation, at a glance</h2>
             <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
-              Outstanding balances, licence alerts, and what needs attention —
-              surfaced the moment you sign in.
+              Outstanding balances, licence alerts, and what needs attention - surfaced the moment you sign in.
             </p>
           </div>
 
@@ -498,7 +497,7 @@ export default function Home() {
           <h2 style={h2}>Audit-ready, every single day</h2>
           <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
             Built around the realities of the Firearms Control Act. Every
-            record, every change, every renewal — logged and ready for
+            record, every change, every renewal - logged and ready for
             inspection.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
@@ -579,7 +578,7 @@ export default function Home() {
               Ready to bring order to your storage operation?
             </h2>
             <p style={{ margin: "16px auto 0", maxWidth: 520, fontSize: "clamp(15px,1.7vw,18px)", lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>
-              Start your free trial today — be compliant and invoicing before
+              Start your free trial today - be compliant and invoicing before
               the day is out.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 30 }}>

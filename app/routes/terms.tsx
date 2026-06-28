@@ -4,7 +4,7 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Terms of Service — Firearm Studio",
+    title: "Terms of Service - Firearm Studio",
     description:
       "The terms governing your access to and use of Firearm Studio, governed by the laws of South Africa.",
     pathname: location.pathname,
@@ -23,7 +23,7 @@ const sections: LegalSection[] = [
     id: "accounts",
     h: "2. Accounts and access",
     body: [
-      "You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. Access is granted on a role basis — Owner, Admin, Clerk, and Viewer — and you must ensure roles are assigned appropriately.",
+      "You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. Access is granted on a role basis - Owner, Admin, Clerk, and Viewer - and you must ensure roles are assigned appropriately.",
       "You must notify us promptly of any unauthorised use of your account.",
     ],
   },
@@ -43,7 +43,7 @@ const sections: LegalSection[] = [
     id: "data",
     h: "4. Your data and compliance",
     body: [
-      "You retain ownership of the records you enter. You are responsible for the accuracy and lawfulness of that data and for meeting your own obligations under the Firearms Control Act. Firearm Studio is a tool to support compliance — it does not replace your legal duties.",
+      "You retain ownership of the records you enter. You are responsible for the accuracy and lawfulness of that data and for meeting your own obligations under the Firearms Control Act. Firearm Studio is a tool to support compliance - it does not replace your legal duties.",
     ],
   },
   {

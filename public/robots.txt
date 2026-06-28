@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Auth-gated application — keep out of search indexes.
+# Auth-gated application - keep out of search indexes.
 Disallow: /login
 Disallow: /signup
 Disallow: /onboarding

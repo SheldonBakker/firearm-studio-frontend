@@ -1,4 +1,4 @@
-# Firearm Studio — Dashboard
+# Firearm Studio - Dashboard
 
 Role-based storage & compliance dashboard for a firearm storage business.
 Built with **React Router v7 (framework mode, SPA)**, **Supabase auth**,
@@ -12,7 +12,7 @@ Built with **React Router v7 (framework mode, SPA)**, **Supabase auth**,
    npm install
    ```
 
-2. Configure environment — copy `.env.example` to `.env` and fill in:
+2. Configure environment - copy `.env.example` to `.env` and fill in:
 
    ```bash
    cp .env.example .env
@@ -32,19 +32,19 @@ Built with **React Router v7 (framework mode, SPA)**, **Supabase auth**,
 
 ## How it works
 
-- **Auth** — email/password via Supabase. `app/lib/supabase.ts` holds the
+- **Auth** - email/password via Supabase. `app/lib/supabase.ts` holds the
   client; the access token is attached as a `Bearer` header to every API call
   (`app/lib/api.ts`). A `401` signs the user out.
-- **Routing** — `/login`, `/signup`, `/onboarding`, then a guarded app layout
+- **Routing** - `/login`, `/signup`, `/onboarding`, then a guarded app layout
   (`app/routes/app-layout.tsx`) wrapping all dashboard pages. The layout's
   `clientLoader` requires a session and gates company onboarding.
-- **Roles (RBAC)** — `app/lib/rbac.ts` maps `Owner / Admin / Clerk / Viewer`
+- **Roles (RBAC)** - `app/lib/rbac.ts` maps `Owner / Admin / Clerk / Viewer`
   to visible nav sections and write capabilities. All roles share one
   dashboard; Team/Settings are Admin+, write actions are hidden for Viewers.
-- **Onboarding** — after signup, new users complete a company form
+- **Onboarding** - after signup, new users complete a company form
   (`POST /api/v1/onboarding/company`). Because the API has no "get my company"
   read, onboarding completion is inferred by probing a protected resource.
-- **Design** — dark theme ported from the Claude Design prototype into shadcn
+- **Design** - dark theme ported from the Claude Design prototype into shadcn
   tokens in `app/app.css` (accent `#E8973C`, IBM Plex fonts).
 
 ## Scripts
@@ -62,7 +62,7 @@ npm run cf-typegen # regenerate worker-configuration.d.ts from wrangler.jsonc
 
 The app deploys as a **Worker serving static assets** (the SPA) with a tiny
 Worker script (`workers/app.ts`) that **proxies `/api/*` to the backend** so
-the API is same-origin in production (no CORS) — mirroring the dev proxy.
+the API is same-origin in production (no CORS) - mirroring the dev proxy.
 Config lives in `wrangler.jsonc`:
 
 - `assets` → serves `build/client` with SPA fallback (`not_found_handling: single-page-application`).
@@ -71,7 +71,7 @@ Config lives in `wrangler.jsonc`:
 ### Where the API URL comes from
 
 The Worker reads `env.API_BASE_URL` at **runtime** to know where to proxy
-`/api/*`. This is a **Worker var/secret** — it is *not* read from `.env`
+`/api/*`. This is a **Worker var/secret** - it is *not* read from `.env`
 (those `VITE_*` values are build-time client vars baked into the bundle by
 Vite and are not visible to the Worker).
 

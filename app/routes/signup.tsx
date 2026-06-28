@@ -11,7 +11,7 @@ import { Label } from "~/components/ui/label";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Create your account — Firearm Studio",
+    title: "Create your account - Firearm Studio",
     description: "Set up Firearm Studio for your business.",
     pathname: location.pathname,
     noIndex: true,

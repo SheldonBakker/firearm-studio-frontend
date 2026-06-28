@@ -4,7 +4,7 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Privacy Policy — Firearm Studio",
+    title: "Privacy Policy - Firearm Studio",
     description:
       "How Firearm Studio collects, uses, and protects personal information, in line with South Africa's POPIA.",
     pathname: location.pathname,
@@ -25,9 +25,9 @@ const sections: LegalSection[] = [
     h: "2. Information we collect",
     body: ["We collect information needed to operate the service and meet regulatory obligations:"],
     bullets: [
-      "Account details — name, work email, role, and the company you represent.",
-      "Operational records you enter — firearm registry data, storage records, customer and licence details, and invoicing information.",
-      "Usage and device data — log entries, IP address, and browser type, used to secure and improve the service.",
+      "Account details - name, work email, role, and the company you represent.",
+      "Operational records you enter - firearm registry data, storage records, customer and licence details, and invoicing information.",
+      "Usage and device data - log entries, IP address, and browser type, used to secure and improve the service.",
     ],
   },
   {
@@ -43,9 +43,9 @@ const sections: LegalSection[] = [
     h: "4. Sharing and disclosure",
     body: ["We share information only where necessary to run the service or where required by law:"],
     bullets: [
-      "Service providers — vetted processors (e.g. hosting and authentication) bound by confidentiality and POPIA obligations.",
-      "Legal and regulatory — where disclosure is required by SAPS, a court, or applicable law.",
-      "Business transfers — in connection with a merger or acquisition, subject to this policy.",
+      "Service providers - vetted processors (e.g. hosting and authentication) bound by confidentiality and POPIA obligations.",
+      "Legal and regulatory - where disclosure is required by SAPS, a court, or applicable law.",
+      "Business transfers - in connection with a merger or acquisition, subject to this policy.",
     ],
   },
   {

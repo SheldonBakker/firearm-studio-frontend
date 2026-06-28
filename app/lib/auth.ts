@@ -89,7 +89,7 @@ export async function hasCompanyAccess(): Promise<boolean> {
     return true;
   }
   if (result === "forbidden" || result === "missing") return false;
-  return true; // connectivity error — don't trap in onboarding
+  return true; // connectivity error - don't trap in onboarding
 }
 
 export async function signOut(): Promise<void> {

@@ -6,9 +6,9 @@ import { pageMeta } from "~/lib/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "About — Firearm Studio",
+    title: "About - Firearm Studio",
     description:
-      "Firearm Studio is built by storage operators, for storage operators — taking the friction out of compliant firearm storage in South Africa.",
+      "Firearm Studio is built by storage operators, for storage operators - taking the friction out of compliant firearm storage in South Africa.",
     pathname: location.pathname,
   });
 }
@@ -44,7 +44,7 @@ function Glyph({ d, size = 21 }: { d: string; size?: number }) {
 
 const values = [
   { title: "Compliance first", body: "Every feature is shaped by the Firearms Control Act. If it doesn't help you stay compliant, it doesn't ship.", color: AMBER, svg: ic.shield },
-  { title: "Accountable by design", body: "A complete, tamper-evident record of who did what, and when — so accountability is never in question.", color: PURPLE, svg: ic.list },
+  { title: "Accountable by design", body: "A complete, tamper-evident record of who did what, and when - so accountability is never in question.", color: PURPLE, svg: ic.list },
   { title: "Built for real operators", body: "We work alongside dealers, gunsmiths, and facilities to make sure the product fits the day-to-day.", color: BLUE, svg: ic.users },
   { title: "Precision over noise", body: "Clear data, no clutter. The numbers that matter, surfaced the moment you need them.", color: GREEN, svg: ic.target },
 ];
@@ -89,7 +89,7 @@ export default function About() {
             Built by storage operators, for storage operators
           </h1>
           <p style={{ margin: "20px auto 0", maxWidth: 600, fontSize: "clamp(15px,1.7vw,18px)", lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>
-            Firearm Studio exists to take the friction out of compliant firearm storage — so South African operators can
+            Firearm Studio exists to take the friction out of compliant firearm storage - so South African operators can
             spend less time on paperwork and more time running a safe, accountable business.
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function About() {
           </p>
           <p style={{ margin: "14px 0 0", fontSize: 15, lineHeight: 1.65, color: "#8a93a2", textWrap: "pretty" }}>
             So we built the system we wished we had: one secure place for the registry, storage records, licences, and
-            billing — structured around the Firearms Control Act and ready for SAPS at any moment. Today it manages
+            billing - structured around the Firearms Control Act and ready for SAPS at any moment. Today it manages
             thousands of firearms for operators across the country.
           </p>
         </div>

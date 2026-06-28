@@ -46,7 +46,6 @@ const GROUPS: NavGroup[] = [
   },
 ];
 
-/** Brand + nav + user footer. Shared by the desktop aside and the mobile drawer. */
 function SidebarBody({
   user,
   onNavigate,
@@ -141,7 +140,6 @@ function SidebarBody({
   );
 }
 
-/** Persistent sidebar — visible from `lg` up. */
 export function Sidebar({ user }: { user: SessionUser }) {
   return (
     <aside className="hidden h-screen w-62 shrink-0 border-r border-border lg:block">
@@ -150,7 +148,6 @@ export function Sidebar({ user }: { user: SessionUser }) {
   );
 }
 
-/** Slide-in drawer for tablet/mobile (below `lg`). */
 export function MobileSidebar({
   user,
   open,

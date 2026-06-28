@@ -17,7 +17,7 @@ import type { CreateCompanyRequest } from "~/lib/api-types";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Set up your company — Firearm Studio",
+    title: "Set up your company - Firearm Studio",
     description: "Set up your company to start using Firearm Studio.",
     pathname: location.pathname,
     noIndex: true,
