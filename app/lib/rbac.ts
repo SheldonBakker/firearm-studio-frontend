@@ -6,12 +6,26 @@ export interface SessionUser {
   roles: Role[];
 }
 
-export const ROLE_RANK: Record<Role, number> = {
-  Owner: 4,
-  Admin: 3,
-  Clerk: 2,
+const ROLE_ALIASES: Record<string, Role> = {
+  owner: "Admin",
+  admin: "Admin",
+  manager: "Manager",
+  staff: "Staff",
+  clerk: "Staff",
+  viewer: "Viewer",
+};
+
+const ROLE_RANK: Record<Role, number> = {
+  Admin: 4,
+  Manager: 3,
+  Staff: 2,
   Viewer: 1,
 };
+
+export function canonicalRole(role: string | null | undefined): Role | null {
+  if (!role) return null;
+  return ROLE_ALIASES[role.toLowerCase()] ?? null;
+}
 
 /** Highest-privilege role the user holds (defaults to Viewer). */
 export function primaryRole(user: SessionUser): Role {
@@ -56,7 +70,7 @@ export function can(user: SessionUser, action: Action): boolean {
   switch (action) {
     case "registry:write":
     case "invoices:write":
-      return isAtLeast(user, "Clerk");
+      return isAtLeast(user, "Staff");
     case "team:manage":
     case "settings:write":
       return isAtLeast(user, "Admin");
@@ -67,9 +81,8 @@ export function can(user: SessionUser, action: Action): boolean {
 
 /** Coerce arbitrary role strings from the API into known Role values. */
 export function normalizeRoles(roles: string[] | null | undefined): Role[] {
-  const known: Role[] = ["Owner", "Admin", "Clerk", "Viewer"];
   const out = (roles ?? [])
-    .map((r) => known.find((k) => k.toLowerCase() === r.toLowerCase()))
+    .map((r) => canonicalRole(r))
     .filter((r): r is Role => Boolean(r));
   return out.length ? out : ["Viewer"];
 }

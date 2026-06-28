@@ -1,9 +1,9 @@
 import type { MetaDescriptor } from "react-router";
 
-export const SITE_URL = "https://firearmstudio.com";
-export const SITE_NAME = "Firearm Studio";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
-export const SUPPORT_EMAIL = "support@firearmstudio.com";
+const SITE_URL = "https://firearmstudio.com"; 
+const SITE_NAME = "Firearm Studio";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+ const SUPPORT_EMAIL = "support@firearmstudio.com";
 
 export const PUBLIC_PATHS = [
   "/",

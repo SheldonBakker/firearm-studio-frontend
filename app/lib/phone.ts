@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SOUTH_AFRICAN_PHONE_ERROR =
+const SOUTH_AFRICAN_PHONE_ERROR =
   "Enter a valid South African cellphone or landline number.";
 
 const LANDLINE_AREA_CODES = new Set([
@@ -104,20 +104,11 @@ export const optionalSouthAfricanPhoneSchema =
 export const requiredSouthAfricanPhoneSchema =
   createSouthAfricanPhoneSchema(true);
 
-/**
- * Accepts South African cellphone and geographic landline numbers in local or
- * international format. Spaces, hyphens and parentheses are allowed.
- */
-export function isValidSouthAfricanPhoneNumber(value: string): boolean {
-  return requiredSouthAfricanPhoneSchema.safeParse(value).success;
-}
-
 export function getSouthAfricanPhoneError(value: string): string | null {
   const result = optionalSouthAfricanPhoneSchema.safeParse(value);
   return result.success ? null : result.error.issues[0]?.message;
 }
 
-/** Returns the nine digits displayed after the fixed +27 field prefix. */
 export function getSouthAfricanNationalDigits(value: string): string {
   const input = value.trim();
   const digits = input.replace(/\D/g, "");
@@ -129,12 +120,4 @@ export function getSouthAfricanNationalDigits(value: string): string {
   }
   if (digits.startsWith("0")) return digits.slice(1, 10);
   return digits.slice(0, 9);
-}
-
-/** Converts a valid number to the canonical API/storage format: +27XXXXXXXXX. */
-export function normalizeSouthAfricanPhoneNumber(
-  value: string,
-): string | null {
-  const result = requiredSouthAfricanPhoneSchema.safeParse(value);
-  return result.success ? result.data : null;
 }

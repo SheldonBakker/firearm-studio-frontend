@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const EMAIL_ERROR = "Enter a valid email address.";
+const EMAIL_ERROR = "Enter a valid email address.";
 
 const trimmedString = z.string().trim();
 

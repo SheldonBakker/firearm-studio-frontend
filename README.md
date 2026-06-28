@@ -38,7 +38,7 @@ Built with **React Router v7 (framework mode, SPA)**, **Supabase auth**,
 - **Routing** - `/login`, `/signup`, `/onboarding`, then a guarded app layout
   (`app/routes/app-layout.tsx`) wrapping all dashboard pages. The layout's
   `clientLoader` requires a session and gates company onboarding.
-- **Roles (RBAC)** - `app/lib/rbac.ts` maps `Owner / Admin / Clerk / Viewer`
+- **Roles (RBAC)** - `app/lib/rbac.ts` maps `Admin / Manager / Staff / Viewer`
   to visible nav sections and write capabilities. All roles share one
   dashboard; Team/Settings are Admin+, write actions are hidden for Viewers.
 - **Onboarding** - after signup, new users complete a company form

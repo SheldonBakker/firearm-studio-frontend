@@ -12,6 +12,7 @@ import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
+import { canonicalRole } from "~/lib/rbac";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +29,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   return { users: api.users().catch(() => [] as UserResponse[]) };
 }
 
-const ROLES = ["Owner", "Admin", "Clerk", "Viewer"];
+const ROLES = ["Admin", "Manager", "Staff", "Viewer"] as const;
 
 export default function Team({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
@@ -145,7 +146,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
             type: "select",
             required: true,
             full: true,
-            defaultValue: "Clerk",
+            defaultValue: "Staff",
             options: ROLES.map((r) => ({ value: r, label: r })),
           },
         ]}
@@ -174,7 +175,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
               type: "select",
               required: true,
               full: true,
-              defaultValue: roleFor.role ?? "Clerk",
+              defaultValue: canonicalRole(roleFor.role) ?? "Staff",
               options: ROLES.map((r) => ({ value: r, label: r })),
             },
           ]}

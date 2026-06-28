@@ -23,7 +23,7 @@ const sections: LegalSection[] = [
     id: "accounts",
     h: "2. Accounts and access",
     body: [
-      "You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. Access is granted on a role basis - Owner, Admin, Clerk, and Viewer - and you must ensure roles are assigned appropriately.",
+      "You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. Access is granted on a role basis - Admin, Manager, Staff, and Viewer - and you must ensure roles are assigned appropriately.",
       "You must notify us promptly of any unauthorised use of your account.",
     ],
   },

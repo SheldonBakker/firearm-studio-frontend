@@ -123,7 +123,7 @@ const attention = [
 const trust = [
   { title: "Firearms Control Act aligned", body: "Record structure mirrors what SAPS expects - serial, calibre, licence linkage, and custody chain." },
   { title: "Tamper-evident audit log", body: "Every create, edit, and deletion is recorded with the user, timestamp, and affected record." },
-  { title: "Role-based access control", body: "Owner, Admin, Clerk, and Viewer roles keep sensitive actions in the right hands." },
+  { title: "Role-based access control", body: "Admin, Manager, Staff, and Viewer roles keep sensitive actions in the right hands." },
   { title: "POPIA-compliant & encrypted", body: "Customer and firearm data is encrypted in transit and at rest, hosted in-region." },
 ];
 

@@ -104,7 +104,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   }
 }
 
-export interface CustomerListParams {
+interface CustomerListParams {
   pageNumber?: number;
   pageSize?: number;
   sortOrder?: string;

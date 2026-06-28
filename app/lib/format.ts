@@ -28,9 +28,8 @@ export function fmtDate(d: string | null | undefined): string {
   });
 }
 
-export const EMDASH = "—";
+const EMDASH = "—";
 
-// status key -> [tailwind color token, label]
 type StatusMeta = { color: string; label: string };
 
 const STATUS: Record<string, StatusMeta> = {
@@ -56,7 +55,9 @@ const STATUS: Record<string, StatusMeta> = {
   // roles
   Owner: { color: "var(--brand)", label: "Owner" },
   Admin: { color: "var(--status-purple)", label: "Admin" },
+  Manager: { color: "var(--brand)", label: "Manager" },
   Clerk: { color: "var(--status-blue)", label: "Clerk" },
+  Staff: { color: "var(--status-blue)", label: "Staff" },
   Viewer: { color: "var(--dim)", label: "Viewer" },
 };
 

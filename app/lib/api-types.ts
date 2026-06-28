@@ -7,9 +7,9 @@ export type FirearmStatus =
   | "Released"
   | "PendingTransfer"
   | "Inactive";
-export type LicenceStatus = "Valid" | "RenewalDue" | "Expired" | "Unknown";
+type LicenceStatus = "Valid" | "RenewalDue" | "Expired" | "Unknown";
 export type PaymentMethod = "Eft" | "Cash" | "Card" | "DebitOrder" | "Other";
-export type Role = "Owner" | "Admin" | "Clerk" | "Viewer";
+export type Role = "Admin" | "Manager" | "Staff" | "Viewer";
 
 export interface CurrentUserResponse {
   id: string;
