@@ -24,6 +24,7 @@ import type {
   UpdateCustomerRequest,
   UpdateFirearmRequest,
   UpdateLicenceRequest,
+  UpdateStorageRecordRequest,
   UpdateUserRoleRequest,
   UserResponse,
 } from "./api-types";
@@ -221,6 +222,8 @@ export const api = {
       method: "PATCH",
       body,
     }),
+  updateStorage: (id: string, body: UpdateStorageRecordRequest) =>
+    request<void>(`/api/v1/storage-records/${id}`, { method: "PATCH", body }),
 
   // ---- Invoices ----
   invoices: () => request<InvoiceResponse[]>("/api/v1/invoices"),

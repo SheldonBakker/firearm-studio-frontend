@@ -1315,7 +1315,7 @@
         }
       }
     },
-    "/api/v1/storage-records/{id}/release": {
+    "/api/v1/storage-records/{id}": {
       "patch": {
         "tags": [
           "StorageRecords"
@@ -1335,17 +1335,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReleaseStorageRequest"
+                "$ref": "#/components/schemas/UpdateStorageRecordRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReleaseStorageRequest"
+                "$ref": "#/components/schemas/UpdateStorageRecordRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReleaseStorageRequest"
+                "$ref": "#/components/schemas/UpdateStorageRecordRequest"
               }
             }
           }
@@ -1550,7 +1550,12 @@
         "additionalProperties": false
       },
       "AppRole": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -1611,6 +1616,9 @@
           }
         },
         "additionalProperties": false
+      },
+      "BooleanOptional": {
+        "type": "boolean"
       },
       "CompanyDetailsResponse": {
         "type": "object",
@@ -2039,9 +2047,24 @@
         "additionalProperties": false
       },
       "CustomerType": {
-        "enum": [0, 1],
+        "enum": [
+          0,
+          1
+        ],
         "type": "integer",
         "format": "int32"
+      },
+      "DateOnlyNullableOptional": {
+        "type": "string",
+        "format": "date"
+      },
+      "DateOnlyOptional": {
+        "type": "string",
+        "format": "date"
+      },
+      "DecimalOptional": {
+        "type": "number",
+        "format": "double"
       },
       "ExpiredLicenceDto": {
         "type": "object",
@@ -2140,9 +2163,17 @@
         "additionalProperties": false
       },
       "FirearmStatus": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
+      },
+      "FirearmStatusOptional": {
+        "$ref": "#/components/schemas/FirearmStatus"
       },
       "GenerateMonthlyInvoicesRequest": {
         "type": "object",
@@ -2334,7 +2365,13 @@
         "additionalProperties": false
       },
       "InvoiceStatus": {
-        "enum": [0, 1, 2, 3, 4],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -2368,12 +2405,26 @@
         "additionalProperties": false
       },
       "LicenceStatus": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
       },
+      "LicenceStatusOptional": {
+        "$ref": "#/components/schemas/LicenceStatus"
+      },
       "PaymentMethod": {
-        "enum": [0, 1, 2, 3, 4],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -2398,17 +2449,6 @@
           },
           "notes": {
             "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReleaseStorageRequest": {
-        "type": "object",
-        "properties": {
-          "storedUntil": {
-            "type": "string",
-            "format": "date",
             "nullable": true
           }
         },
@@ -2499,52 +2539,52 @@
         "additionalProperties": false
       },
       "StorageStatus": {
-        "enum": [0, 1, 2],
+        "enum": [
+          0,
+          1,
+          2
+        ],
         "type": "integer",
         "format": "int32"
+      },
+      "StorageStatusOptional": {
+        "$ref": "#/components/schemas/StorageStatus"
+      },
+      "StringOptional": {
+        "type": "string"
       },
       "UpdateCompanyRequest": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "registrationNumber": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "vatNumber": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "email": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "phone": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "addressLine1": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "addressLine2": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "city": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "province": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "postalCode": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           }
         },
         "additionalProperties": false
@@ -2553,28 +2593,22 @@
         "type": "object",
         "properties": {
           "fullName": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "companyName": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "email": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "phone": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "notes": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "isActive": {
-            "type": "boolean",
-            "nullable": true
+            "$ref": "#/components/schemas/BooleanOptional"
           }
         },
         "additionalProperties": false
@@ -2583,23 +2617,19 @@
         "type": "object",
         "properties": {
           "model": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "calibre": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "firearmType": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "notes": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "status": {
-            "$ref": "#/components/schemas/FirearmStatus"
+            "$ref": "#/components/schemas/FirearmStatusOptional"
           }
         },
         "additionalProperties": false
@@ -2608,25 +2638,49 @@
         "type": "object",
         "properties": {
           "licenceNumber": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
           },
           "issuedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
+            "$ref": "#/components/schemas/DateOnlyNullableOptional"
           },
           "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
+            "$ref": "#/components/schemas/DateOnlyOptional"
           },
           "status": {
-            "$ref": "#/components/schemas/LicenceStatus"
+            "$ref": "#/components/schemas/LicenceStatusOptional"
           },
           "documentUrl": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/StringOptional"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateStorageRecordRequest": {
+        "type": "object",
+        "properties": {
+          "storedFrom": {
+            "$ref": "#/components/schemas/DateOnlyOptional"
+          },
+          "storedUntil": {
+            "$ref": "#/components/schemas/DateOnlyNullableOptional"
+          },
+          "monthlyRate": {
+            "$ref": "#/components/schemas/DecimalOptional"
+          },
+          "storageStatus": {
+            "$ref": "#/components/schemas/StorageStatusOptional"
+          },
+          "storageLocation": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "rackNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "safeNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "notes": {
+            "$ref": "#/components/schemas/StringOptional"
           }
         },
         "additionalProperties": false
@@ -2658,8 +2712,8 @@
   },
   "security": [
     {
-      "Bearer": [],
-      "ApiKey": []
+      "Bearer": [ ],
+      "ApiKey": [ ]
     }
   ]
 }

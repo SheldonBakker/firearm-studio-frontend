@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRevalidator } from "react-router";
+import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
 import { api } from "~/lib/api";
@@ -27,6 +27,7 @@ export function clientLoader() {
 }
 
 export default function Storage({ loaderData }: Route.ComponentProps) {
+  const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
   const [filter, setFilter] = useState("all");
@@ -35,7 +36,7 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <PageHeader title="Storage Records" />
-      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={5} />}>
+      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
         {([storage, firearms]) => {
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           const rows =
@@ -62,6 +63,7 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
               />
               <DataTable<StorageRecordResponse>
                 rows={rows}
+                onRowClick={(r) => navigate(`/storage/${r.id}`)}
                 empty="No storage records match this filter."
                 columns={[
                   {
@@ -73,9 +75,20 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                           {firearmLabel(fireMap[r.firearmId ?? ""])}
                         </div>
                         <Mono className="text-[11.5px] text-dim">
-                          {fireMap[r.firearmId ?? ""]?.serialNumber ?? "—"}
+                          {r.serialNumber ??
+                            fireMap[r.firearmId ?? ""]?.serialNumber ??
+                            "—"}
                         </Mono>
                       </div>
+                    ),
+                  },
+                  {
+                    key: "customer",
+                    header: "Customer",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {r.customerName ?? "—"}
+                      </span>
                     ),
                   },
                   {
@@ -95,6 +108,15 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     cell: (r) => (
                       <span className="text-[12.5px] text-muted-foreground">
                         {fmtDate(r.storedFrom)}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "until",
+                    header: "Stored until",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {fmtDate(r.storedUntil)}
                       </span>
                     ),
                   },
@@ -129,7 +151,10 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setReleasing(r)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setReleasing(r);
+                          }}
                         >
                           Release
                         </Button>

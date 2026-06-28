@@ -181,6 +181,17 @@ export interface ReleaseStorageRequest {
   storedUntil?: string | null;
 }
 
+export interface UpdateStorageRecordRequest {
+  storedFrom?: string | null;
+  storedUntil?: string | null;
+  monthlyRate?: number | null;
+  storageStatus?: StorageStatus;
+  storageLocation?: string | null;
+  rackNumber?: string | null;
+  safeNumber?: string | null;
+  notes?: string | null;
+}
+
 export interface InviteUserRequest {
   email?: string | null;
   fullName?: string | null;
@@ -214,16 +225,22 @@ export interface PaymentResponse {
   [k: string]: unknown;
 }
 
+// Mirrors swagger StorageRecordDto (GET /api/v1/storage). The customer variant
+// (GET /api/v1/storage/customer/{id}, CustomerStorageRecordDto) returns a subset,
+// so all fields stay optional and the index signature is retained.
 export interface StorageRecordResponse {
   id: string;
   firearmId?: string | null;
-  storedFrom?: string | null;
-  storedUntil?: string | null;
+  customerId?: string | null;
+  customerName?: string | null;
+  serialNumber?: string | null;
+  storageStatus?: StorageStatus | null;
   monthlyRate?: number | null;
   storageLocation?: string | null;
   rackNumber?: string | null;
   safeNumber?: string | null;
-  storageStatus?: StorageStatus | null;
+  storedFrom?: string | null;
+  storedUntil?: string | null;
   isActive?: boolean | null;
   [k: string]: unknown;
 }

@@ -24,6 +24,7 @@ export default [
     route("firearms", "routes/firearms.tsx"),
     route("firearms/:id", "routes/firearm-detail.tsx"),
     route("storage", "routes/storage.tsx"),
+    route("storage/:id", "routes/storage-detail.tsx"),
     route("licences", "routes/licences.tsx"),
     route("invoices", "routes/invoices.tsx"),
     route("invoices/:id", "routes/invoice-detail.tsx"),
