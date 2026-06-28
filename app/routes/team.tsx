@@ -5,7 +5,7 @@ import type { Route } from "./+types/team";
 import { api } from "~/lib/api";
 import { requireAuth } from "~/lib/auth";
 import { canSeeNav } from "~/lib/rbac";
-import { fmtDate, initials } from "~/lib/format";
+import { initials } from "~/lib/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { DataTable } from "~/components/common/data-table";
@@ -84,20 +84,15 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           {
             key: "status",
             header: "Status",
-            cell: (r) =>
-              r.isActive === false ? (
-                <span className="text-[12px] text-dim">Inactive</span>
-              ) : (
-                <StatusBadge status="Valid" />
-              ),
+            cell: (r) => (
+              <StatusBadge status={r.isActive ? "Active" : "Inactive"} />
+            ),
           },
           {
-            key: "last",
-            header: "Last sign-in",
+            key: "linked",
+            header: "Linked",
             cell: (r) => (
-              <span className="text-[12.5px] text-muted-foreground">
-                {fmtDate(r.lastSignInAt)}
-              </span>
+              <StatusBadge status={r.isLinked ? "Linked" : "NotLinked"} />
             ),
           },
           {

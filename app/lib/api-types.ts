@@ -243,11 +243,11 @@ export interface LicenceResponse {
 
 export interface UserResponse {
   id: string;
-  email?: string | null;
-  fullName?: string | null;
-  role?: string | null;
-  isActive?: boolean | null;
-  lastSignInAt?: string | null;
+  email: string;
+  fullName: string | null;
+  role: string;
+  isActive: boolean;
+  isLinked: boolean;
   [k: string]: unknown;
 }
 

@@ -37,7 +37,10 @@ const STATUS: Record<string, StatusMeta> = {
   InStorage: { color: "var(--status-blue)", label: "In storage" },
   Released: { color: "var(--dim)", label: "Released" },
   PendingTransfer: { color: "var(--status-amber)", label: "Pending transfer" },
+  Active: { color: "var(--status-green)", label: "Active" },
   Inactive: { color: "var(--dim)", label: "Inactive" },
+  Linked: { color: "var(--status-green)", label: "Linked" },
+  NotLinked: { color: "var(--status-amber)", label: "Not linked" },
   // licence
   Valid: { color: "var(--status-green)", label: "Valid" },
   RenewalDue: { color: "var(--status-amber)", label: "Renewal due" },
