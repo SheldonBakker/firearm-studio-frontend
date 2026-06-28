@@ -17,10 +17,10 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
+import { PaymentMethod, enumKey, enumNames } from "~/lib/enums";
 import type {
   CustomerResponse,
   InvoiceResponse,
-  PaymentMethod,
   PaymentResponse,
 } from "~/lib/api-types";
 
@@ -33,7 +33,7 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
   return { data };
 }
 
-const METHODS: PaymentMethod[] = ["Eft", "Cash", "Card", "DebitOrder", "Other"];
+const METHODS = enumNames(PaymentMethod);
 
 export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
@@ -102,19 +102,19 @@ function InvoiceView({
         actions={
           writable && (
             <>
-              {invoice.status !== "Paid" && (
+              {inv.status(invoice) !== "Paid" && (
                 <Button variant="ghost" onClick={() => setPayOpen(true)}>
                   <Icon name="money" size={16} />
                   Record payment
                 </Button>
               )}
-              {invoice.status !== "Paid" && (
+              {inv.status(invoice) !== "Paid" && (
                 <Button variant="ghost" onClick={send}>
                   <Icon name="send" size={16} />
                   Send
                 </Button>
               )}
-              {invoice.status !== "Paid" && (
+              {inv.status(invoice) !== "Paid" && (
                 <Button variant="ghost" onClick={cancel}>
                   Cancel invoice
                 </Button>
@@ -174,7 +174,7 @@ function InvoiceView({
                 header: "Method",
                 cell: (r) => (
                   <span className="text-[12.5px] text-muted-foreground">
-                    {r.method ?? "—"}
+                    {enumKey(PaymentMethod, r.method) ?? "—"}
                   </span>
                 ),
               },
@@ -217,7 +217,7 @@ function InvoiceView({
           await api.recordPayment(invoice.id, {
             amount: Number(v.amount || 0),
             paidOn: v.paidOn || null,
-            method: v.method as PaymentMethod,
+            method: PaymentMethod[v.method as keyof typeof PaymentMethod],
             reference: v.reference || null,
             notes: v.notes || null,
           });

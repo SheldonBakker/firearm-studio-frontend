@@ -208,7 +208,7 @@ export const api = {
 
   // ---- Storage ----
   storageActive: (params?: { serialNumber?: string; customerName?: string; storageStatus?: string }) =>
-    request<StorageRecordResponse[]>("/api/v1/storage/active", { query: params }),
+    request<StorageRecordResponse[]>("/api/v1/storage", { query: params }),
   storageByCustomer: (customerId: string) =>
     request<StorageRecordResponse[]>(`/api/v1/storage/customer/${customerId}`),
   startStorage: (firearmId: string, body: StartStorageRequest) =>

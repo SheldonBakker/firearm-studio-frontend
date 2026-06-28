@@ -1,3 +1,4 @@
+import { InvoiceStatus, enumKey } from "./enums";
 import type {
   CustomerListItemDto,
   CustomerResponse,
@@ -38,7 +39,8 @@ export const inv = {
     (i.subtotal ?? (i.subTotal as number) ?? 0) as number,
   vat: (i: InvoiceResponse) =>
     (i.vatAmount ?? (i.vat as number) ?? 0) as number,
-  status: (i: InvoiceResponse) => (i.status ?? "Draft") as string,
+  status: (i: InvoiceResponse): string =>
+    enumKey(InvoiceStatus, i.status) ?? "Draft",
   month: (i: InvoiceResponse) =>
     i.invoiceMonth ?? (i.month as string) ?? "—",
   dueOn: (i: InvoiceResponse) => i.dueOn ?? (i.dueDate as string) ?? null,

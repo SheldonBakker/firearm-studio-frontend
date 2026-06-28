@@ -1,16 +1,16 @@
-// Hand-written types mirroring swagger.json (#/components/schemas).
-// Endpoints that declare only `200 OK` with no schema are typed loosely.
+import type {
+  AppRole,
+  CustomerType,
+  FirearmStatus,
+  InvoiceStatus,
+  LicenceStatus,
+  PaymentMethod,
+  StorageStatus,
+} from "./enums";
 
-export type CustomerType = "Individual" | "Company";
-export type FirearmStatus =
-  | "InStorage"
-  | "Released"
-  | "PendingTransfer"
-  | "Inactive";
-type LicenceStatus = "Valid" | "RenewalDue" | "Expired" | "Unknown";
-export type PaymentMethod = "Eft" | "Cash" | "Card" | "DebitOrder" | "Other";
+export * from "./enums";
+
 export type Role = "Admin" | "Manager" | "Staff" | "Viewer";
-export type StorageStatus = "Active" | "Released" | "Cancelled";
 
 export interface CurrentUserResponse {
   id: string;
@@ -135,7 +135,6 @@ export interface CreateCompanyRequest {
   postalCode?: string | null;
 }
 
-// PATCH /api/v1/company shares the same shape as CreateCompanyRequest.
 export type UpdateCompanyRequest = CreateCompanyRequest;
 
 export interface CompanyDetailsResponse {
@@ -185,15 +184,12 @@ export interface ReleaseStorageRequest {
 export interface InviteUserRequest {
   email?: string | null;
   fullName?: string | null;
-  role?: string | null;
+  role?: AppRole | null;
 }
 
 export interface UpdateUserRoleRequest {
-  role?: string | null;
+  role?: AppRole | null;
 }
-
-// ---- Loosely-typed responses (no schema in swagger) ----
-// The UI reads these defensively; shapes reflect the design prototype.
 
 export interface InvoiceResponse {
   id: string;
@@ -203,7 +199,7 @@ export interface InvoiceResponse {
   subtotal?: number | null;
   vatAmount?: number | null;
   total?: number | null;
-  status?: string | null;
+  status?: InvoiceStatus | null;
   dueOn?: string | null;
   issuedOn?: string | null;
   payments?: PaymentResponse[] | null;
@@ -247,7 +243,7 @@ export interface UserResponse {
   id: string;
   email: string;
   fullName: string | null;
-  role: string;
+  role: AppRole | string;
   isActive: boolean;
   isLinked: boolean;
   [k: string]: unknown;

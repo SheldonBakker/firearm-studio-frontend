@@ -16,9 +16,9 @@ import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { StorageStatus, enumKey, enumNames } from "~/lib/enums";
 import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
 
-const STORAGE_STATUSES = ["Active", "Released", "Cancelled"] as const;
 
 export function clientLoader() {
   const storageP = api.storageActive().catch(() => [] as StorageRecordResponse[]);
@@ -41,7 +41,9 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
           const rows =
             filter === "all"
               ? storage
-              : storage.filter((r) => r.storageStatus === filter);
+              : storage.filter(
+                  (r) => enumKey(StorageStatus, r.storageStatus) === filter,
+                );
           return (
             <>
               <FilterBar
@@ -49,10 +51,12 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                 onChange={setFilter}
                 options={[
                   { id: "all", label: "All", n: storage.length },
-                  ...STORAGE_STATUSES.map((s) => ({
+                  ...enumNames(StorageStatus).map((s) => ({
                     id: s,
                     label: s,
-                    n: storage.filter((r) => r.storageStatus === s).length,
+                    n: storage.filter(
+                      (r) => enumKey(StorageStatus, r.storageStatus) === s,
+                    ).length,
                   })),
                 ]}
               />
@@ -107,13 +111,12 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                   {
                     key: "status",
                     header: "Status",
-                    cell: (r) => (
-                      r.storageStatus ? (
-                        <StatusBadge status={r.storageStatus} />
+                    cell: (r) =>
+                      r.storageStatus != null ? (
+                        <StatusBadge status={enumKey(StorageStatus, r.storageStatus)} />
                       ) : (
                         <span className="text-[12px] text-dim">—</span>
-                      )
-                    ),
+                      ),
                   },
                   {
                     key: "action",
@@ -121,7 +124,8 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     align: "right",
                     width: "120px",
                     cell: (r) =>
-                      can(user, "registry:write") && r.storageStatus === "Active" ? (
+                      can(user, "registry:write") &&
+                      r.storageStatus === StorageStatus.Active ? (
                         <Button
                           variant="ghost"
                           size="sm"

@@ -21,6 +21,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { AppRole, enumKey, enumNames } from "~/lib/enums";
 import type { UserResponse } from "~/lib/api-types";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -29,7 +30,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   return { users: api.users().catch(() => [] as UserResponse[]) };
 }
 
-const ROLES = ["Admin", "Manager", "Staff", "Viewer"] as const;
+const ROLES = enumNames(AppRole);
 
 export default function Team({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
@@ -79,7 +80,9 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           {
             key: "role",
             header: "Role",
-            cell: (r) => <StatusBadge status={r.role} dot={false} />,
+            cell: (r) => (
+              <StatusBadge status={enumKey(AppRole, r.role)} dot={false} />
+            ),
           },
           {
             key: "status",
@@ -149,7 +152,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           await api.inviteUser({
             email: v.email,
             fullName: v.fullName || null,
-            role: v.role,
+            role: AppRole[v.role as keyof typeof AppRole],
           });
           toast.success("Invitation sent");
           revalidator.revalidate();
@@ -170,12 +173,17 @@ export default function Team({ loaderData }: Route.ComponentProps) {
               type: "select",
               required: true,
               full: true,
-              defaultValue: canonicalRole(roleFor.role) ?? "Staff",
+              defaultValue:
+              (typeof roleFor.role === "number"
+                ? enumKey(AppRole, roleFor.role)
+                : canonicalRole(roleFor.role as string)) ?? "Staff",
               options: ROLES.map((r) => ({ value: r, label: r })),
             },
           ]}
           onSubmit={async (v) => {
-            await api.updateUserRole(roleFor.id, { role: v.role });
+            await api.updateUserRole(roleFor.id, {
+              role: AppRole[v.role as keyof typeof AppRole],
+            });
             toast.success("Role updated");
             setRoleFor(null);
             revalidator.revalidate();

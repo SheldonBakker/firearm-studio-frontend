@@ -10,6 +10,7 @@ import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { LicenceStatus, enumKey } from "~/lib/enums";
 import type { FirearmResponse, LicenceResponse } from "~/lib/api-types";
 
 export function clientLoader() {
@@ -22,8 +23,14 @@ export function clientLoader() {
       const seen = new Set<string>();
       const licences: LicenceResponse[] = [];
       for (const l of [
-        ...due.map((l) => ({ ...l, status: l.status ?? "RenewalDue" })),
-        ...expired.map((l) => ({ ...l, status: l.status ?? "Expired" })),
+        ...due.map((l) => ({
+          ...l,
+          status: enumKey(LicenceStatus, l.status) ?? "RenewalDue",
+        })),
+        ...expired.map((l) => ({
+          ...l,
+          status: enumKey(LicenceStatus, l.status) ?? "Expired",
+        })),
       ]) {
         if (seen.has(l.id)) continue;
         seen.add(l.id);
@@ -111,7 +118,7 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
             key: "status",
             header: "Status",
             align: "right",
-            cell: (r) => <StatusBadge status={r.status} />,
+            cell: (r) => <StatusBadge status={r.status as string | undefined} />,
           },
         ]}
               />

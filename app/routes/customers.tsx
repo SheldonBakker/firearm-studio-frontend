@@ -17,10 +17,10 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { CustomerType, enumKey } from "~/lib/enums";
 import type {
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
-  CustomerType,
   FirearmResponse,
 } from "~/lib/api-types";
 
@@ -73,9 +73,13 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           const activeN = customers.filter((c) => c.isActive).length;
           let rows = customers;
           if (filter === "individual")
-            rows = rows.filter((c) => c.customerType === "Individual");
+            rows = rows.filter(
+              (c) => c.customerType === CustomerType.Individual,
+            );
           if (filter === "company")
-            rows = rows.filter((c) => c.customerType === "Company");
+            rows = rows.filter(
+              (c) => c.customerType === CustomerType.Company,
+            );
           if (filter === "inactive") rows = rows.filter((c) => !c.isActive);
           return (
             <>
@@ -87,14 +91,16 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                   {
                     id: "individual",
                     label: "Individuals",
-                    n: customers.filter((c) => c.customerType === "Individual")
-                      .length,
+                    n: customers.filter(
+                      (c) => c.customerType === CustomerType.Individual,
+                    ).length,
                   },
                   {
                     id: "company",
                     label: "Companies",
-                    n: customers.filter((c) => c.customerType === "Company")
-                      .length,
+                    n: customers.filter(
+                      (c) => c.customerType === CustomerType.Company,
+                    ).length,
                   },
                   {
                     id: "inactive",
@@ -117,10 +123,10 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                   className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
                   style={{
                     color:
-                      r.customerType === "Company"
+                      r.customerType === CustomerType.Company
                         ? "var(--status-purple)"
                         : "var(--status-teal)",
-                    background: `color-mix(in srgb, ${r.customerType === "Company" ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
+                    background: `color-mix(in srgb, ${r.customerType === CustomerType.Company ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
                   }}
                 >
                   {initials(customerLabel(r))}
@@ -137,7 +143,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           {
             key: "type",
             header: "Type",
-            cell: (r) => <StatusBadge status={r.customerType} />,
+            cell: (r) => <StatusBadge status={enumKey(CustomerType, r.customerType)} />,
           },
           {
             key: "contact",
@@ -265,7 +271,8 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
         ]}
         onSubmit={async (v) => {
           await api.createCustomer({
-            customerType: v.customerType as CustomerType,
+            customerType:
+              CustomerType[v.customerType as keyof typeof CustomerType],
             fullName: v.fullName || null,
             companyName: v.companyName || null,
             email: v.email || null,

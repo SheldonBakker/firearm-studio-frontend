@@ -18,10 +18,15 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
+import {
+  FirearmStatus,
+  LicenceStatus,
+  enumKey,
+  enumNames,
+} from "~/lib/enums";
 import type {
   CustomerResponse,
   FirearmResponse,
-  FirearmStatus,
   LicenceResponse,
 } from "~/lib/api-types";
 
@@ -38,12 +43,7 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
   return { data };
 }
 
-const STATUSES: FirearmStatus[] = [
-  "InStorage",
-  "Released",
-  "PendingTransfer",
-  "Inactive",
-];
+const STATUSES = enumNames(FirearmStatus);
 
 export default function FirearmDetail({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ function FirearmView({
         title={firearmLabel(firearm)}
         subtitle={
           <span className="flex items-center gap-2">
-            <StatusBadge status={firearm.status} />
+            <StatusBadge status={enumKey(FirearmStatus, firearm.status)} />
             {customer && (
               <button
                 onClick={() => navigate(`/customers/${customer.id}`)}
@@ -96,7 +96,7 @@ function FirearmView({
         actions={
           writable && (
             <>
-              {firearm.status !== "InStorage" && (
+              {firearm.status !== FirearmStatus.InStorage && (
                 <Button variant="ghost" onClick={() => setStorageOpen(true)}>
                   <Icon name="box" size={16} />
                   Start storage
@@ -131,7 +131,7 @@ function FirearmView({
                   k: "Serial number",
                   v: <Mono>{firearm.serialNumber ?? "—"}</Mono>,
                 },
-                { k: "Status", v: <StatusBadge status={firearm.status} /> },
+                { k: "Status", v: <StatusBadge status={enumKey(FirearmStatus, firearm.status)} /> },
                 { k: "Notes", v: firearm.notes || "—", full: true },
               ]}
             />
@@ -182,7 +182,9 @@ function FirearmView({
                 key: "status",
                 header: "Status",
                 align: "right",
-                cell: (r) => <StatusBadge status={r.status} />,
+                cell: (r) => (
+                  <StatusBadge status={enumKey(LicenceStatus, r.status)} />
+                ),
               },
             ]}
           />
@@ -202,7 +204,7 @@ function FirearmView({
             name: "status",
             label: "Status",
             type: "select",
-            defaultValue: firearm.status,
+            defaultValue: enumKey(FirearmStatus, firearm.status),
             options: STATUSES.map((s) => ({ value: s, label: s })),
           },
           { name: "notes", label: "Notes", type: "textarea", full: true, defaultValue: firearm.notes ?? "" },
@@ -212,7 +214,7 @@ function FirearmView({
             model: v.model || null,
             calibre: v.calibre || null,
             firearmType: v.firearmType || null,
-            status: v.status as FirearmStatus,
+            status: FirearmStatus[v.status as keyof typeof FirearmStatus],
             notes: v.notes || null,
           });
           toast.success("Firearm updated");

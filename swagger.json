@@ -340,7 +340,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerFirearmListItemDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerFirearmListItemDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerFirearmListItemDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -363,7 +389,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerInvoiceListItemDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerInvoiceListItemDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerInvoiceListItemDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -585,7 +637,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -608,7 +686,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FirearmLicenceListItemDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FirearmLicenceListItemDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FirearmLicenceListItemDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -651,7 +755,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceListItemDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceListItemDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceListItemDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -674,7 +804,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
           }
         }
       }
@@ -774,7 +921,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -786,7 +959,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -964,14 +1163,63 @@
         }
       }
     },
-    "/api/v1/storage/active": {
+    "/api/v1/storage": {
       "get": {
         "tags": [
           "StorageRecords"
         ],
+        "parameters": [
+          {
+            "name": "storageStatus",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/StorageStatus"
+            }
+          },
+          {
+            "name": "serialNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageRecordDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageRecordDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageRecordDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -994,7 +1242,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1090,7 +1364,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppUserResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1194,6 +1494,48 @@
   },
   "components": {
     "schemas": {
+      "ActiveStorageFirearmDto": {
+        "type": "object",
+        "properties": {
+          "firearmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "make": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "monthlyRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "storageLocation": {
+            "type": "string",
+            "nullable": true
+          },
+          "storedFrom": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminCheckResponse": {
         "type": "object",
         "properties": {
@@ -1208,13 +1550,36 @@
         "additionalProperties": false
       },
       "AppRole": {
-        "enum": [
-          "Admin",
-          "Manager",
-          "Staff",
-          "Viewer"
-        ],
-        "type": "string"
+        "enum": [0, 1, 2, 3],
+        "type": "integer",
+        "format": "int32"
+      },
+      "AppUserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/AppRole"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isLinked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "AuditLogListItemDto": {
         "type": "object",
@@ -1490,6 +1855,56 @@
         },
         "additionalProperties": false
       },
+      "CustomerFirearmListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "make": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/FirearmStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerInvoiceListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "invoiceMonth": {
+            "type": "string",
+            "format": "date"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomerListItemDto": {
         "type": "object",
         "properties": {
@@ -1593,12 +2008,95 @@
         },
         "additionalProperties": false
       },
+      "CustomerStorageRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firearmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "monthlyRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "storageStatus": {
+            "$ref": "#/components/schemas/StorageStatus"
+          },
+          "storedFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "storedUntil": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomerType": {
-        "enum": [
-          "Individual",
-          "Company"
-        ],
-        "type": "string"
+        "enum": [0, 1],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ExpiredLicenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firearmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LicenceStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FirearmLicenceListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "renewalDueOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LicenceStatus"
+          }
+        },
+        "additionalProperties": false
       },
       "FirearmResponse": {
         "type": "object",
@@ -1642,13 +2140,9 @@
         "additionalProperties": false
       },
       "FirearmStatus": {
-        "enum": [
-          "InStorage",
-          "Released",
-          "PendingTransfer",
-          "Inactive"
-        ],
-        "type": "string"
+        "enum": [0, 1, 2, 3],
+        "type": "integer",
+        "format": "int32"
       },
       "GenerateMonthlyInvoicesRequest": {
         "type": "object",
@@ -1685,24 +2179,203 @@
         },
         "additionalProperties": false
       },
+      "InvoiceDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "invoiceMonth": {
+            "type": "string",
+            "format": "date"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "vatAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dueOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLineDto"
+            },
+            "nullable": true
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoicePaymentDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceLineDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "lineTotal": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "invoiceMonth": {
+            "type": "string",
+            "format": "date"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "vatAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          },
+          "dueOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoicePaymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "paidOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceStatus": {
+        "enum": [0, 1, 2, 3, 4],
+        "type": "integer",
+        "format": "int32"
+      },
+      "LicenceDueForRenewalDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firearmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "renewalDueOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LicenceStatus"
+          }
+        },
+        "additionalProperties": false
+      },
       "LicenceStatus": {
-        "enum": [
-          "Valid",
-          "RenewalDue",
-          "Expired",
-          "Unknown"
-        ],
-        "type": "string"
+        "enum": [0, 1, 2, 3],
+        "type": "integer",
+        "format": "int32"
       },
       "PaymentMethod": {
-        "enum": [
-          "Eft",
-          "Cash",
-          "Card",
-          "DebitOrder",
-          "Other"
-        ],
-        "type": "string"
+        "enum": [0, 1, 2, 3, 4],
+        "type": "integer",
+        "format": "int32"
       },
       "RecordPaymentRequest": {
         "type": "object",
@@ -1771,13 +2444,64 @@
         },
         "additionalProperties": false
       },
+      "StorageRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firearmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "storageStatus": {
+            "$ref": "#/components/schemas/StorageStatus"
+          },
+          "monthlyRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "storageLocation": {
+            "type": "string",
+            "nullable": true
+          },
+          "rackNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "safeNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "storedFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "storedUntil": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "StorageStatus": {
-        "enum": [
-          "Active",
-          "Released",
-          "Cancelled"
-        ],
-        "type": "string"
+        "enum": [0, 1, 2],
+        "type": "integer",
+        "format": "int32"
       },
       "UpdateCompanyRequest": {
         "type": "object",

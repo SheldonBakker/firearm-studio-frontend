@@ -16,6 +16,7 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { FirearmStatus, enumKey } from "~/lib/enums";
 import type { CustomerListItemDto, FirearmResponse } from "~/lib/api-types";
 
 export function clientLoader() {
@@ -54,7 +55,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
           const rows =
             filter === "all"
               ? firearms
-              : firearms.filter((f) => f.status === filter);
+              : firearms.filter((f) => enumKey(FirearmStatus, f.status) === filter);
           return (
             <>
               <FilterBar
@@ -65,7 +66,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                   ...STATUSES.map((s) => ({
                     id: s,
                     label: s.replace(/([A-Z])/g, " $1").trim(),
-                    n: firearms.filter((f) => f.status === s).length,
+                    n: firearms.filter((f) => enumKey(FirearmStatus, f.status) === s).length,
                   })),
                 ]}
               />
@@ -109,7 +110,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
           {
             key: "status",
             header: "Status",
-            cell: (r) => <StatusBadge status={r.status} />,
+            cell: (r) => <StatusBadge status={enumKey(FirearmStatus, r.status)} />,
           },
           {
             key: "go",

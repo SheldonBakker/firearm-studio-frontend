@@ -18,6 +18,7 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
+import { CustomerType, FirearmStatus, enumKey } from "~/lib/enums";
 import type {
   CustomerResponse,
   FirearmResponse,
@@ -83,7 +84,7 @@ function CustomerView({
         title={customerLabel(customer)}
         subtitle={
           <span className="flex items-center gap-2">
-            <StatusBadge status={customer.customerType} />
+            <StatusBadge status={enumKey(CustomerType, customer.customerType)} />
             <span>·</span>
             <span>{fmtMoney(outstanding)} outstanding</span>
           </span>
@@ -147,7 +148,7 @@ function CustomerView({
                 key: "status",
                 header: "Status",
                 align: "right",
-                cell: (r) => <StatusBadge status={r.status} />,
+                cell: (r) => <StatusBadge status={enumKey(FirearmStatus, r.status)} />,
               },
             ]}
           />
@@ -250,7 +251,7 @@ function CustomerView({
             <KeyValue
               pairs={[
                 { k: "Name", v: customerLabel(customer), strong: true },
-                { k: "Type", v: customer.customerType },
+                { k: "Type", v: enumKey(CustomerType, customer.customerType) },
                 { k: "Email", v: customer.email ?? "—" },
                 { k: "Phone", v: customer.phone ?? "—" },
                 {
