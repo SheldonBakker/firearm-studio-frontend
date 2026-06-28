@@ -1,22 +1,19 @@
 import { reactRouter } from "@react-router/dev/vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  // Dev proxy: the browser calls same-origin `/api/...`, Vite forwards to the
-  // real API server-side. This sidesteps CORS during local development.
-  const target = env.VITE_API_PROXY_TARGET || "http://localhost:5146";
-
-  return {
-    plugins: [tailwindcss(), reactRouter()],
-    resolve: {
-      tsconfigPaths: true,
-    },
-    server: {
-      proxy: {
-        "/api": { target, changeOrigin: true, secure: false },
-      },
-    },
-  };
+export default defineConfig({
+  // The Cloudflare plugin runs the Worker (workers/app.ts) inside workerd for
+  // both dev and build, so SSR happens on the same runtime as production. The
+  // Worker also proxies `/api/*` using `API_BASE_URL` (from .dev.vars in dev,
+  // wrangler.jsonc vars in prod), which replaces the old Vite dev proxy.
+  plugins: [
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
+    tailwindcss(),
+    reactRouter(),
+  ],
+  resolve: {
+    tsconfigPaths: true,
+  },
 });

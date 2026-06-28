@@ -1698,12 +1698,19 @@
         "description": "Paste a Supabase access token (without the 'Bearer ' prefix).",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "Shared API key required on all /api endpoints.",
+        "name": "X-Api-Key",
+        "in": "header"
       }
     }
   },
   "security": [
     {
-      "Bearer": []
+      "Bearer": [],
+      "ApiKey": []
     }
   ]
 }

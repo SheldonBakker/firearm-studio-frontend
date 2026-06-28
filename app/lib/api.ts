@@ -30,6 +30,10 @@ const BASE_URL = (
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
 ).replace(/\/$/, "");
 
+// Shared API key required on every /api endpoint (X-Api-Key header), in
+// addition to the per-user Supabase JWT (Authorization: Bearer …).
+const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -57,6 +61,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   }
 
   const headers: Record<string, string> = { Accept: "application/json" };
+  if (API_KEY) headers["X-Api-Key"] = API_KEY;
   if (token) headers.Authorization = `Bearer ${token}`;
   if (opts.body !== undefined) headers["Content-Type"] = "application/json";
 

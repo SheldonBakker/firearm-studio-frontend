@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2022"],
-    "types": [],
+    "types": ["vite/client"],
     "moduleResolution": "bundler"
   },
   "include": ["workers/**/*.ts", "worker-configuration.d.ts"],

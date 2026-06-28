@@ -120,6 +120,7 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   ::-webkit-scrollbar {
     width: 10px;
@@ -164,4 +165,98 @@
 }
 .animate-fade-in {
   animation: fadeIn 0.12s ease-out;
+}
+
+/* ---- Marketing site (public SSR pages) ----
+   Self-contained styles for the landing/legal pages so they need no client JS
+   for hover/animation. Palette matches the design tokens above. */
+@keyframes mkFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.mk-fade-up {
+  animation: mkFadeUp 0.5s ease-out both;
+}
+.mk-fade-up-delayed {
+  animation: mkFadeUp 0.6s ease-out 0.08s both;
+}
+
+.mk-nav-link {
+  transition: color 0.15s;
+}
+.mk-nav-link:hover {
+  color: #e6eaf0;
+}
+.mk-ghost {
+  transition: background 0.15s;
+}
+.mk-ghost:hover {
+  background: #1a1f28;
+}
+.mk-cta {
+  transition: background 0.15s;
+}
+.mk-cta:hover {
+  background: #f0a64a;
+}
+.mk-cta-lg {
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.mk-cta-lg:hover {
+  transform: translateY(-2px);
+  background: #f0a64a;
+}
+.mk-ghost-lg {
+  transition: background 0.15s;
+}
+.mk-ghost-lg:hover {
+  background: #222834;
+}
+.mk-card {
+  transition:
+    transform 0.18s,
+    border-color 0.18s;
+}
+.mk-card:hover {
+  transform: translateY(-3px);
+  border-color: #333b49;
+}
+.mk-foot-link {
+  transition: color 0.15s;
+}
+.mk-foot-link:hover {
+  color: #e6eaf0;
+}
+.mk-toc-link {
+  transition: color 0.15s;
+}
+.mk-toc-link:hover {
+  color: #e8973c;
+}
+.mk-input {
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.mk-input:focus {
+  outline: none;
+  border-color: #e8973c;
+  background: #0e1116;
+}
+.mk-input::placeholder {
+  color: #5c6573;
+}
+.mk-method {
+  transition: border-color 0.18s;
+}
+.mk-method:hover {
+  border-color: #333b49;
 }
