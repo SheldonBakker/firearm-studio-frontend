@@ -9,14 +9,13 @@ import { useSessionUser } from "./app-layout";
 import { can } from "~/lib/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
-import { StorageStatus, enumKey, enumNames } from "~/lib/enums";
+import { StorageStatus, enumKey } from "~/lib/enums";
 import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
 
 
@@ -30,7 +29,6 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
-  const [filter, setFilter] = useState("all");
   const [releasing, setReleasing] = useState<StorageRecordResponse | null>(null);
 
   return (
@@ -39,32 +37,12 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
       <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
         {([storage, firearms]) => {
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
-          const rows =
-            filter === "all"
-              ? storage
-              : storage.filter(
-                  (r) => enumKey(StorageStatus, r.storageStatus) === filter,
-                );
           return (
             <>
-              <FilterBar
-                active={filter}
-                onChange={setFilter}
-                options={[
-                  { id: "all", label: "All", n: storage.length },
-                  ...enumNames(StorageStatus).map((s) => ({
-                    id: s,
-                    label: s,
-                    n: storage.filter(
-                      (r) => enumKey(StorageStatus, r.storageStatus) === s,
-                    ).length,
-                  })),
-                ]}
-              />
               <DataTable<StorageRecordResponse>
-                rows={rows}
+                rows={storage}
                 onRowClick={(r) => navigate(`/storage/${r.id}`)}
-                empty="No storage records match this filter."
+                empty="No storage records yet."
                 columns={[
                   {
                     key: "firearm",
