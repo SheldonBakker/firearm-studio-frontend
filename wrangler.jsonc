@@ -7,19 +7,9 @@
     "enabled": true
   },
   "assets": {
-    // React Router SPA build output (ssr: false).
     "directory": "./build/client",
     "binding": "ASSETS",
-    // Unmatched routes return index.html (200) so client-side routing works.
     "not_found_handling": "single-page-application",
-    // Run the Worker for API calls so it can proxy them to the backend
-    // (same-origin in production → no CORS). Everything else is served
-    // directly from static assets.
     "run_worker_first": ["/api/*"]
-  },
-  "vars": {
-    // Backend base URL the Worker proxies /api/* to. Override per environment;
-    // set the real production API URL before deploying.
-    "API_BASE_URL": "https://api.firearm-studio.example"
   }
 }

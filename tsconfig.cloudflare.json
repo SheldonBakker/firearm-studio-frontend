@@ -1,7 +1,4 @@
 {
-  // TypeScript config for the Cloudflare Worker only. Kept separate from the
-  // app's tsconfig because worker-configuration.d.ts ships workerd runtime
-  // globals (Request/Response/fetch/…) that would clash with the app's DOM lib.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2022"],

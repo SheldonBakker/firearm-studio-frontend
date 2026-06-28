@@ -67,24 +67,34 @@ Config lives in `wrangler.jsonc`:
 
 - `assets` → serves `build/client` with SPA fallback (`not_found_handling: single-page-application`).
 - `run_worker_first: ["/api/*"]` → the Worker handles API routes; assets serve everything else.
-- `vars.API_BASE_URL` → where `/api/*` is proxied.
 
-Steps:
+### Where the API URL comes from
 
-1. **Set the production API URL** in `wrangler.jsonc` → `vars.API_BASE_URL`
-   (e.g. `https://api.your-domain.co.za`). For local `wrangler dev`, it's read
-   from `.dev.vars` (git-ignored).
-2. Keep `VITE_API_BASE_URL` **empty** in `.env` so the client calls same-origin
-   `/api` (which the Worker proxies). `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
-   are baked into the client bundle at build time.
-3. Authenticate and deploy:
+The Worker reads `env.API_BASE_URL` at **runtime** to know where to proxy
+`/api/*`. This is a **Worker var/secret** — it is *not* read from `.env`
+(those `VITE_*` values are build-time client vars baked into the bundle by
+Vite and are not visible to the Worker).
 
-   ```bash
-   npx wrangler login
-   npm run deploy
-   ```
+- **Local (`npm run preview` / `wrangler dev`):** read from `.dev.vars`
+  (git-ignored), e.g. `API_BASE_URL=http://localhost:5146`.
+- **Production:** set it as a secret before deploying (see below).
 
-> Note: the backend at `API_BASE_URL` must accept the proxied requests
-> (forwarded with the original method, headers incl. `Authorization`, and body).
-> `wrangler types` regenerates `worker-configuration.d.ts` (git-ignored) — rerun
-> it after editing `wrangler.jsonc`.
+Keep `VITE_API_BASE_URL` **empty** in `.env` so the client calls same-origin
+`/api`, which the Worker proxies. `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
+are baked into the client bundle at build time.
+
+### Steps
+
+```bash
+npx wrangler login                      # or: export CLOUDFLARE_API_TOKEN=...
+npx wrangler secret put API_BASE_URL    # paste your production API URL
+npm run deploy
+```
+
+> Notes
+> - The backend at `API_BASE_URL` must accept the proxied requests (forwarded
+>   with the original method, headers incl. `Authorization`, and body).
+> - If `API_BASE_URL` is unset, the Worker returns `502` for `/api/*` (assets
+>   still serve normally).
+> - `wrangler types` regenerates `worker-configuration.d.ts` (git-ignored) —
+>   rerun it (`npm run cf-typegen`) after editing `wrangler.jsonc`.
