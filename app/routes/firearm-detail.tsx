@@ -96,6 +96,10 @@ function FirearmView({
         actions={
           writable && (
             <>
+              <Button onClick={() => setLicOpen(true)}>
+                <Icon name="plus" size={16} />
+                Add licence
+              </Button>
               {firearm.status !== FirearmStatus.InStorage && (
                 <Button variant="ghost" onClick={() => setStorageOpen(true)}>
                   <Icon name="box" size={16} />

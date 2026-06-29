@@ -9,6 +9,7 @@ import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
+import { LicenceStatus } from "~/lib/enums";
 import {
   Resolve,
   StatGridSkeleton,
@@ -27,8 +28,12 @@ export function clientLoader() {
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
   const storageP = api.storageActive().catch(() => [] as StorageRecordResponse[]);
   const invoicesP = api.invoices().catch(() => [] as InvoiceResponse[]);
-  const dueP = api.licencesDueRenewal().catch(() => [] as LicenceResponse[]);
-  const expiredP = api.licencesExpired().catch(() => [] as LicenceResponse[]);
+  const dueP = api
+    .licences({ sortOrder: "asc", status: LicenceStatus.RenewalDue })
+    .catch(() => [] as LicenceResponse[]);
+  const expiredP = api
+    .licences({ sortOrder: "asc", status: LicenceStatus.Expired })
+    .catch(() => [] as LicenceResponse[]);
   const customersP = api
     .allCustomers()
     .catch(() => [] as CustomerListItemDto[]);
@@ -201,7 +206,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                   t: "Licence expired",
                   d: `${l.licenceNumber ?? "—"}`,
                   tag: "Expired",
-                  go: () => navigate("/licences"),
+                  go: () =>
+                    navigate(`/licences?status=${LicenceStatus.Expired}`),
                 })),
                 ...invoices
                   .filter((i) => inv.status(i) === "Overdue")
@@ -217,7 +223,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                   t: "Renewal due soon",
                   d: `${l.licenceNumber ?? "—"} · expires ${fmtDate(l.expiresOn)}`,
                   tag: "Renew",
-                  go: () => navigate("/licences"),
+                  go: () =>
+                    navigate(`/licences?status=${LicenceStatus.RenewalDue}`),
                 })),
               ].slice(0, 6);
               return (

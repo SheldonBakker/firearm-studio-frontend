@@ -14,6 +14,7 @@ import type {
   FirearmResponse,
   GenerateMonthlyInvoicesRequest,
   InvoiceResponse,
+  LicenceStatus,
   InviteUserRequest,
   LicenceResponse,
   RecordPaymentRequest,
@@ -114,6 +115,12 @@ interface CustomerListParams {
   phone?: string;
 }
 
+interface LicenceListParams {
+  sortOrder?: string;
+  licenceNumber?: string;
+  status?: LicenceStatus | string;
+}
+
 async function getCustomers(
   params: CustomerListParams = {},
 ): Promise<CustomerListItemDtoPaginatedResponse> {
@@ -194,6 +201,14 @@ export const api = {
   firearmLicences: (id: string) =>
     request<LicenceResponse[]>(`/api/v1/firearms/${id}/licences`),
   // ---- Licences ----
+  licences: (params?: LicenceListParams) =>
+    request<LicenceResponse[]>("/api/v1/licences", {
+      query: {
+        sortOrder: params?.sortOrder,
+        licenceNumber: params?.licenceNumber,
+        status: params?.status,
+      },
+    }),
   licencesDueRenewal: () =>
     request<LicenceResponse[]>("/api/v1/licences/due-renewal"),
   licencesExpired: () =>

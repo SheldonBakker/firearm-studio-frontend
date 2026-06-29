@@ -607,67 +607,6 @@
         }
       }
     },
-    "/api/v1/firearms/storage/active": {
-      "get": {
-        "tags": [
-          "Firearms"
-        ],
-        "parameters": [
-          {
-            "name": "serialNumber",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "customerName",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "storageStatus",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/StorageStatus"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ActiveStorageFirearmDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/firearms/{id}/licences": {
       "get": {
         "tags": [
@@ -914,48 +853,34 @@
         }
       }
     },
-    "/api/v1/licences/due-renewal": {
+    "/api/v1/licences": {
       "get": {
         "tags": [
           "Licences"
         ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LicenceDueForRenewalDto"
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "asc"
+            }
+          },
+          {
+            "name": "licenceNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/LicenceStatus"
             }
           }
-        }
-      }
-    },
-    "/api/v1/licences/expired": {
-      "get": {
-        "tags": [
-          "Licences"
         ],
         "responses": {
           "200": {
@@ -965,7 +890,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                    "$ref": "#/components/schemas/LicenceListItemDto"
                   }
                 }
               },
@@ -973,7 +898,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                    "$ref": "#/components/schemas/LicenceListItemDto"
                   }
                 }
               },
@@ -981,7 +906,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ExpiredLicenceDto"
+                    "$ref": "#/components/schemas/LicenceListItemDto"
                   }
                 }
               }
@@ -1494,48 +1419,6 @@
   },
   "components": {
     "schemas": {
-      "ActiveStorageFirearmDto": {
-        "type": "object",
-        "properties": {
-          "firearmId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "customerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "customerName": {
-            "type": "string",
-            "nullable": true
-          },
-          "serialNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "make": {
-            "type": "string",
-            "nullable": true
-          },
-          "model": {
-            "type": "string",
-            "nullable": true
-          },
-          "monthlyRate": {
-            "type": "number",
-            "format": "double"
-          },
-          "storageLocation": {
-            "type": "string",
-            "nullable": true
-          },
-          "storedFrom": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "additionalProperties": false
-      },
       "AdminCheckResponse": {
         "type": "object",
         "properties": {
@@ -2058,31 +1941,6 @@
         "type": "number",
         "format": "double"
       },
-      "ExpiredLicenceDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "firearmId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "licenceNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date"
-          },
-          "status": {
-            "$ref": "#/components/schemas/LicenceStatus"
-          }
-        },
-        "additionalProperties": false
-      },
       "FirearmLicenceListItemDto": {
         "type": "object",
         "properties": {
@@ -2356,7 +2214,7 @@
         "type": "integer",
         "format": "int32"
       },
-      "LicenceDueForRenewalDto": {
+      "LicenceListItemDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -2369,6 +2227,11 @@
           },
           "licenceNumber": {
             "type": "string",
+            "nullable": true
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date",
             "nullable": true
           },
           "expiresOn": {

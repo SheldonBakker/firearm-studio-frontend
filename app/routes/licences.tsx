@@ -1,82 +1,95 @@
 import { useState } from "react";
+import { useRevalidator, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import type { Route } from "./+types/licences";
 import { api } from "~/lib/api";
 import { firearmLabel } from "~/lib/entities";
 import { fmtDate } from "~/lib/format";
+import { useSessionUser } from "./app-layout";
+import { can } from "~/lib/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
+import { Icon } from "~/components/common/icon";
+import { Button } from "~/components/ui/button";
+import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/enums";
 import type { FirearmResponse, LicenceResponse } from "~/lib/api-types";
 
-export function clientLoader() {
-  const dueP = api.licencesDueRenewal().catch(() => [] as LicenceResponse[]);
-  const expiredP = api.licencesExpired().catch(() => [] as LicenceResponse[]);
+const STATUS_FILTERS = [
+  { id: "all", label: "All" },
+  { id: String(LicenceStatus.Valid), label: "Valid" },
+  { id: String(LicenceStatus.RenewalDue), label: "Renewal due" },
+  { id: String(LicenceStatus.Expired), label: "Expired" },
+  { id: String(LicenceStatus.Unknown), label: "Unknown" },
+];
+
+const LICENCE_STATUSES = new Set(STATUS_FILTERS.slice(1).map(({ id }) => id));
+const LICENCE_STATUS_NAMES = Object.keys(LicenceStatus);
+
+function dateInputValue(value: string | null | undefined) {
+  return value?.slice(0, 10) ?? "";
+}
+
+export function clientLoader({ request }: Route.ClientLoaderArgs) {
+  const searchParams = new URL(request.url).searchParams;
+  const requestedStatus = searchParams.get("status");
+  const status =
+    requestedStatus && LICENCE_STATUSES.has(requestedStatus)
+      ? requestedStatus
+      : undefined;
+  const licenceNumber =
+    searchParams.get("licenceNumber")?.trim() || undefined;
+  const licencesP = api
+    .licences({ sortOrder: "asc", licenceNumber, status })
+    .catch(() => [] as LicenceResponse[]);
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
-  const data = Promise.all([dueP, expiredP, firearmsP]).then(
-    ([due, expired, firearms]) => {
-      // Tag and de-dupe by id.
-      const seen = new Set<string>();
-      const licences: LicenceResponse[] = [];
-      for (const l of [
-        ...due.map((l) => ({
-          ...l,
-          status: enumKey(LicenceStatus, l.status) ?? "RenewalDue",
-        })),
-        ...expired.map((l) => ({
-          ...l,
-          status: enumKey(LicenceStatus, l.status) ?? "Expired",
-        })),
-      ]) {
-        if (seen.has(l.id)) continue;
-        seen.add(l.id);
-        licences.push(l);
-      }
-      return { licences, firearms };
-    },
-  );
-  return { data };
+  return { data: Promise.all([licencesP, firearmsP]) };
 }
 
 export default function Licences({ loaderData }: Route.ComponentProps) {
-  const [filter, setFilter] = useState("all");
+  const revalidator = useRevalidator();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const user = useSessionUser();
+  const writable = can(user, "registry:write");
+  const [editing, setEditing] = useState<LicenceResponse | null>(null);
+  const activeStatus = LICENCE_STATUSES.has(searchParams.get("status") ?? "")
+    ? searchParams.get("status")!
+    : "all";
+  const licenceNumberSearch = searchParams.get("licenceNumber") ?? "";
+  const hasFilters = activeStatus !== "all" || !!licenceNumberSearch.trim();
+
+  const setStatusFilter = (status: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (status === "all") next.delete("status");
+    else next.set("status", status);
+    setSearchParams(next);
+  };
 
   return (
     <PageWrap>
       <PageHeader title="Licences" />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
-        {({ licences, firearms }) => {
+      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={7} />}>
+        {([licences, firearms]) => {
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
-          const rows =
-            filter === "all"
-              ? licences
-              : licences.filter((l) => l.status === filter);
           return (
             <>
               <FilterBar
-                active={filter}
-                onChange={setFilter}
-                options={[
-                  { id: "all", label: "All", n: licences.length },
-                  {
-                    id: "RenewalDue",
-                    label: "Renewal due",
-                    n: licences.filter((l) => l.status === "RenewalDue").length,
-                  },
-                  {
-                    id: "Expired",
-                    label: "Expired",
-                    n: licences.filter((l) => l.status === "Expired").length,
-                  },
-                ]}
+                active={activeStatus}
+                onChange={setStatusFilter}
+                options={STATUS_FILTERS}
               />
               <DataTable<LicenceResponse>
-                rows={rows}
-                empty="No licences need attention."
+                rows={licences}
+                empty={
+                  hasFilters
+                    ? "No licences match these filters."
+                    : "No licences recorded."
+                }
                 columns={[
           {
             key: "num",
@@ -115,13 +128,100 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
             ),
           },
           {
+            key: "renewalDue",
+            header: "Renewal due",
+            cell: (r) => (
+              <span className="text-[12.5px] text-muted-foreground">
+                {fmtDate(r.renewalDueOn)}
+              </span>
+            ),
+          },
+          {
             key: "status",
             header: "Status",
             align: "right",
-            cell: (r) => <StatusBadge status={r.status as string | undefined} />,
+            cell: (r) => (
+              <StatusBadge status={enumKey(LicenceStatus, r.status)} />
+            ),
+          },
+          {
+            key: "action",
+            header: "",
+            align: "right",
+            width: "90px",
+            cell: (r) =>
+              writable ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setEditing(r);
+                  }}
+                >
+                  <Icon name="edit" size={14} />
+                  Edit
+                </Button>
+              ) : null,
           },
         ]}
               />
+
+              {editing && (
+                <FormDialog
+                  open={!!editing}
+                  onOpenChange={(open) => !open && setEditing(null)}
+                  title="Edit licence"
+                  submitLabel="Save changes"
+                  fields={[
+                    {
+                      name: "licenceNumber",
+                      label: "Licence number",
+                      full: true,
+                      defaultValue: editing.licenceNumber ?? "",
+                    },
+                    {
+                      name: "issuedOn",
+                      label: "Issued on",
+                      type: "date",
+                      defaultValue: dateInputValue(editing.issuedOn),
+                    },
+                    {
+                      name: "expiresOn",
+                      label: "Expires on",
+                      type: "date",
+                      required: true,
+                      defaultValue: dateInputValue(editing.expiresOn),
+                    },
+                    {
+                      name: "status",
+                      label: "Status",
+                      type: "select",
+                      required: true,
+                      defaultValue:
+                        enumKey(LicenceStatus, editing.status) ?? "Unknown",
+                      options: LICENCE_STATUS_NAMES.map((status) => ({
+                        value: status,
+                        label: status.replace(/([A-Z])/g, " $1").trim(),
+                      })),
+                    },
+                  ]}
+                  onSubmit={async (values) => {
+                    await api.updateLicence(editing.id, {
+                      licenceNumber: values.licenceNumber || null,
+                      issuedOn: values.issuedOn || null,
+                      expiresOn: values.expiresOn,
+                      status:
+                        LicenceStatus[
+                          values.status as keyof typeof LicenceStatus
+                        ],
+                    });
+                    toast.success("Licence updated");
+                    setEditing(null);
+                    revalidator.revalidate();
+                  }}
+                />
+              )}
             </>
           );
         }}

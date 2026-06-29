@@ -70,13 +70,14 @@ export function Topbar({
   onMenuClick: () => void;
 }) {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const title =
     TITLES.find((t) => pathname.startsWith(t.prefix))?.title ?? "Firearm Studio";
 
   const isCustomers = pathname.startsWith("/customers");
   const isFirearms = pathname.startsWith("/firearms");
   const isStorage = pathname.startsWith("/storage");
+  const isLicences = pathname.startsWith("/licences");
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -95,9 +96,21 @@ export function Topbar({
   const [liveStorage, setLiveStorage] = useState<StorageRecordResponse[]>([]);
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const licenceNumberSearch =
+    new URLSearchParams(search).get("licenceNumber") ?? "";
 
   // Reset on page navigation
   useEffect(() => {
+    if (isLicences) {
+      setQuery(licenceNumberSearch);
+      setOpen(false);
+      setLiveCustomers([]);
+      setLiveFirearms([]);
+      setLiveStorage([]);
+      setSearching(false);
+      cacheLoaded.current = false;
+      return;
+    }
     setQuery("");
     setOpen(false);
     setLiveCustomers([]);
@@ -105,7 +118,7 @@ export function Topbar({
     setLiveStorage([]);
     setSearching(false);
     cacheLoaded.current = false;
-  }, [pathname]);
+  }, [pathname, isLicences, licenceNumberSearch]);
 
   // Live search — active on contextual list/detail sections
   useEffect(() => {
@@ -156,7 +169,7 @@ export function Topbar({
 
   // Lazy-load cache for global (non-context) pages
   async function ensureCache() {
-    if (isCustomers || isFirearms || isStorage) return;
+    if (isCustomers || isFirearms || isStorage || isLicences) return;
     if (cacheLoaded.current) return;
     cacheLoaded.current = true;
     try {
@@ -195,7 +208,9 @@ export function Topbar({
   const storageMatches = isStorage ? liveStorage : [];
 
   const showDropdown =
-    open && (!!query.trim() || isCustomers || isFirearms || isStorage);
+    open &&
+    !isLicences &&
+    (!!query.trim() || isCustomers || isFirearms || isStorage);
   const empty =
     custMatches.length + fireMatches.length + storageMatches.length === 0;
 
@@ -208,7 +223,25 @@ export function Topbar({
       : isStorage
         ? (STORAGE_SEARCH_TYPES.find((s) => s.value === storageSearchType)?.placeholder ??
             "Search storage…")
-      : "Search customers, firearms, serials…";
+        : isLicences
+          ? "Search licences by number…"
+          : "Search customers, firearms, serials…";
+
+  function updateLicenceSearch(value: string) {
+    setQuery(value);
+    setOpen(false);
+    const next = new URLSearchParams(search);
+    const licenceNumber = value.trim();
+    if (licenceNumber) next.set("licenceNumber", licenceNumber);
+    else next.delete("licenceNumber");
+    navigate(
+      {
+        pathname,
+        search: next.toString() ? `?${next.toString()}` : "",
+      },
+      { replace: true },
+    );
+  }
 
   function goto(to: string) {
     setOpen(false);
@@ -238,10 +271,15 @@ export function Topbar({
           value={query}
           placeholder={activePlaceholder}
           onFocus={() => {
+            if (isLicences) return;
             setOpen(true);
             ensureCache();
           }}
           onChange={(e) => {
+            if (isLicences) {
+              updateLicenceSearch(e.target.value);
+              return;
+            }
             setQuery(e.target.value);
             setOpen(true);
           }}

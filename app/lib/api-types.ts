@@ -247,6 +247,7 @@ export interface LicenceResponse {
   licenceNumber?: string | null;
   issuedOn?: string | null;
   expiresOn?: string | null;
+  renewalDueOn?: string | null;
   status?: LicenceStatus | string | null;
   documentUrl?: string | null;
   [k: string]: unknown;
