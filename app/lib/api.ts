@@ -10,6 +10,7 @@ import type {
   CreateFirearmRequest,
   CreateLicenceRequest,
   CurrentUserResponse,
+  DashboardStatsResponse,
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
   CustomerResponse,
@@ -324,6 +325,23 @@ async function getAllCustomers(): Promise<CustomerListItemDto[]> {
   return customers;
 }
 
+async function getDashboardStats(): Promise<DashboardStatsResponse> {
+  const response = await request<DashboardStatsResponse>(
+    "/api/v1/dashboard/stats",
+  );
+  return {
+    activeStorageCount: response?.activeStorageCount ?? 0,
+    totalMonthlyRate: response?.totalMonthlyRate ?? 0,
+    firearmsCount: response?.firearmsCount ?? 0,
+    outstandingAmount: response?.outstandingAmount ?? 0,
+    overdueCount: response?.overdueCount ?? 0,
+    licenceAlerts: {
+      renewalDue: response?.licenceAlerts?.renewalDue ?? 0,
+      expired: response?.licenceAlerts?.expired ?? 0,
+    },
+  };
+}
+
 async function getAuditLogs(
   params: AuditLogListParams = {},
 ): Promise<AuditLogListItemDtoPaginatedResponse> {
@@ -362,6 +380,9 @@ export const api = {
   // ---- Me ----
   me: () => request<CurrentUserResponse>("/api/v1/me"),
   adminCheck: () => request<AdminCheckResponse>("/api/v1/me/admin-check"),
+
+  // ---- Dashboard ----
+  dashboardStats: getDashboardStats,
 
   // ---- Onboarding ----
   createCompany: (body: CreateCompanyRequest) =>

@@ -274,7 +274,7 @@ export interface AuditLogResponse {
   user?: AuditLogUserDto | null;
 }
 
-export interface AuditLogUserDto {
+interface AuditLogUserDto {
   id: string;
   fullName?: string | null;
   email?: string | null;
@@ -321,4 +321,18 @@ export interface AppUserResponsePaginatedResponse {
   pageNumber: number;
   pageSize: number;
   totalCount: number;
+}
+
+interface LicenceAlertsDto {
+  renewalDue: number;
+  expired: number;
+}
+
+export interface DashboardStatsResponse {
+  activeStorageCount: number;
+  totalMonthlyRate: number;
+  firearmsCount: number;
+  outstandingAmount: number;
+  overdueCount: number;
+  licenceAlerts: LicenceAlertsDto;
 }

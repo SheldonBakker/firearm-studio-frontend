@@ -9,7 +9,7 @@ import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
-import { LicenceStatus, StorageStatus } from "~/lib/enums";
+import { LicenceStatus } from "~/lib/enums";
 import {
   Resolve,
   StatGridSkeleton,
@@ -18,24 +18,19 @@ import {
 } from "~/components/common/skeletons";
 import type {
   CustomerListItemDto,
-  FirearmResponsePaginatedResponse,
+  DashboardStatsResponse,
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
   LicenceListItemDtoPaginatedResponse,
-  StorageRecordDtoPaginatedResponse,
 } from "~/lib/api-types";
 
-const EMPTY_FIREARM_PAGE: FirearmResponsePaginatedResponse = {
-  items: [],
-  pageNumber: 1,
-  pageSize: 200,
-  totalCount: 0,
-};
-const EMPTY_STORAGE_PAGE: StorageRecordDtoPaginatedResponse = {
-  items: [],
-  pageNumber: 1,
-  pageSize: 200,
-  totalCount: 0,
+const EMPTY_DASHBOARD_STATS: DashboardStatsResponse = {
+  activeStorageCount: 0,
+  totalMonthlyRate: 0,
+  firearmsCount: 0,
+  outstandingAmount: 0,
+  overdueCount: 0,
+  licenceAlerts: { renewalDue: 0, expired: 0 },
 };
 const EMPTY_INVOICE_PAGE: InvoiceListItemDtoPaginatedResponse = {
   items: [],
@@ -51,12 +46,6 @@ const EMPTY_LICENCE_PAGE: LicenceListItemDtoPaginatedResponse = {
 };
 
 export function clientLoader() {
-  const firearmsP = api
-    .firearms({ pageSize: 200 })
-    .catch(() => EMPTY_FIREARM_PAGE);
-  const storageP = api
-    .storageActive({ pageSize: 200, storageStatus: StorageStatus.Active })
-    .catch(() => EMPTY_STORAGE_PAGE);
   const invoicesP = api
     .invoices({ pageSize: 200 })
     .catch(() => EMPTY_INVOICE_PAGE);
@@ -70,7 +59,7 @@ export function clientLoader() {
     .allCustomers()
     .catch(() => [] as CustomerListItemDto[]);
   return {
-    stats: Promise.all([firearmsP, storageP, invoicesP, dueP, expiredP]),
+    stats: api.dashboardStats().catch(() => EMPTY_DASHBOARD_STATS),
     recent: Promise.all([invoicesP, customersP]),
     attention: Promise.all([expiredP, invoicesP, dueP, customersP]),
   };
@@ -104,55 +93,42 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
 
       <div className="mb-6">
         <Resolve resolve={loaderData.stats} fallback={<StatGridSkeleton />}>
-          {([firearmsPage, storagePage, invoicesPage, duePage, expiredPage]) => {
-            const storage = storagePage.items ?? [];
-            const invoices = invoicesPage.items ?? [];
-            const due = duePage.items ?? [];
-            const expired = expiredPage.items ?? [];
-            const mrr = storage.reduce((a, s) => a + (s.monthlyRate ?? 0), 0);
-            const outstanding = invoices
-              .filter((i) => ["Sent", "Overdue"].includes(inv.status(i)))
-              .reduce((a, i) => a + inv.total(i), 0);
-            const overdueN = invoices.filter(
-              (i) => inv.status(i) === "Overdue",
-            ).length;
-            return (
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard
-                  label="Firearms in storage"
-                  value={storagePage.totalCount}
-                  sub={`${firearmsPage.totalCount} total on registry`}
-                  icon="box"
-                  color="var(--status-blue)"
-                  onClick={() => navigate("/storage")}
-                />
-                <StatCard
-                  label="Monthly recurring"
-                  value={fmtMoneyShort(mrr)}
-                  sub={`across ${storage.length} active records`}
-                  icon="money"
-                  color="var(--status-green)"
-                  onClick={() => navigate("/invoices")}
-                />
-                <StatCard
-                  label="Outstanding"
-                  value={fmtMoneyShort(outstanding)}
-                  sub={`${overdueN} overdue · needs follow-up`}
-                  icon="alert"
-                  color="var(--status-red)"
-                  onClick={() => navigate("/invoices")}
-                />
-                <StatCard
-                  label="Licence alerts"
-                  value={due.length + expired.length}
-                  sub={`${due.length} due · ${expired.length} expired`}
-                  icon="shield"
-                  color="var(--status-amber)"
-                  onClick={() => navigate("/licences")}
-                />
-              </div>
-            );
-          }}
+          {(stats) => (
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                label="Firearms in storage"
+                value={stats.activeStorageCount}
+                sub={`${stats.firearmsCount} total on registry`}
+                icon="box"
+                color="var(--status-blue)"
+                onClick={() => navigate("/storage")}
+              />
+              <StatCard
+                label="Monthly recurring"
+                value={fmtMoneyShort(stats.totalMonthlyRate)}
+                sub={`across ${stats.activeStorageCount} active records`}
+                icon="money"
+                color="var(--status-green)"
+                onClick={() => navigate("/invoices")}
+              />
+              <StatCard
+                label="Outstanding"
+                value={fmtMoneyShort(stats.outstandingAmount)}
+                sub={`${stats.overdueCount} overdue · needs follow-up`}
+                icon="alert"
+                color="var(--status-red)"
+                onClick={() => navigate("/invoices")}
+              />
+              <StatCard
+                label="Licence alerts"
+                value={stats.licenceAlerts.renewalDue + stats.licenceAlerts.expired}
+                sub={`${stats.licenceAlerts.renewalDue} due · ${stats.licenceAlerts.expired} expired`}
+                icon="shield"
+                color="var(--status-amber)"
+                onClick={() => navigate("/licences")}
+              />
+            </div>
+          )}
         </Resolve>
       </div>
 
