@@ -1550,12 +1550,7 @@
         "additionalProperties": false
       },
       "AppRole": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
@@ -2047,10 +2042,7 @@
         "additionalProperties": false
       },
       "CustomerType": {
-        "enum": [
-          0,
-          1
-        ],
+        "enum": [0, 1],
         "type": "integer",
         "format": "int32"
       },
@@ -2163,12 +2155,7 @@
         "additionalProperties": false
       },
       "FirearmStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
@@ -2365,13 +2352,7 @@
         "additionalProperties": false
       },
       "InvoiceStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
+        "enum": [0, 1, 2, 3, 4],
         "type": "integer",
         "format": "int32"
       },
@@ -2405,12 +2386,7 @@
         "additionalProperties": false
       },
       "LicenceStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
+        "enum": [0, 1, 2, 3],
         "type": "integer",
         "format": "int32"
       },
@@ -2418,13 +2394,7 @@
         "$ref": "#/components/schemas/LicenceStatus"
       },
       "PaymentMethod": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
+        "enum": [0, 1, 2, 3, 4],
         "type": "integer",
         "format": "int32"
       },
@@ -2539,11 +2509,7 @@
         "additionalProperties": false
       },
       "StorageStatus": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
+        "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
       },
@@ -2712,8 +2678,8 @@
   },
   "security": [
     {
-      "Bearer": [ ],
-      "ApiKey": [ ]
+      "Bearer": [],
+      "ApiKey": []
     }
   ]
 }

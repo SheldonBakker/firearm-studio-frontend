@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator } from "react-router";
+import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
 import { api } from "~/lib/api";
@@ -9,18 +9,45 @@ import { useSessionUser } from "./app-layout";
 import { can } from "~/lib/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
+import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
+import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/enums";
 import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
 
 
-export function clientLoader() {
-  const storageP = api.storageActive().catch(() => [] as StorageRecordResponse[]);
+const STATUS_FILTERS = [
+  { id: "all", label: "All" },
+  { id: String(StorageStatus.Active), label: "Active" },
+  { id: String(StorageStatus.Released), label: "Released" },
+  { id: String(StorageStatus.Cancelled), label: "Cancelled" },
+];
+
+const STORAGE_STATUSES = new Set(STATUS_FILTERS.slice(1).map(({ id }) => id));
+
+export function clientLoader({ request }: Route.ClientLoaderArgs) {
+  const searchParams = new URL(request.url).searchParams;
+  const requestedStatus = searchParams.get("storageStatus");
+  const storageStatus =
+    requestedStatus && STORAGE_STATUSES.has(requestedStatus)
+      ? requestedStatus
+      : undefined;
+  const serialNumber = searchParams.get("serialNumber")?.trim() || undefined;
+  const customerName = searchParams.get("customerName")?.trim() || undefined;
+  const storageParams = { storageStatus, serialNumber, customerName };
+  const hasStorageParams = Object.values(storageParams).some(
+    (value) => value !== undefined,
+  );
+
+  const storageP = (
+    hasStorageParams ? api.storageActive(storageParams) : api.storageActive()
+  ).catch(() => [] as StorageRecordResponse[]);
   const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([storageP, firearmsP]) };
 }
@@ -28,8 +55,25 @@ export function clientLoader() {
 export default function Storage({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+  const [searchParams, setSearchParams] = useSearchParams();
   const user = useSessionUser();
   const [releasing, setReleasing] = useState<StorageRecordResponse | null>(null);
+  const activeStatus = STORAGE_STATUSES.has(
+    searchParams.get("storageStatus") ?? "",
+  )
+    ? searchParams.get("storageStatus")!
+    : "all";
+  const serialNumber = searchParams.get("serialNumber")?.trim() ?? "";
+  const customerName = searchParams.get("customerName")?.trim() ?? "";
+  const hasFilters =
+    activeStatus !== "all" || !!serialNumber || !!customerName;
+
+  const setStatusFilter = (status: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (status === "all") next.delete("storageStatus");
+    else next.set("storageStatus", status);
+    setSearchParams(next);
+  };
 
   return (
     <PageWrap>
@@ -39,10 +83,75 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           return (
             <>
+              <FilterBar
+                active={activeStatus}
+                onChange={setStatusFilter}
+                options={STATUS_FILTERS}
+                right={
+                  <form
+                    key={`${serialNumber}:${customerName}`}
+                    className="flex flex-wrap items-center justify-end gap-2"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const formData = new FormData(event.currentTarget);
+                      const next = new URLSearchParams(searchParams);
+
+                      for (const name of ["serialNumber", "customerName"]) {
+                        const value = String(formData.get(name) ?? "").trim();
+                        if (value) next.set(name, value);
+                        else next.delete(name);
+                      }
+
+                      setSearchParams(next);
+                    }}
+                  >
+                    <label className="relative">
+                      <span className="sr-only">Search by serial number</span>
+                      <Icon
+                        name="search"
+                        size={14}
+                        className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-dim"
+                      />
+                      <Input
+                        name="serialNumber"
+                        defaultValue={serialNumber}
+                        placeholder="Serial number"
+                        className="w-40 pl-8"
+                      />
+                    </label>
+                    <label>
+                      <span className="sr-only">Search by customer name</span>
+                      <Input
+                        name="customerName"
+                        defaultValue={customerName}
+                        placeholder="Customer name"
+                        className="w-44"
+                      />
+                    </label>
+                    <Button type="submit" variant="outline" size="sm">
+                      Search
+                    </Button>
+                    {hasFilters && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSearchParams(new URLSearchParams())}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </form>
+                }
+              />
               <DataTable<StorageRecordResponse>
                 rows={storage}
                 onRowClick={(r) => navigate(`/storage/${r.id}`)}
-                empty="No storage records yet."
+                empty={
+                  hasFilters
+                    ? "No storage records match these filters."
+                    : "No storage records yet."
+                }
                 columns={[
                   {
                     key: "firearm",
