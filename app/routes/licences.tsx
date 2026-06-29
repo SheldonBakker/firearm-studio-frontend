@@ -18,7 +18,13 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/enums";
-import type { FirearmResponse, LicenceResponse } from "~/lib/api-types";
+import type {
+  FirearmResponse,
+  LicenceListItemDtoPaginatedResponse,
+  LicenceResponse,
+} from "~/lib/api-types";
+
+const PAGE_SIZE = 20;
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -37,6 +43,9 @@ function dateInputValue(value: string | null | undefined) {
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
+  const requestedPage = Number(searchParams.get("page"));
+  const pageNumber =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedStatus = searchParams.get("status");
   const status =
     requestedStatus && LICENCE_STATUSES.has(requestedStatus)
@@ -44,10 +53,19 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       : undefined;
   const licenceNumber =
     searchParams.get("licenceNumber")?.trim() || undefined;
+
   const licencesP = api
-    .licences({ sortOrder: "asc", licenceNumber, status })
-    .catch(() => [] as LicenceResponse[]);
-  const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
+    .licences({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status })
+    .catch(
+      () =>
+        ({
+          items: [],
+          pageNumber,
+          pageSize: PAGE_SIZE,
+          totalCount: 0,
+        }) satisfies LicenceListItemDtoPaginatedResponse,
+    );
+  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([licencesP, firearmsP]) };
 }
 
@@ -65,8 +83,16 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
 
   const setStatusFilter = (status: string) => {
     const next = new URLSearchParams(searchParams);
+    next.delete("page");
     if (status === "all") next.delete("status");
     else next.set("status", status);
+    setSearchParams(next);
+  };
+
+  const navigatePage = (newPage: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (newPage <= 1) next.delete("page");
+    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -74,7 +100,8 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <PageHeader title="Licences" />
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={7} />}>
-        {([licences, firearms]) => {
+        {([licencesPage, firearms]) => {
+          const licences = licencesPage.items ?? [];
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           return (
             <>
@@ -91,81 +118,120 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                     : "No licences recorded."
                 }
                 columns={[
-          {
-            key: "num",
-            header: "Licence",
-            cell: (r) => (
-              <Mono className="text-[12.5px] font-semibold text-foreground">
-                {r.licenceNumber ?? "—"}
-              </Mono>
-            ),
-          },
-          {
-            key: "firearm",
-            header: "Firearm",
-            cell: (r) => (
-              <span className="text-[12.5px] text-muted-foreground">
-                {firearmLabel(fireMap[r.firearmId ?? ""])}
-              </span>
-            ),
-          },
-          {
-            key: "issued",
-            header: "Issued",
-            cell: (r) => (
-              <span className="text-[12.5px] text-muted-foreground">
-                {fmtDate(r.issuedOn)}
-              </span>
-            ),
-          },
-          {
-            key: "expires",
-            header: "Expires",
-            cell: (r) => (
-              <span className="text-[12.5px] text-muted-foreground">
-                {fmtDate(r.expiresOn)}
-              </span>
-            ),
-          },
-          {
-            key: "renewalDue",
-            header: "Renewal due",
-            cell: (r) => (
-              <span className="text-[12.5px] text-muted-foreground">
-                {fmtDate(r.renewalDueOn)}
-              </span>
-            ),
-          },
-          {
-            key: "status",
-            header: "Status",
-            align: "right",
-            cell: (r) => (
-              <StatusBadge status={enumKey(LicenceStatus, r.status)} />
-            ),
-          },
-          {
-            key: "action",
-            header: "",
-            align: "right",
-            width: "90px",
-            cell: (r) =>
-              writable ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setEditing(r);
-                  }}
-                >
-                  <Icon name="edit" size={14} />
-                  Edit
-                </Button>
-              ) : null,
-          },
-        ]}
+                  {
+                    key: "num",
+                    header: "Licence",
+                    cell: (r) => (
+                      <Mono className="text-[12.5px] font-semibold text-foreground">
+                        {r.licenceNumber ?? "—"}
+                      </Mono>
+                    ),
+                  },
+                  {
+                    key: "firearm",
+                    header: "Firearm",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {firearmLabel(fireMap[r.firearmId ?? ""])}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "issued",
+                    header: "Issued",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {fmtDate(r.issuedOn)}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "expires",
+                    header: "Expires",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {fmtDate(r.expiresOn)}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "renewalDue",
+                    header: "Renewal due",
+                    cell: (r) => (
+                      <span className="text-[12.5px] text-muted-foreground">
+                        {fmtDate(r.renewalDueOn)}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    align: "right",
+                    cell: (r) => (
+                      <StatusBadge status={enumKey(LicenceStatus, r.status)} />
+                    ),
+                  },
+                  {
+                    key: "action",
+                    header: "",
+                    align: "right",
+                    width: "90px",
+                    cell: (r) =>
+                      writable ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setEditing(r);
+                          }}
+                        >
+                          <Icon name="edit" size={14} />
+                          Edit
+                        </Button>
+                      ) : null,
+                  },
+                ]}
               />
+
+              {licencesPage.totalCount > licencesPage.pageSize && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[12.5px] text-muted-foreground">
+                    Showing{" "}
+                    {(licencesPage.pageNumber - 1) * licencesPage.pageSize + 1}–
+                    {Math.min(
+                      licencesPage.pageNumber * licencesPage.pageSize,
+                      licencesPage.totalCount,
+                    )}{" "}
+                    of {licencesPage.totalCount}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={licencesPage.pageNumber <= 1}
+                      onClick={() =>
+                        navigatePage(licencesPage.pageNumber - 1)
+                      }
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={
+                        licencesPage.pageNumber * licencesPage.pageSize >=
+                        licencesPage.totalCount
+                      }
+                      onClick={() =>
+                        navigatePage(licencesPage.pageNumber + 1)
+                      }
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {editing && (
                 <FormDialog

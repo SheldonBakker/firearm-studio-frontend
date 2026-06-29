@@ -265,9 +265,60 @@ export interface UserResponse {
 
 export interface AuditLogResponse {
   id: string;
-  appUserId: string | null;
   entityType: string | null;
   entityId: string;
   action: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
   createdAt: string;
+  user?: AuditLogUserDto | null;
+}
+
+export interface AuditLogUserDto {
+  id: string;
+  fullName?: string | null;
+  email?: string | null;
+  role?: AppRole | string | null;
+}
+
+export interface AuditLogListItemDtoPaginatedResponse {
+  items: AuditLogResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface FirearmResponsePaginatedResponse {
+  items: FirearmResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface InvoiceListItemDtoPaginatedResponse {
+  items: InvoiceResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface LicenceListItemDtoPaginatedResponse {
+  items: LicenceResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface StorageRecordDtoPaginatedResponse {
+  items: StorageRecordResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface AppUserResponsePaginatedResponse {
+  items: UserResponse[] | null;
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
 }

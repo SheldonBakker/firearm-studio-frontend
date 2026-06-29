@@ -41,7 +41,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies CustomerListItemDtoPaginatedResponse,
     );
-  const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
+  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([customersP, firearmsP]) };
 }
 

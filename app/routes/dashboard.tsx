@@ -9,7 +9,7 @@ import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
-import { LicenceStatus } from "~/lib/enums";
+import { LicenceStatus, StorageStatus } from "~/lib/enums";
 import {
   Resolve,
   StatGridSkeleton,
@@ -18,22 +18,54 @@ import {
 } from "~/components/common/skeletons";
 import type {
   CustomerListItemDto,
-  FirearmResponse,
+  FirearmResponsePaginatedResponse,
+  InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
-  LicenceResponse,
-  StorageRecordResponse,
+  LicenceListItemDtoPaginatedResponse,
+  StorageRecordDtoPaginatedResponse,
 } from "~/lib/api-types";
 
+const EMPTY_FIREARM_PAGE: FirearmResponsePaginatedResponse = {
+  items: [],
+  pageNumber: 1,
+  pageSize: 200,
+  totalCount: 0,
+};
+const EMPTY_STORAGE_PAGE: StorageRecordDtoPaginatedResponse = {
+  items: [],
+  pageNumber: 1,
+  pageSize: 200,
+  totalCount: 0,
+};
+const EMPTY_INVOICE_PAGE: InvoiceListItemDtoPaginatedResponse = {
+  items: [],
+  pageNumber: 1,
+  pageSize: 200,
+  totalCount: 0,
+};
+const EMPTY_LICENCE_PAGE: LicenceListItemDtoPaginatedResponse = {
+  items: [],
+  pageNumber: 1,
+  pageSize: 200,
+  totalCount: 0,
+};
+
 export function clientLoader() {
-  const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
-  const storageP = api.storageActive().catch(() => [] as StorageRecordResponse[]);
-  const invoicesP = api.invoices().catch(() => [] as InvoiceResponse[]);
+  const firearmsP = api
+    .firearms({ pageSize: 200 })
+    .catch(() => EMPTY_FIREARM_PAGE);
+  const storageP = api
+    .storageActive({ pageSize: 200, storageStatus: StorageStatus.Active })
+    .catch(() => EMPTY_STORAGE_PAGE);
+  const invoicesP = api
+    .invoices({ pageSize: 200 })
+    .catch(() => EMPTY_INVOICE_PAGE);
   const dueP = api
-    .licences({ sortOrder: "asc", status: LicenceStatus.RenewalDue })
-    .catch(() => [] as LicenceResponse[]);
+    .licences({ sortOrder: "asc", status: LicenceStatus.RenewalDue, pageSize: 200 })
+    .catch(() => EMPTY_LICENCE_PAGE);
   const expiredP = api
-    .licences({ sortOrder: "asc", status: LicenceStatus.Expired })
-    .catch(() => [] as LicenceResponse[]);
+    .licences({ sortOrder: "asc", status: LicenceStatus.Expired, pageSize: 200 })
+    .catch(() => EMPTY_LICENCE_PAGE);
   const customersP = api
     .allCustomers()
     .catch(() => [] as CustomerListItemDto[]);
@@ -72,7 +104,11 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
 
       <div className="mb-6">
         <Resolve resolve={loaderData.stats} fallback={<StatGridSkeleton />}>
-          {([firearms, storage, invoices, due, expired]) => {
+          {([firearmsPage, storagePage, invoicesPage, duePage, expiredPage]) => {
+            const storage = storagePage.items ?? [];
+            const invoices = invoicesPage.items ?? [];
+            const due = duePage.items ?? [];
+            const expired = expiredPage.items ?? [];
             const mrr = storage.reduce((a, s) => a + (s.monthlyRate ?? 0), 0);
             const outstanding = invoices
               .filter((i) => ["Sent", "Overdue"].includes(inv.status(i)))
@@ -84,8 +120,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   label="Firearms in storage"
-                  value={storage.length}
-                  sub={`${firearms.length} total on registry`}
+                  value={storagePage.totalCount}
+                  sub={`${firearmsPage.totalCount} total on registry`}
                   icon="box"
                   color="var(--status-blue)"
                   onClick={() => navigate("/storage")}
@@ -138,7 +174,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
             resolve={loaderData.recent}
             fallback={<TableSkeleton cols={4} rows={5} />}
           >
-            {([invoices, customers]) => {
+            {([invoicesPage, customers]) => {
+              const invoices = invoicesPage.items ?? [];
               const names = customerNameMap(customers);
               return (
                 <DataTable<InvoiceResponse>
@@ -198,7 +235,10 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
             resolve={loaderData.attention}
             fallback={<AttentionListSkeleton />}
           >
-            {([expired, invoices, due, customers]) => {
+            {([expiredPage, invoicesPage, duePage, customers]) => {
+              const expired = expiredPage.items ?? [];
+              const invoices = invoicesPage.items ?? [];
+              const due = duePage.items ?? [];
               const names = customerNameMap(customers);
               const attention = [
                 ...expired.map((l) => ({

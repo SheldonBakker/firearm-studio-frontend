@@ -17,7 +17,13 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/enums";
-import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
+import type {
+  FirearmResponse,
+  StorageRecordDtoPaginatedResponse,
+  StorageRecordResponse,
+} from "~/lib/api-types";
+
+const PAGE_SIZE = 20;
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -30,6 +36,9 @@ const STORAGE_STATUSES = new Set(STATUS_FILTERS.slice(1).map(({ id }) => id));
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
+  const requestedPage = Number(searchParams.get("page"));
+  const pageNumber =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedStatus = searchParams.get("storageStatus");
   const storageStatus =
     requestedStatus && STORAGE_STATUSES.has(requestedStatus)
@@ -37,15 +46,19 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       : undefined;
   const serialNumber = searchParams.get("serialNumber")?.trim() || undefined;
   const customerName = searchParams.get("customerName")?.trim() || undefined;
-  const storageParams = { storageStatus, serialNumber, customerName };
-  const hasStorageParams = Object.values(storageParams).some(
-    (value) => value !== undefined,
-  );
 
-  const storageP = (
-    hasStorageParams ? api.storageActive(storageParams) : api.storageActive()
-  ).catch(() => [] as StorageRecordResponse[]);
-  const firearmsP = api.firearms().catch(() => [] as FirearmResponse[]);
+  const storageP = api
+    .storageActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName })
+    .catch(
+      () =>
+        ({
+          items: [],
+          pageNumber,
+          pageSize: PAGE_SIZE,
+          totalCount: 0,
+        }) satisfies StorageRecordDtoPaginatedResponse,
+    );
+  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
   return { data: Promise.all([storageP, firearmsP]) };
 }
 
@@ -54,7 +67,9 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useSessionUser();
-  const [releasing, setReleasing] = useState<StorageRecordResponse | null>(null);
+  const [releasing, setReleasing] = useState<StorageRecordResponse | null>(
+    null,
+  );
   const activeStatus = STORAGE_STATUSES.has(
     searchParams.get("storageStatus") ?? "",
   )
@@ -67,8 +82,16 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
 
   const setStatusFilter = (status: string) => {
     const next = new URLSearchParams(searchParams);
+    next.delete("page");
     if (status === "all") next.delete("storageStatus");
     else next.set("storageStatus", status);
+    setSearchParams(next);
+  };
+
+  const navigatePage = (newPage: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (newPage <= 1) next.delete("page");
+    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -76,7 +99,8 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <PageHeader title="Storage Records" />
       <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
-        {([storage, firearms]) => {
+        {([storagePage, firearms]) => {
+          const storage = storagePage.items ?? [];
           const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           return (
             <>
@@ -163,7 +187,9 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     header: "Status",
                     cell: (r) =>
                       r.storageStatus != null ? (
-                        <StatusBadge status={enumKey(StorageStatus, r.storageStatus)} />
+                        <StatusBadge
+                          status={enumKey(StorageStatus, r.storageStatus)}
+                        />
                       ) : (
                         <span className="text-[12px] text-dim">—</span>
                       ),
@@ -190,6 +216,41 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                   },
                 ]}
               />
+
+              {storagePage.totalCount > storagePage.pageSize && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[12.5px] text-muted-foreground">
+                    Showing{" "}
+                    {(storagePage.pageNumber - 1) * storagePage.pageSize + 1}–
+                    {Math.min(
+                      storagePage.pageNumber * storagePage.pageSize,
+                      storagePage.totalCount,
+                    )}{" "}
+                    of {storagePage.totalCount}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={storagePage.pageNumber <= 1}
+                      onClick={() => navigatePage(storagePage.pageNumber - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={
+                        storagePage.pageNumber * storagePage.pageSize >=
+                        storagePage.totalCount
+                      }
+                      onClick={() => navigatePage(storagePage.pageNumber + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {releasing && (
                 <FormDialog

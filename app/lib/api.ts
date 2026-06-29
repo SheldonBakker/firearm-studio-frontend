@@ -1,6 +1,8 @@
 import { getAccessToken, supabase } from "./supabase";
 import type {
   AdminCheckResponse,
+  AppUserResponsePaginatedResponse,
+  AuditLogListItemDtoPaginatedResponse,
   AuditLogResponse,
   CompanyDetailsResponse,
   CreateCompanyRequest,
@@ -12,13 +14,17 @@ import type {
   CustomerListItemDtoPaginatedResponse,
   CustomerResponse,
   FirearmResponse,
+  FirearmResponsePaginatedResponse,
   GenerateMonthlyInvoicesRequest,
+  InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
   LicenceStatus,
   InviteUserRequest,
+  LicenceListItemDtoPaginatedResponse,
   LicenceResponse,
   RecordPaymentRequest,
   StartStorageRequest,
+  StorageRecordDtoPaginatedResponse,
   StorageRecordResponse,
   UpdateCompanyRequest,
   UpdateCustomerRequest,
@@ -26,7 +32,6 @@ import type {
   UpdateLicenceRequest,
   UpdateStorageRecordRequest,
   UpdateUserRoleRequest,
-  UserResponse,
 } from "./api-types";
 
 const BASE_URL = (
@@ -115,10 +120,38 @@ interface CustomerListParams {
   phone?: string;
 }
 
+interface FirearmListParams {
+  pageNumber?: number;
+  pageSize?: number;
+  serialNumber?: string;
+  status?: string | number;
+  customerName?: string;
+}
+
 interface LicenceListParams {
+  pageNumber?: number;
+  pageSize?: number;
   sortOrder?: string;
   licenceNumber?: string;
-  status?: LicenceStatus | string;
+  status?: LicenceStatus | string | number;
+}
+
+interface StorageListParams {
+  pageNumber?: number;
+  pageSize?: number;
+  storageStatus?: string | number;
+  serialNumber?: string;
+  customerName?: string;
+}
+
+interface AuditLogListParams {
+  pageNumber?: number;
+  pageSize?: number;
+  fullName?: string;
+  action?: string;
+  entityType?: string;
+  createdOn?: string;
+  take?: number;
 }
 
 async function getCustomers(
@@ -146,6 +179,135 @@ async function getCustomers(
   };
 }
 
+async function getFirearms(
+  params: FirearmListParams = {},
+): Promise<FirearmResponsePaginatedResponse> {
+  const response = await request<FirearmResponsePaginatedResponse>(
+    "/api/v1/firearms",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        serialNumber: params.serialNumber,
+        status: params.status !== undefined ? String(params.status) : undefined,
+        customerName: params.customerName,
+      },
+    },
+  );
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
+async function getAllFirearms(): Promise<FirearmResponse[]> {
+  const pageSize = 200;
+  const firstPage = await getFirearms({ pageNumber: 1, pageSize });
+  const firearms = [...(firstPage.items ?? [])];
+  const totalPages = Math.ceil(
+    firstPage.totalCount / Math.max(1, firstPage.pageSize),
+  );
+  for (let pageNumber = 2; pageNumber <= totalPages; pageNumber += 1) {
+    const page = await getFirearms({ pageNumber, pageSize });
+    firearms.push(...(page.items ?? []));
+  }
+  return firearms;
+}
+
+async function getLicences(
+  params: LicenceListParams = {},
+): Promise<LicenceListItemDtoPaginatedResponse> {
+  const response = await request<LicenceListItemDtoPaginatedResponse>(
+    "/api/v1/licences",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        sortOrder: params.sortOrder,
+        licenceNumber: params.licenceNumber,
+        status:
+          params.status !== undefined ? String(params.status) : undefined,
+      },
+    },
+  );
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
+async function getStorage(
+  params: StorageListParams = {},
+): Promise<StorageRecordDtoPaginatedResponse> {
+  const response = await request<StorageRecordDtoPaginatedResponse>(
+    "/api/v1/storage",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        storageStatus:
+          params.storageStatus !== undefined
+            ? String(params.storageStatus)
+            : undefined,
+        serialNumber: params.serialNumber,
+        customerName: params.customerName,
+      },
+    },
+  );
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
+async function getInvoices(params: {
+  pageNumber?: number;
+  pageSize?: number;
+} = {}): Promise<InvoiceListItemDtoPaginatedResponse> {
+  const response = await request<InvoiceListItemDtoPaginatedResponse>(
+    "/api/v1/invoices",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+      },
+    },
+  );
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
+async function getUsers(params: {
+  pageNumber?: number;
+  pageSize?: number;
+} = {}): Promise<AppUserResponsePaginatedResponse> {
+  const response = await request<AppUserResponsePaginatedResponse>(
+    "/api/v1/users",
+    {
+      query: {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+      },
+    },
+  );
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
+}
+
 async function getAllCustomers(): Promise<CustomerListItemDto[]> {
   const pageSize = 100;
   const firstPage = await getCustomers({ pageNumber: 1, pageSize });
@@ -160,6 +322,40 @@ async function getAllCustomers(): Promise<CustomerListItemDto[]> {
   }
 
   return customers;
+}
+
+async function getAuditLogs(
+  params: AuditLogListParams = {},
+): Promise<AuditLogListItemDtoPaginatedResponse> {
+  const response = await request<
+    AuditLogListItemDtoPaginatedResponse | AuditLogResponse[]
+  >("/api/v1/audit-logs", {
+    query: {
+      pageNumber: params.pageNumber,
+      pageSize: params.pageSize,
+      fullName: params.fullName,
+      action: params.action,
+      entityType: params.entityType,
+      createdOn: params.createdOn,
+      take: params.take,
+    },
+  });
+
+  if (Array.isArray(response)) {
+    return {
+      items: response,
+      pageNumber: params.pageNumber ?? 1,
+      pageSize: params.pageSize ?? params.take ?? response.length,
+      totalCount: response.length,
+    };
+  }
+
+  return {
+    items: Array.isArray(response?.items) ? response.items : [],
+    pageNumber: response?.pageNumber ?? params.pageNumber ?? 1,
+    pageSize: response?.pageSize ?? params.pageSize ?? 20,
+    totalCount: response?.totalCount ?? 0,
+  };
 }
 
 export const api = {
@@ -191,8 +387,8 @@ export const api = {
     request<InvoiceResponse[]>(`/api/v1/customers/${id}/invoices`),
 
   // ---- Firearms ----
-  firearms: (params?: { serialNumber?: string; status?: string; customerName?: string }) =>
-    request<FirearmResponse[]>("/api/v1/firearms", { query: params }),
+  firearms: getFirearms,
+  allFirearms: getAllFirearms,
   firearm: (id: string) => request<FirearmResponse>(`/api/v1/firearms/${id}`),
   createFirearm: (body: CreateFirearmRequest) =>
     request<FirearmResponse>("/api/v1/firearms", { method: "POST", body }),
@@ -201,18 +397,7 @@ export const api = {
   firearmLicences: (id: string) =>
     request<LicenceResponse[]>(`/api/v1/firearms/${id}/licences`),
   // ---- Licences ----
-  licences: (params?: LicenceListParams) =>
-    request<LicenceResponse[]>("/api/v1/licences", {
-      query: {
-        sortOrder: params?.sortOrder,
-        licenceNumber: params?.licenceNumber,
-        status: params?.status,
-      },
-    }),
-  licencesDueRenewal: () =>
-    request<LicenceResponse[]>("/api/v1/licences/due-renewal"),
-  licencesExpired: () =>
-    request<LicenceResponse[]>("/api/v1/licences/expired"),
+  licences: getLicences,
   createLicence: (firearmId: string, body: CreateLicenceRequest) =>
     request<void>(`/api/v1/firearms/${firearmId}/licences`, {
       method: "POST",
@@ -222,8 +407,7 @@ export const api = {
     request<void>(`/api/v1/licences/${id}`, { method: "PATCH", body }),
 
   // ---- Storage ----
-  storageActive: (params?: { serialNumber?: string; customerName?: string; storageStatus?: string }) =>
-    request<StorageRecordResponse[]>("/api/v1/storage", { query: params }),
+  storageActive: getStorage,
   storageByCustomer: (customerId: string) =>
     request<StorageRecordResponse[]>(`/api/v1/storage/customer/${customerId}`),
   startStorage: (firearmId: string, body: StartStorageRequest) =>
@@ -235,7 +419,7 @@ export const api = {
     request<void>(`/api/v1/storage-records/${id}`, { method: "PATCH", body }),
 
   // ---- Invoices ----
-  invoices: () => request<InvoiceResponse[]>("/api/v1/invoices"),
+  invoices: getInvoices,
   invoice: (id: string) => request<InvoiceResponse>(`/api/v1/invoices/${id}`),
   generateMonthlyInvoices: (body: GenerateMonthlyInvoicesRequest) =>
     request<void>("/api/v1/invoices/generate-monthly", { method: "POST", body }),
@@ -247,7 +431,7 @@ export const api = {
     request<void>(`/api/v1/invoices/${id}/cancel`, { method: "PATCH" }),
 
   // ---- Users / Team ----
-  users: () => request<UserResponse[]>("/api/v1/users"),
+  users: getUsers,
   inviteUser: (body: InviteUserRequest) =>
     request<void>("/api/v1/users/invite", { method: "POST", body }),
   updateUserRole: (id: string, body: UpdateUserRoleRequest) =>
@@ -256,6 +440,5 @@ export const api = {
     request<void>(`/api/v1/users/${id}/deactivate`, { method: "PATCH" }),
 
   // ---- Audit ----
-  auditLogs: (params?: { entityType?: string; take?: number }) =>
-    request<AuditLogResponse[]>("/api/v1/audit-logs", { query: params }),
+  auditLogs: getAuditLogs,
 };

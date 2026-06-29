@@ -33,6 +33,7 @@ function customerName(c: CustomerListItemDto) {
 type CustomerSearchType = "name" | "email" | "phone";
 type FirearmSearchType = "serialNumber" | "customerName";
 type StorageSearchType = "serialNumber" | "customerName";
+type AuditSearchType = "fullName" | "action" | "entityType" | "createdOn";
 
 const CUSTOMER_SEARCH_TYPES: {
   value: CustomerSearchType;
@@ -62,6 +63,17 @@ const STORAGE_SEARCH_TYPES: {
   { value: "customerName", label: "Customer", placeholder: "Search storage by customer name…" },
 ];
 
+const AUDIT_SEARCH_TYPES: {
+  value: AuditSearchType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "fullName", label: "User", placeholder: "Search audit by user name…" },
+  { value: "action", label: "Action", placeholder: "Search audit by action…" },
+  { value: "entityType", label: "Entity", placeholder: "Search audit by entity type…" },
+  { value: "createdOn", label: "Date", placeholder: "Filter audit by date…" },
+];
+
 export function Topbar({
   user,
   onMenuClick,
@@ -78,12 +90,14 @@ export function Topbar({
   const isFirearms = pathname.startsWith("/firearms");
   const isStorage = pathname.startsWith("/storage");
   const isLicences = pathname.startsWith("/licences");
+  const isAudit = pathname.startsWith("/audit");
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [customerSearchType, setCustomerSearchType] = useState<CustomerSearchType>("name");
   const [firearmSearchType, setFirearmSearchType] = useState<FirearmSearchType>("serialNumber");
   const [storageSearchType, setStorageSearchType] = useState<StorageSearchType>("serialNumber");
+  const [auditSearchType, setAuditSearchType] = useState<AuditSearchType>("fullName");
 
   // Cached registry for global (non-context) pages
   const [cachedCustomers, setCachedCustomers] = useState<CustomerListItemDto[]>([]);
@@ -98,11 +112,17 @@ export function Topbar({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const licenceNumberSearch =
     new URLSearchParams(search).get("licenceNumber") ?? "";
+  const auditSearchParams = new URLSearchParams(search);
+  const activeAuditSearchType =
+    AUDIT_SEARCH_TYPES.find((type) => auditSearchParams.has(type.value))
+      ?.value ?? auditSearchType;
+  const auditSearchValue = auditSearchParams.get(activeAuditSearchType) ?? "";
 
   // Reset on page navigation
   useEffect(() => {
-    if (isLicences) {
-      setQuery(licenceNumberSearch);
+    if (isLicences || isAudit) {
+      if (isAudit) setAuditSearchType(activeAuditSearchType);
+      setQuery(isAudit ? auditSearchValue : licenceNumberSearch);
       setOpen(false);
       setLiveCustomers([]);
       setLiveFirearms([]);
@@ -118,7 +138,14 @@ export function Topbar({
     setLiveStorage([]);
     setSearching(false);
     cacheLoaded.current = false;
-  }, [pathname, isLicences, licenceNumberSearch]);
+  }, [
+    pathname,
+    isLicences,
+    isAudit,
+    licenceNumberSearch,
+    activeAuditSearchType,
+    auditSearchValue,
+  ]);
 
   // Live search — active on contextual list/detail sections
   useEffect(() => {
@@ -141,10 +168,10 @@ export function Topbar({
           setLiveCustomers(result.items ?? []);
         } else if (isFirearms) {
           const results = await api.firearms({ [firearmSearchType]: trimmed });
-          setLiveFirearms((results ?? []).slice(0, 6));
+          setLiveFirearms((results?.items ?? []).slice(0, 6));
         } else {
           const results = await api.storageActive({ [storageSearchType]: trimmed });
-          setLiveStorage((results ?? []).slice(0, 6));
+          setLiveStorage((results?.items ?? []).slice(0, 6));
         }
       } catch {
         setLiveCustomers([]);
@@ -169,11 +196,11 @@ export function Topbar({
 
   // Lazy-load cache for global (non-context) pages
   async function ensureCache() {
-    if (isCustomers || isFirearms || isStorage || isLicences) return;
+    if (isCustomers || isFirearms || isStorage || isLicences || isAudit) return;
     if (cacheLoaded.current) return;
     cacheLoaded.current = true;
     try {
-      const [cs, fs] = await Promise.all([api.allCustomers(), api.firearms()]);
+      const [cs, fs] = await Promise.all([api.allCustomers(), api.allFirearms()]);
       setCachedCustomers(cs ?? []);
       setCachedFirearms(fs ?? []);
     } catch {
@@ -185,7 +212,7 @@ export function Topbar({
 
   const custMatches = isCustomers
     ? liveCustomers
-    : !isFirearms && !isStorage && q
+    : !isFirearms && !isStorage && !isLicences && !isAudit && q
       ? cachedCustomers
           .filter((c) =>
             (customerName(c) + " " + (c.email ?? "")).toLowerCase().includes(q),
@@ -195,7 +222,7 @@ export function Topbar({
 
   const fireMatches = isFirearms
     ? liveFirearms
-    : !isCustomers && !isStorage && q
+    : !isCustomers && !isStorage && !isLicences && !isAudit && q
       ? cachedFirearms
           .filter((f) =>
             `${f.make ?? ""} ${f.model ?? ""} ${f.serialNumber ?? ""}`
@@ -210,7 +237,7 @@ export function Topbar({
   const showDropdown =
     open &&
     !isLicences &&
-    (!!query.trim() || isCustomers || isFirearms || isStorage);
+    (!!query.trim() || isCustomers || isFirearms || isStorage || isAudit);
   const empty =
     custMatches.length + fireMatches.length + storageMatches.length === 0;
 
@@ -225,15 +252,35 @@ export function Topbar({
             "Search storage…")
         : isLicences
           ? "Search licences by number…"
-          : "Search customers, firearms, serials…";
+          : isAudit
+            ? (AUDIT_SEARCH_TYPES.find((s) => s.value === auditSearchType)
+                ?.placeholder ?? "Search audit logs…")
+            : "Search customers, firearms, serials…";
 
   function updateLicenceSearch(value: string) {
     setQuery(value);
     setOpen(false);
     const next = new URLSearchParams(search);
+    next.delete("page");
     const licenceNumber = value.trim();
     if (licenceNumber) next.set("licenceNumber", licenceNumber);
     else next.delete("licenceNumber");
+    navigate(
+      {
+        pathname,
+        search: next.toString() ? `?${next.toString()}` : "",
+      },
+      { replace: true },
+    );
+  }
+
+  function updateAuditSearch(value: string, searchType = auditSearchType) {
+    setQuery(value);
+    const next = new URLSearchParams(search);
+    for (const type of AUDIT_SEARCH_TYPES) next.delete(type.value);
+    next.delete("page");
+    const auditQuery = value.trim();
+    if (auditQuery) next.set(searchType, auditQuery);
     navigate(
       {
         pathname,
@@ -269,6 +316,7 @@ export function Topbar({
         </span>
         <input
           value={query}
+          type={isAudit && auditSearchType === "createdOn" ? "date" : "search"}
           placeholder={activePlaceholder}
           onFocus={() => {
             if (isLicences) return;
@@ -278,6 +326,11 @@ export function Topbar({
           onChange={(e) => {
             if (isLicences) {
               updateLicenceSearch(e.target.value);
+              return;
+            }
+            if (isAudit) {
+              updateAuditSearch(e.target.value);
+              setOpen(true);
               return;
             }
             setQuery(e.target.value);
@@ -360,7 +413,30 @@ export function Topbar({
                 ))}
               </div>
             )}
-            {query.trim() ? (
+            {isAudit && (
+              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+                {AUDIT_SEARCH_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      if (auditSearchType === t.value) return;
+                      setAuditSearchType(t.value);
+                      updateAuditSearch("", t.value);
+                    }}
+                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
+                      auditSearchType === t.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!isAudit && query.trim() ? (
               searching ? (
                 <div className="px-3.5 py-5 text-center text-[13px] text-dim">
                   Searching…

@@ -23,9 +23,10 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
   // No single-record GET exists; derive the record from the list, then enrich
   // with the firearm for make/model/calibre.
   const data = api
-    .storageActive()
-    .catch(() => [] as StorageRecordResponse[])
-    .then(async (records) => {
+    .storageActive({ pageSize: 200 })
+    .catch(() => ({ items: [] as StorageRecordResponse[], pageNumber: 1, pageSize: 200, totalCount: 0 }))
+    .then(async (response) => {
+      const records = response.items ?? [];
       const record = records.find((r) => r.id === params.id) ?? null;
       const firearm = record?.firearmId
         ? await api.firearm(record.firearmId).catch(() => null)
