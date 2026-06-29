@@ -123,6 +123,7 @@ export function SiteHeader({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
           {isLoggedIn ? (
             <Link
               to="/dashboard"
+              prefetch="viewport"
               className="mk-cta"
               style={{
                 display: "inline-flex",
@@ -144,6 +145,7 @@ export function SiteHeader({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
             <>
               <Link
                 to="/login"
+                prefetch="viewport"
                 className="mk-ghost"
                 style={{
                   display: "inline-flex",
@@ -161,6 +163,7 @@ export function SiteHeader({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
               </Link>
               <Link
                 to="/signup"
+                prefetch="viewport"
                 className="mk-cta"
                 style={{
                   display: "inline-flex",

@@ -274,6 +274,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               {isLoggedIn ? (
                 <Link
                   to="/dashboard"
+                  prefetch="viewport"
                   className="mk-cta-lg"
                   style={{
                     display: "inline-flex",
@@ -298,6 +299,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 <>
                   <Link
                     to="/signup"
+                    prefetch="viewport"
                     className="mk-cta-lg"
                     style={{
                       display: "inline-flex",
@@ -320,6 +322,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   </Link>
                   <Link
                     to="/login"
+                    prefetch="viewport"
                     className="mk-ghost-lg"
                     style={{
                       display: "inline-flex",
@@ -617,15 +620,15 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 30 }}>
               {isLoggedIn ? (
-                <Link to="/dashboard" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
+                <Link to="/dashboard" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
                   Go to Dashboard
                 </Link>
               ) : (
                 <>
-                  <Link to="/signup" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
+                  <Link to="/signup" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
                     Start Free
                   </Link>
-                  <Link to="/login" className="mk-ghost-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#e6eaf0", background: "transparent", border: "1px solid #333b49", textDecoration: "none" }}>
+                  <Link to="/login" prefetch="viewport" className="mk-ghost-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#e6eaf0", background: "transparent", border: "1px solid #333b49", textDecoration: "none" }}>
                     Talk to sales
                   </Link>
                 </>
