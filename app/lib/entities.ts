@@ -1,4 +1,4 @@
-import { InvoiceStatus, enumKey } from "./enums";
+import { CustomerType, InvoiceStatus, enumKey } from "./enums";
 import type {
   CustomerListItemDto,
   CustomerResponse,
@@ -10,6 +10,9 @@ type CustomerDisplay = CustomerResponse | CustomerListItemDto;
 
 export function customerLabel(c: CustomerDisplay | undefined | null): string {
   if (!c) return "—";
+  if (c.customerType === CustomerType.Company) {
+    return c.companyName || c.fullName || "Unnamed";
+  }
   return c.fullName || c.companyName || "Unnamed";
 }
 

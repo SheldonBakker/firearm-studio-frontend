@@ -251,6 +251,9 @@ function CustomerView({
             <KeyValue
               pairs={[
                 { k: "Name", v: customerLabel(customer), strong: true },
+                ...(customer.customerType === CustomerType.Company
+                  ? [{ k: "Contact person", v: customer.fullName || "—" }]
+                  : []),
                 { k: "Type", v: enumKey(CustomerType, customer.customerType) },
                 { k: "Email", v: customer.email ?? "—" },
                 { k: "Phone", v: customer.phone ?? "—" },

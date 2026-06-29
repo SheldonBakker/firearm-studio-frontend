@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Icon } from "~/components/common/icon";
 import { api } from "~/lib/api";
+import { CustomerType } from "~/lib/enums";
 import { can, type SessionUser } from "~/lib/rbac";
 import { Button } from "~/components/ui/button";
 import type {
@@ -23,6 +24,9 @@ const TITLES: { prefix: string; title: string }[] = [
 ];
 
 function customerName(c: CustomerListItemDto) {
+  if (c.customerType === CustomerType.Company) {
+    return c.companyName || c.fullName || "Unnamed";
+  }
   return c.fullName || c.companyName || "Unnamed";
 }
 

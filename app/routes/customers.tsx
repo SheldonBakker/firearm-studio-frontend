@@ -117,28 +117,35 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           {
             key: "customer",
             header: "Customer",
-            cell: (r) => (
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
-                  style={{
-                    color:
-                      r.customerType === CustomerType.Company
+            cell: (r) => {
+              const isCompany = r.customerType === CustomerType.Company;
+              return (
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
+                    style={{
+                      color: isCompany
                         ? "var(--status-purple)"
                         : "var(--status-teal)",
-                    background: `color-mix(in srgb, ${r.customerType === CustomerType.Company ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
-                  }}
-                >
-                  {initials(customerLabel(r))}
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-foreground">
-                    {customerLabel(r)}
+                      background: `color-mix(in srgb, ${isCompany ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
+                    }}
+                  >
+                    {initials(customerLabel(r))}
                   </div>
-                  <div className="text-[11.5px] text-dim">{r.email ?? "—"}</div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-foreground">
+                      {customerLabel(r)}
+                    </div>
+                    <div className="text-[11.5px] text-dim">
+                      {isCompany
+                        ? [r.fullName, r.email].filter(Boolean).join(" - ") ||
+                          "—"
+                        : r.email ?? "—"}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ),
+              );
+            },
           },
           {
             key: "type",
