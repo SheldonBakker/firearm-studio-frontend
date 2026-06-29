@@ -13,14 +13,11 @@ import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
-import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/enums";
 import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
-
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -63,10 +60,10 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
   )
     ? searchParams.get("storageStatus")!
     : "all";
-  const serialNumber = searchParams.get("serialNumber")?.trim() ?? "";
-  const customerName = searchParams.get("customerName")?.trim() ?? "";
   const hasFilters =
-    activeStatus !== "all" || !!serialNumber || !!customerName;
+    activeStatus !== "all" ||
+    !!searchParams.get("serialNumber")?.trim() ||
+    !!searchParams.get("customerName")?.trim();
 
   const setStatusFilter = (status: string) => {
     const next = new URLSearchParams(searchParams);
@@ -87,62 +84,6 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                 active={activeStatus}
                 onChange={setStatusFilter}
                 options={STATUS_FILTERS}
-                right={
-                  <form
-                    key={`${serialNumber}:${customerName}`}
-                    className="flex flex-wrap items-center justify-end gap-2"
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      const formData = new FormData(event.currentTarget);
-                      const next = new URLSearchParams(searchParams);
-
-                      for (const name of ["serialNumber", "customerName"]) {
-                        const value = String(formData.get(name) ?? "").trim();
-                        if (value) next.set(name, value);
-                        else next.delete(name);
-                      }
-
-                      setSearchParams(next);
-                    }}
-                  >
-                    <label className="relative">
-                      <span className="sr-only">Search by serial number</span>
-                      <Icon
-                        name="search"
-                        size={14}
-                        className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-dim"
-                      />
-                      <Input
-                        name="serialNumber"
-                        defaultValue={serialNumber}
-                        placeholder="Serial number"
-                        className="w-40 pl-8"
-                      />
-                    </label>
-                    <label>
-                      <span className="sr-only">Search by customer name</span>
-                      <Input
-                        name="customerName"
-                        defaultValue={customerName}
-                        placeholder="Customer name"
-                        className="w-44"
-                      />
-                    </label>
-                    <Button type="submit" variant="outline" size="sm">
-                      Search
-                    </Button>
-                    {hasFilters && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSearchParams(new URLSearchParams())}
-                      >
-                        Clear
-                      </Button>
-                    )}
-                  </form>
-                }
               />
               <DataTable<StorageRecordResponse>
                 rows={storage}

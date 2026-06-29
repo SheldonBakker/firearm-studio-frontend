@@ -4,7 +4,11 @@ import { Icon } from "~/components/common/icon";
 import { api } from "~/lib/api";
 import { can, type SessionUser } from "~/lib/rbac";
 import { Button } from "~/components/ui/button";
-import type { CustomerListItemDto, FirearmResponse } from "~/lib/api-types";
+import type {
+  CustomerListItemDto,
+  FirearmResponse,
+  StorageRecordResponse,
+} from "~/lib/api-types";
 
 const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },
@@ -24,6 +28,7 @@ function customerName(c: CustomerListItemDto) {
 
 type CustomerSearchType = "name" | "email" | "phone";
 type FirearmSearchType = "serialNumber" | "customerName";
+type StorageSearchType = "serialNumber" | "customerName";
 
 const CUSTOMER_SEARCH_TYPES: {
   value: CustomerSearchType;
@@ -44,6 +49,15 @@ const FIREARM_SEARCH_TYPES: {
   { value: "customerName", label: "Customer", placeholder: "Search firearms by customer name…" },
 ];
 
+const STORAGE_SEARCH_TYPES: {
+  value: StorageSearchType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "serialNumber", label: "Serial", placeholder: "Search storage by serial number…" },
+  { value: "customerName", label: "Customer", placeholder: "Search storage by customer name…" },
+];
+
 export function Topbar({
   user,
   onMenuClick,
@@ -58,11 +72,13 @@ export function Topbar({
 
   const isCustomers = pathname.startsWith("/customers");
   const isFirearms = pathname.startsWith("/firearms");
+  const isStorage = pathname.startsWith("/storage");
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [customerSearchType, setCustomerSearchType] = useState<CustomerSearchType>("name");
   const [firearmSearchType, setFirearmSearchType] = useState<FirearmSearchType>("serialNumber");
+  const [storageSearchType, setStorageSearchType] = useState<StorageSearchType>("serialNumber");
 
   // Cached registry for global (non-context) pages
   const [cachedCustomers, setCachedCustomers] = useState<CustomerListItemDto[]>([]);
@@ -72,6 +88,7 @@ export function Topbar({
   // Live search results
   const [liveCustomers, setLiveCustomers] = useState<CustomerListItemDto[]>([]);
   const [liveFirearms, setLiveFirearms] = useState<FirearmResponse[]>([]);
+  const [liveStorage, setLiveStorage] = useState<StorageRecordResponse[]>([]);
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -81,17 +98,19 @@ export function Topbar({
     setOpen(false);
     setLiveCustomers([]);
     setLiveFirearms([]);
+    setLiveStorage([]);
     setSearching(false);
     cacheLoaded.current = false;
   }, [pathname]);
 
-  // Live search — active on /customers and /firearms
+  // Live search — active on contextual list/detail sections
   useEffect(() => {
-    if (!isCustomers && !isFirearms) return;
+    if (!isCustomers && !isFirearms && !isStorage) return;
     const trimmed = query.trim();
     if (!trimmed) {
       setLiveCustomers([]);
       setLiveFirearms([]);
+      setLiveStorage([]);
       setSearching(false);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       return;
@@ -103,13 +122,17 @@ export function Topbar({
         if (isCustomers) {
           const result = await api.customers({ [customerSearchType]: trimmed, pageSize: 6 });
           setLiveCustomers(result.items ?? []);
-        } else {
+        } else if (isFirearms) {
           const results = await api.firearms({ [firearmSearchType]: trimmed });
           setLiveFirearms((results ?? []).slice(0, 6));
+        } else {
+          const results = await api.storageActive({ [storageSearchType]: trimmed });
+          setLiveStorage((results ?? []).slice(0, 6));
         }
       } catch {
         setLiveCustomers([]);
         setLiveFirearms([]);
+        setLiveStorage([]);
       } finally {
         setSearching(false);
       }
@@ -117,11 +140,19 @@ export function Topbar({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query, customerSearchType, firearmSearchType, isCustomers, isFirearms]);
+  }, [
+    query,
+    customerSearchType,
+    firearmSearchType,
+    storageSearchType,
+    isCustomers,
+    isFirearms,
+    isStorage,
+  ]);
 
   // Lazy-load cache for global (non-context) pages
   async function ensureCache() {
-    if (isCustomers || isFirearms) return;
+    if (isCustomers || isFirearms || isStorage) return;
     if (cacheLoaded.current) return;
     cacheLoaded.current = true;
     try {
@@ -137,7 +168,7 @@ export function Topbar({
 
   const custMatches = isCustomers
     ? liveCustomers
-    : !isFirearms && q
+    : !isFirearms && !isStorage && q
       ? cachedCustomers
           .filter((c) =>
             (customerName(c) + " " + (c.email ?? "")).toLowerCase().includes(q),
@@ -147,7 +178,7 @@ export function Topbar({
 
   const fireMatches = isFirearms
     ? liveFirearms
-    : !isCustomers && q
+    : !isCustomers && !isStorage && q
       ? cachedFirearms
           .filter((f) =>
             `${f.make ?? ""} ${f.model ?? ""} ${f.serialNumber ?? ""}`
@@ -157,8 +188,12 @@ export function Topbar({
           .slice(0, 4)
       : [];
 
-  const showDropdown = open && (!!query.trim() || isCustomers || isFirearms);
-  const empty = custMatches.length + fireMatches.length === 0;
+  const storageMatches = isStorage ? liveStorage : [];
+
+  const showDropdown =
+    open && (!!query.trim() || isCustomers || isFirearms || isStorage);
+  const empty =
+    custMatches.length + fireMatches.length + storageMatches.length === 0;
 
   const activePlaceholder = isCustomers
     ? (CUSTOMER_SEARCH_TYPES.find((s) => s.value === customerSearchType)?.placeholder ??
@@ -166,6 +201,9 @@ export function Topbar({
     : isFirearms
       ? (FIREARM_SEARCH_TYPES.find((s) => s.value === firearmSearchType)?.placeholder ??
           "Search firearms…")
+      : isStorage
+        ? (STORAGE_SEARCH_TYPES.find((s) => s.value === storageSearchType)?.placeholder ??
+            "Search storage…")
       : "Search customers, firearms, serials…";
 
   function goto(to: string) {
@@ -256,6 +294,30 @@ export function Topbar({
                 ))}
               </div>
             )}
+            {isStorage && (
+              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+                {STORAGE_SEARCH_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      if (storageSearchType === t.value) return;
+                      setStorageSearchType(t.value);
+                      setQuery("");
+                      setLiveStorage([]);
+                    }}
+                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
+                      storageSearchType === t.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
             {query.trim() ? (
               searching ? (
                 <div className="px-3.5 py-5 text-center text-[13px] text-dim">
@@ -285,6 +347,18 @@ export function Topbar({
                       title: `${f.make ?? ""} ${f.model ?? ""}`.trim(),
                       sub: `${f.serialNumber ?? ""} · ${f.calibre ?? ""}`,
                       onClick: () => goto(`/firearms/${f.id}`),
+                    }))}
+                  />
+                  <SearchSection
+                    label="Storage Records"
+                    items={storageMatches.map((record) => ({
+                      icon: "box" as const,
+                      color: "var(--status-purple)",
+                      title: record.serialNumber || "Storage record",
+                      sub: [record.customerName, record.storageLocation]
+                        .filter(Boolean)
+                        .join(" · "),
+                      onClick: () => goto(`/storage/${record.id}`),
                     }))}
                   />
                 </>
@@ -326,7 +400,7 @@ function SearchSection({
 }: {
   label: string;
   items: {
-    icon: "users" | "target";
+    icon: "users" | "target" | "box";
     color: string;
     title: string;
     sub: string;
