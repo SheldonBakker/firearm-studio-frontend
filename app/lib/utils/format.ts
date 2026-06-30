@@ -35,7 +35,7 @@ type StatusMeta = { color: string; label: string };
 const STATUS: Record<string, StatusMeta> = {
   // firearm
   InStorage: { color: "var(--status-blue)", label: "In storage" },
-  Released: { color: "var(--dim)", label: "Released" },
+  Released: { color: "var(--status-teal)", label: "Released" },
   PendingTransfer: { color: "var(--status-amber)", label: "Pending transfer" },
   Active: { color: "var(--status-green)", label: "Active" },
   Inactive: { color: "var(--dim)", label: "Inactive" },
@@ -49,9 +49,9 @@ const STATUS: Record<string, StatusMeta> = {
   // invoice
   Paid: { color: "var(--status-green)", label: "Paid" },
   Sent: { color: "var(--status-blue)", label: "Sent" },
-  Overdue: { color: "var(--status-red)", label: "Overdue" },
+  Overdue: { color: "var(--status-orange)", label: "Overdue" },
   Draft: { color: "var(--dim)", label: "Draft" },
-  Cancelled: { color: "var(--dim)", label: "Cancelled" },
+  Cancelled: { color: "var(--status-red)", label: "Cancelled" },
   // customer type
   Individual: { color: "var(--status-teal)", label: "Individual" },
   Company: { color: "var(--status-purple)", label: "Company" },

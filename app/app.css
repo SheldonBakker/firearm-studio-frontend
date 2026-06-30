@@ -53,6 +53,7 @@
   --color-status-blue: var(--status-blue);
   --color-status-purple: var(--status-purple);
   --color-status-teal: var(--status-teal);
+  --color-status-orange: var(--status-orange);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -98,6 +99,7 @@
   --status-blue: #4c8df0;
   --status-purple: #9a7cf0;
   --status-teal: #34b6c9;
+  --status-orange: #f2711c;
 
   --sidebar: #14181f;
   --sidebar-foreground: #e6eaf0;
