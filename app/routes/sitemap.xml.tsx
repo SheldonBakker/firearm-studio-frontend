@@ -1,4 +1,4 @@
-import { canonical, PUBLIC_PATHS } from "~/lib/seo";
+import { canonical, PUBLIC_PATHS } from "~/lib/utils/seo";
 
 const LAST_MODIFIED = "2026-06-28";
 

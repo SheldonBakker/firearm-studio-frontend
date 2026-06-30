@@ -1,4 +1,4 @@
-import { statusMeta } from "~/lib/format";
+import { statusMeta } from "~/lib/utils/format";
 
 /** Pill badge driven by the shared status map (color dot + label). */
 export function StatusBadge({

@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Icon } from "~/components/common/icon";
-import { api } from "~/lib/api";
-import { CustomerType } from "~/lib/enums";
-import { can, type SessionUser } from "~/lib/rbac";
+import { api } from "~/lib/api/client";
+import { CustomerType } from "~/lib/types/enums";
+import { can, type SessionUser } from "~/lib/utils/rbac";
 import { Button } from "~/components/ui/button";
 import type {
   CustomerListItemDto,
   FirearmResponse,
   StorageRecordResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },

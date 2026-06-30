@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/dashboard";
-import { api } from "~/lib/api";
-import { fmtMoneyShort, fmtMoney, fmtDate } from "~/lib/format";
-import { customerNameMap, inv, firearmLabel } from "~/lib/entities";
+import { api } from "~/lib/api/client";
+import { fmtMoneyShort, fmtMoney, fmtDate } from "~/lib/utils/format";
+import { customerNameMap, inv, firearmLabel } from "~/lib/utils/entities";
 import { PageWrap, SectionTitle, StatDot } from "~/components/common/misc";
 import { StatCard } from "~/components/common/stat-card";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
-import { LicenceStatus } from "~/lib/enums";
+import { LicenceStatus } from "~/lib/types/enums";
 import {
   Resolve,
   StatGridSkeleton,
@@ -22,7 +22,7 @@ import type {
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
   LicenceListItemDtoPaginatedResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const EMPTY_DASHBOARD_STATS: DashboardStatsResponse = {
   activeStorageCount: 0,

@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customers";
-import { api } from "~/lib/api";
-import { customerLabel } from "~/lib/entities";
-import { initials } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { customerLabel } from "~/lib/utils/entities";
+import { initials } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
@@ -17,12 +17,12 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
-import { CustomerType, enumKey } from "~/lib/enums";
+import { CustomerType, enumKey } from "~/lib/types/enums";
 import type {
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
   FirearmResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
 

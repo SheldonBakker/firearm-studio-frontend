@@ -1,6 +1,6 @@
 import type { Route } from "./+types/fca-notice";
 import { LegalDoc, type LegalSection } from "~/components/marketing/legal-doc";
-import { pageMeta } from "~/lib/seo";
+import { pageMeta } from "~/lib/utils/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({

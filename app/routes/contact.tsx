@@ -4,8 +4,8 @@ import { Link } from "react-router";
 import type { Route } from "./+types/contact";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
-import { pageMeta } from "~/lib/seo";
-import { requiredEmailSchema, requiredTextSchema } from "~/lib/validation";
+import { pageMeta } from "~/lib/utils/seo";
+import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({

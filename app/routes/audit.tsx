@@ -1,8 +1,8 @@
 import { redirect, useLocation, useNavigate } from "react-router";
 import type { Route } from "./+types/audit";
-import { api } from "~/lib/api";
-import { requireAuth } from "~/lib/auth";
-import { canSeeNav } from "~/lib/rbac";
+import { api } from "~/lib/api/client";
+import { requireAuth } from "~/lib/api/auth";
+import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { DataTable } from "~/components/common/data-table";
@@ -16,11 +16,11 @@ import {
   LicenceStatus,
   StorageStatus,
   enumKey,
-} from "~/lib/enums";
+} from "~/lib/types/enums";
 import type {
   AuditLogListItemDtoPaginatedResponse,
   AuditLogResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
 const MAX_DETAIL_FIELDS = 4;

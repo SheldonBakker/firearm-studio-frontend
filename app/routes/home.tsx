@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { SiteHeader, MarketingLogo } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
-import { organizationLd, pageMeta, websiteLd } from "~/lib/seo";
-import { getSessionUser } from "~/lib/auth";
+import { organizationLd, pageMeta, websiteLd } from "~/lib/utils/seo";
+import { getSessionUser } from "~/lib/api/auth";
 
 export async function clientLoader() {
   const user = await getSessionUser();

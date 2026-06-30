@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Input } from "~/components/ui/input";
-import { getSouthAfricanNationalDigits } from "~/lib/phone";
-import { cn } from "~/lib/utils";
+import { getSouthAfricanNationalDigits } from "~/lib/utils/phone";
+import { cn } from "~/lib/utils/cn";
 
 type SouthAfricanPhoneInputProps = Omit<
   React.ComponentProps<"input">,

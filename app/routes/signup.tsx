@@ -2,14 +2,14 @@ import { useState } from "react";
 import { z } from "zod";
 import { Link, redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/signup";
-import { supabase } from "~/lib/supabase";
-import { getSessionUser } from "~/lib/auth";
-import { pageMeta } from "~/lib/seo";
+import { supabase } from "~/lib/api/supabase";
+import { getSessionUser } from "~/lib/api/auth";
+import { pageMeta } from "~/lib/utils/seo";
 import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { requiredEmailSchema, requiredTextSchema } from "~/lib/validation";
+import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({

@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage-detail";
-import { api } from "~/lib/api";
-import { firearmLabel } from "~/lib/entities";
-import { fmtDate, fmtMoney } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { firearmLabel } from "~/lib/utils/entities";
+import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -16,8 +16,8 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { StorageStatus, enumKey, enumNames } from "~/lib/enums";
-import type { FirearmResponse, StorageRecordResponse } from "~/lib/api-types";
+import { StorageStatus, enumKey, enumNames } from "~/lib/types/enums";
+import type { FirearmResponse, StorageRecordResponse } from "~/lib/types/api";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
   // No single-record GET exists; derive the record from the list, then enrich

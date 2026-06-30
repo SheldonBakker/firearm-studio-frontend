@@ -1,10 +1,10 @@
-import { CustomerType, InvoiceStatus, enumKey } from "./enums";
+import { CustomerType, InvoiceStatus, enumKey } from "../types/enums";
 import type {
   CustomerListItemDto,
   CustomerResponse,
   FirearmResponse,
   InvoiceResponse,
-} from "./api-types";
+} from "../types/api";
 
 type CustomerDisplay = CustomerResponse | CustomerListItemDto;
 

@@ -2,25 +2,25 @@ import { useState } from "react";
 import { z } from "zod";
 import { redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/onboarding";
-import { api, ApiError } from "~/lib/api";
+import { api, ApiError } from "~/lib/api/client";
 import {
   grantCompanyAccess,
   hasCompanyAccess,
   refreshSession,
   requireAuth,
-} from "~/lib/auth";
-import { pageMeta } from "~/lib/seo";
+} from "~/lib/api/auth";
+import { pageMeta } from "~/lib/utils/seo";
 import { BrandMark } from "~/components/common/brand";
 import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import type { CreateCompanyRequest } from "~/lib/api-types";
+import type { CreateCompanyRequest } from "~/lib/types/api";
 import {
   getSouthAfricanPhoneError,
   optionalSouthAfricanPhoneSchema,
-} from "~/lib/phone";
-import { optionalEmailSchema, requiredTextSchema } from "~/lib/validation";
+} from "~/lib/utils/phone";
+import { optionalEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({

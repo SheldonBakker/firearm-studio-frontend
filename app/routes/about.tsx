@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import type { Route } from "./+types/about";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
-import { pageMeta } from "~/lib/seo";
+import { pageMeta } from "~/lib/utils/seo";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({

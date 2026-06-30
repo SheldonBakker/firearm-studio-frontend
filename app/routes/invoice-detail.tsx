@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/invoice-detail";
-import { api, ApiError } from "~/lib/api";
-import { customerLabel, inv } from "~/lib/entities";
-import { fmtDate, fmtMoney } from "~/lib/format";
+import { api, ApiError } from "~/lib/api/client";
+import { customerLabel, inv } from "~/lib/utils/entities";
+import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -17,12 +17,12 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { PaymentMethod, enumKey, enumNames } from "~/lib/enums";
+import { PaymentMethod, enumKey, enumNames } from "~/lib/types/enums";
 import type {
   CustomerResponse,
   InvoiceResponse,
   PaymentResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
   const data = api.invoice(params.id).then(async (invoice) => {

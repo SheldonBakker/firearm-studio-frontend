@@ -2,17 +2,17 @@ import { useState } from "react";
 import { redirect, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/team";
-import { api } from "~/lib/api";
-import { requireAuth } from "~/lib/auth";
-import { canSeeNav } from "~/lib/rbac";
-import { initials } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { requireAuth } from "~/lib/api/auth";
+import { canSeeNav } from "~/lib/utils/rbac";
+import { initials } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
-import { canonicalRole } from "~/lib/rbac";
+import { canonicalRole } from "~/lib/utils/rbac";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +21,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
-import { AppRole, enumKey, enumNames } from "~/lib/enums";
-import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/api-types";
+import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
+import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
 

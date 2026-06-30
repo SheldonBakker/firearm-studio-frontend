@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Outlet, redirect, useRouteLoaderData } from "react-router";
 import type { Route } from "./+types/app-layout";
-import { getSessionUser, hasCompanyAccess, requireAuth } from "~/lib/auth";
-import type { SessionUser } from "~/lib/rbac";
+import { getSessionUser, hasCompanyAccess, requireAuth } from "~/lib/api/auth";
+import type { SessionUser } from "~/lib/utils/rbac";
 import { Sidebar, MobileSidebar } from "~/components/layout/sidebar";
 import { Topbar } from "~/components/layout/topbar";
 import { AppShellSkeleton } from "~/components/common/skeletons";

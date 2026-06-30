@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
-import { api } from "~/lib/api";
-import { firearmLabel } from "~/lib/entities";
-import { fmtDate, fmtMoney } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { firearmLabel } from "~/lib/utils/entities";
+import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
@@ -16,12 +16,12 @@ import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
-import { StorageStatus, enumKey } from "~/lib/enums";
+import { StorageStatus, enumKey } from "~/lib/types/enums";
 import type {
   FirearmResponse,
   StorageRecordDtoPaginatedResponse,
   StorageRecordResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
 

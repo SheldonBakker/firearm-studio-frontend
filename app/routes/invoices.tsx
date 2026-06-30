@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/invoices";
-import { api } from "~/lib/api";
-import { customerNameMap, inv } from "~/lib/entities";
-import { fmtMoney } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { customerNameMap, inv } from "~/lib/utils/entities";
+import { fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
@@ -21,7 +21,7 @@ import type {
   CustomerListItemDto,
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
 const STATUSES = ["Paid", "Sent", "Overdue", "Draft", "Cancelled"];

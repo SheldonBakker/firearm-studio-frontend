@@ -1,5 +1,5 @@
 import { Icon } from "./icon";
-import { cn } from "~/lib/utils";
+import { cn } from "~/lib/utils/cn";
 
 export function BackLink({
   label,

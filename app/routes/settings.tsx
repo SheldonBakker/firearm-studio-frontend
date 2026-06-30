@@ -2,11 +2,11 @@ import { useState } from "react";
 import { redirect, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/settings";
-import { api } from "~/lib/api";
-import { requireAuth } from "~/lib/auth";
-import { canSeeNav, primaryRole } from "~/lib/rbac";
+import { api } from "~/lib/api/client";
+import { requireAuth } from "~/lib/api/auth";
+import { canSeeNav, primaryRole } from "~/lib/utils/rbac";
 import { useSessionUser } from "./app-layout";
-import { fmtDate } from "~/lib/format";
+import { fmtDate } from "~/lib/utils/format";
 import { PageWrap, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { Button } from "~/components/ui/button";
@@ -15,7 +15,7 @@ import { KeyValue } from "~/components/common/key-value";
 import { Mono } from "~/components/common/mono";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
-import type { CompanyDetailsResponse } from "~/lib/api-types";
+import type { CompanyDetailsResponse } from "~/lib/types/api";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);

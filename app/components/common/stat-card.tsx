@@ -1,5 +1,5 @@
 import { Icon, type IconName } from "./icon";
-import { cn } from "~/lib/utils";
+import { cn } from "~/lib/utils/cn";
 
 /** Dashboard stat tile: label, big mono value, sub-line, accent icon chip. */
 export function StatCard({

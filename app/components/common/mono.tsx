@@ -1,4 +1,4 @@
-import { cn } from "~/lib/utils";
+import { cn } from "~/lib/utils/cn";
 
 /** Monospace inline text for serials, references, numbers. */
 export function Mono({

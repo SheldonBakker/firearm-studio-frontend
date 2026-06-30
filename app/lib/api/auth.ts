@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
 import { supabase } from "./supabase";
-import { api, ApiError } from "./api";
-import { normalizeRoles, type SessionUser } from "./rbac";
+import { api, ApiError } from "./client";
+import { normalizeRoles, type SessionUser } from "../utils/rbac";
 
 export async function getSessionUser(): Promise<SessionUser | null> {
   const { data } = await supabase.auth.getSession();

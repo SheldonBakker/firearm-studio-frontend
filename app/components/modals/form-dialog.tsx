@@ -19,16 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { ApiError } from "~/lib/api";
+import { ApiError } from "~/lib/api/client";
 import {
   optionalSouthAfricanPhoneSchema,
   requiredSouthAfricanPhoneSchema,
-} from "~/lib/phone";
+} from "~/lib/utils/phone";
 import {
   optionalEmailSchema,
   requiredEmailSchema,
   requiredTextSchema,
-} from "~/lib/validation";
+} from "~/lib/utils/validation";
 
 export interface FormField {
   name: string;

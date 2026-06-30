@@ -1,10 +1,10 @@
 import { useNavigate, useLocation, Link } from "react-router";
 import { Icon, type IconName } from "~/components/common/icon";
 import { BrandLockup } from "~/components/common/brand";
-import { signOut } from "~/lib/auth";
-import { canSeeNav, primaryRole, type NavKey, type SessionUser } from "~/lib/rbac";
-import { initials } from "~/lib/format";
-import { cn } from "~/lib/utils";
+import { signOut } from "~/lib/api/auth";
+import { canSeeNav, primaryRole, type NavKey, type SessionUser } from "~/lib/utils/rbac";
+import { initials } from "~/lib/utils/format";
+import { cn } from "~/lib/utils/cn";
 import { Sheet, SheetContent, SheetTitle } from "~/components/ui/sheet";
 
 interface NavItem {

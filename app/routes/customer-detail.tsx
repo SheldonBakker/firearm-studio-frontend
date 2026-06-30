@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customer-detail";
-import { api } from "~/lib/api";
-import { customerLabel, firearmLabel, inv } from "~/lib/entities";
-import { fmtDate, fmtMoney } from "~/lib/format";
+import { api } from "~/lib/api/client";
+import { customerLabel, firearmLabel, inv } from "~/lib/utils/entities";
+import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/rbac";
+import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { DataTable } from "~/components/common/data-table";
@@ -18,13 +18,13 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { CustomerType, FirearmStatus, enumKey } from "~/lib/enums";
+import { CustomerType, FirearmStatus, enumKey } from "~/lib/types/enums";
 import type {
   CustomerResponse,
   FirearmResponse,
   InvoiceResponse,
   StorageRecordResponse,
-} from "~/lib/api-types";
+} from "~/lib/types/api";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const id = params.id;
