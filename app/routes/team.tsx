@@ -3,7 +3,7 @@ import { redirect, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/team";
 import { api } from "~/lib/api/client";
-import { requireAuth } from "~/lib/api/auth";
+import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";

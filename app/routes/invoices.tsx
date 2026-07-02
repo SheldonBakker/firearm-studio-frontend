@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator, useSearchParams } from "react-router";
-import { toast } from "sonner";
+import { useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/invoices";
 import { api } from "~/lib/api/client";
 import { customerNameMap, inv } from "~/lib/utils/entities";
 import { fmtMoney } from "~/lib/utils/format";
-import { useSessionUser } from "./app-layout";
-import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
@@ -15,7 +12,6 @@ import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
-import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import type {
   CustomerListItemDto,
@@ -52,11 +48,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 
 export default function Invoices({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
-  const revalidator = useRevalidator();
-  const user = useSessionUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState("all");
-  const [genOpen, setGenOpen] = useState(false);
 
   const navigatePage = (newPage: number) => {
     const next = new URLSearchParams(searchParams);
@@ -67,17 +60,7 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader
-        title="Invoices"
-        actions={
-          can(user, "invoices:write") && (
-            <Button onClick={() => setGenOpen(true)}>
-              <Icon name="file" size={16} />
-              Generate monthly invoices
-            </Button>
-          )
-        }
-      />
+      <PageHeader title="Invoices" />
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
         {([invoicesPage, customers]) => {
           const invoices = invoicesPage.items ?? [];
@@ -200,44 +183,6 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
           );
         }}
       </Resolve>
-
-      <FormDialog
-        open={genOpen}
-        onOpenChange={setGenOpen}
-        title="Generate monthly invoices"
-        description="Create invoices for all active storage records for the chosen month."
-        submitLabel="Generate"
-        fields={[
-          {
-            name: "invoiceMonth",
-            label: "Invoice month",
-            type: "date",
-            required: true,
-            full: true,
-          },
-          {
-            name: "vatRate",
-            label: "VAT rate (%)",
-            type: "number",
-            defaultValue: "15",
-          },
-          {
-            name: "dueDays",
-            label: "Due in (days)",
-            type: "number",
-            defaultValue: "14",
-          },
-        ]}
-        onSubmit={async (v) => {
-          await api.generateMonthlyInvoices({
-            invoiceMonth: v.invoiceMonth,
-            vatRate: Number(v.vatRate || 0) / 100,
-            dueDays: Number(v.dueDays || 0),
-          });
-          toast.success("Monthly invoices generated");
-          revalidator.revalidate();
-        }}
-      />
     </PageWrap>
   );
 }

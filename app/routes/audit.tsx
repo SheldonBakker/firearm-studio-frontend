@@ -1,7 +1,7 @@
 import { redirect, useLocation, useNavigate } from "react-router";
 import type { Route } from "./+types/audit";
 import { api } from "~/lib/api/client";
-import { requireAuth } from "~/lib/api/auth";
+import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";

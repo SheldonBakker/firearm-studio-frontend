@@ -5,7 +5,7 @@ import type { Route } from "./+types/firearm-detail";
 import { api } from "~/lib/api/client";
 import { customerLabel, firearmLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
-import { useSessionUser } from "./app-layout";
+import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";

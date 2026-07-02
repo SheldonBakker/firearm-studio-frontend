@@ -13,6 +13,7 @@ import { Toaster } from "~/components/ui/sonner";
 import { AppShellSkeleton } from "~/components/common/skeletons";
 import { PageWrap, ErrorState } from "~/components/common/misc";
 import { ApiError } from "~/lib/api/client";
+import { AuthProvider } from "~/context/auth-context";
 
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
@@ -63,7 +64,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
 }
 
 export function HydrateFallback() {

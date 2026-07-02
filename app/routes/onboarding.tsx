@@ -8,7 +8,7 @@ import {
   hasCompanyAccess,
   refreshSession,
   requireAuth,
-} from "~/lib/api/auth";
+} from "~/context/auth-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { BrandMark } from "~/components/common/brand";
 import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";

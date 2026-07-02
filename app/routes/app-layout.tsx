@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Outlet, redirect, useRouteLoaderData } from "react-router";
+import { Outlet, redirect } from "react-router";
 import type { Route } from "./+types/app-layout";
-import { getSessionUser, hasCompanyAccess, requireAuth } from "~/lib/api/auth";
-import type { SessionUser } from "~/lib/utils/rbac";
+import { hasCompanyAccess, requireAuth } from "~/context/auth-context";
 import { Sidebar, MobileSidebar } from "~/components/layout/sidebar";
 import { Topbar } from "~/components/layout/topbar";
 import { AppShellSkeleton } from "~/components/common/skeletons";
@@ -15,24 +14,15 @@ export function meta() {
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  await requireAuth(request);
+  const user = await requireAuth(request);
 
   if (!(await hasCompanyAccess())) throw redirect("/onboarding");
 
-  const user = (await getSessionUser())!;
   return { user };
 }
 
 export function HydrateFallback() {
   return <AppShellSkeleton />;
-}
-
-export function useSessionUser(): SessionUser {
-  const data = useRouteLoaderData("routes/app-layout") as
-    | { user: SessionUser }
-    | undefined;
-  if (!data) throw new Error("useSessionUser used outside the app layout");
-  return data.user;
 }
 
 export default function AppLayout({ loaderData }: Route.ComponentProps) {

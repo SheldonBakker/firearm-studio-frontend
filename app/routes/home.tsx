@@ -3,12 +3,7 @@ import type { Route } from "./+types/home";
 import { SiteHeader, MarketingLogo } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 import { organizationLd, pageMeta, websiteLd } from "~/lib/utils/seo";
-import { getSessionUser } from "~/lib/api/auth";
-
-export async function clientLoader() {
-  const user = await getSessionUser();
-  return { isLoggedIn: !!user };
-}
+import { useAuth } from "~/context/auth-context";
 
 export function meta({ location }: Route.MetaArgs) {
   return [
@@ -101,7 +96,7 @@ const metrics = [
 const features = [
   { title: "Storage registry", body: "Track every firearm in your custody - make, model, serial, calibre, and exact storage location - on one searchable registry.", color: BLUE, svg: ic.box },
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
-  { title: "Invoicing", body: "Generate monthly storage invoices, track outstanding balances, and flag overdue accounts automatically.", color: GREEN, svg: ic.money },
+  { title: "Invoicing", body: "Monthly storage invoices are generated automatically, so you can track outstanding balances and flag overdue accounts.", color: GREEN, svg: ic.money },
   { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: PURPLE, svg: ic.list },
 ];
 
@@ -201,11 +196,11 @@ function StatusPill({ inv, big = false }: { inv: Invoice; big?: boolean }) {
   );
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-  const { isLoggedIn } = loaderData;
+export default function Home() {
+  const { isLoggedIn } = useAuth();
   return (
     <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader isLoggedIn={isLoggedIn} />
+      <SiteHeader />
 
       <section id="top" style={{ position: "relative" }}>
         <div

@@ -161,12 +161,6 @@ export interface CompanyDetailsResponse {
   updatedAt: string | null;
 }
 
-export interface GenerateMonthlyInvoicesRequest {
-  invoiceMonth: string; // date
-  vatRate: number;
-  dueDays: number;
-}
-
 export interface RecordPaymentRequest {
   amount: number;
   paidOn?: string | null;

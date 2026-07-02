@@ -2,8 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { Link, redirect, useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/login";
-import { supabase } from "~/lib/api/supabase";
-import { getSessionUser } from "~/lib/api/auth";
+import { getSessionUser, useAuth } from "~/context/auth-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
@@ -29,6 +28,7 @@ export async function clientLoader() {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [params] = useSearchParams();
   const next = params.get("next");
   const [email, setEmail] = useState("");
@@ -61,13 +61,10 @@ export default function Login() {
 
     setFieldErrors({});
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: result.data.email,
-      password: result.data.password,
-    });
+    const { error } = await signIn(result.data.email, result.data.password);
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(error);
       return;
     }
     navigate(next ? decodeURIComponent(next) : "/dashboard", { replace: true });

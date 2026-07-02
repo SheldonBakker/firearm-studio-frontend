@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useAuth } from "~/context/auth-context";
 
 export function MarketingLogo({ size = 19 }: { size?: number }) {
   const box = Math.round((size / 19) * 34);
@@ -26,7 +27,8 @@ const NAV = [
   { href: "/#how", label: "How it works" },
 ];
 
-export function SiteHeader({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
+export function SiteHeader() {
+  const { isLoggedIn } = useAuth();
   return (
     <header
       style={{

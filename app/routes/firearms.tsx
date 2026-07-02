@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import type { Route } from "./+types/firearms";
 import { api } from "~/lib/api/client";
 import { customerLabel, customerNameMap } from "~/lib/utils/entities";
-import { useSessionUser } from "./app-layout";
+import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";

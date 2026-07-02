@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Link } from "react-router";
 import { Icon, type IconName } from "~/components/common/icon";
 import { BrandLockup } from "~/components/common/brand";
-import { signOut } from "~/lib/api/auth";
+import { useAuth } from "~/context/auth-context";
 import { canSeeNav, primaryRole, type NavKey, type SessionUser } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { cn } from "~/lib/utils/cn";
@@ -55,6 +55,7 @@ function SidebarBody({
 }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { signOut } = useAuth();
 
   const isActive = (to: string) =>
     pathname === to || pathname.startsWith(to + "/");

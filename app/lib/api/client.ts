@@ -17,7 +17,6 @@ import type {
   CustomerResponse,
   FirearmResponse,
   FirearmResponsePaginatedResponse,
-  GenerateMonthlyInvoicesRequest,
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
   LicenceStatus,
@@ -448,8 +447,6 @@ export const api = {
   // ---- Invoices ----
   invoices: getInvoices,
   invoice: (id: string) => request<InvoiceResponse>(`/api/v1/invoices/${id}`),
-  generateMonthlyInvoices: (body: GenerateMonthlyInvoicesRequest) =>
-    request<void>("/api/v1/invoices/generate-monthly", { method: "POST", body }),
   sendInvoice: (id: string) =>
     request<void>(`/api/v1/invoices/${id}/send`, { method: "POST" }),
   recordPayment: (id: string, body: RecordPaymentRequest) =>

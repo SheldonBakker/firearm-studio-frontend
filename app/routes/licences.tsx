@@ -5,7 +5,7 @@ import type { Route } from "./+types/licences";
 import { api } from "~/lib/api/client";
 import { firearmLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
-import { useSessionUser } from "./app-layout";
+import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
