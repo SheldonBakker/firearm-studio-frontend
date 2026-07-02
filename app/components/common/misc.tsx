@@ -1,4 +1,5 @@
 import { Icon } from "./icon";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils/cn";
 
 export function BackLink({
@@ -37,7 +38,7 @@ export function SectionTitle({
   );
 }
 
-export function LoadingState({ label = "Loading…" }: { label?: string }) {
+function LoadingState({ label = "Loading…" }: { label?: string }) {
   return (
     <div className="flex items-center justify-center py-16 text-sm text-dim">
       {label}
@@ -45,9 +46,15 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
   );
 }
 
-export function ErrorState({ message }: { message: string }) {
+export function ErrorState({
+  message = "An unexpected error occurred.",
+  onBack,
+}: {
+  message?: string;
+  onBack?: () => void;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-card py-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-card px-4 py-16 text-center">
       <span style={{ color: "var(--status-red)" }}>
         <Icon name="alert" size={22} />
       </span>
@@ -55,6 +62,12 @@ export function ErrorState({ message }: { message: string }) {
         Something went wrong
       </div>
       <div className="max-w-md text-xs text-muted-foreground">{message}</div>
+      {onBack && (
+        <Button variant="outline" size="lg" onClick={onBack} className="mt-3">
+          <Icon name="back" size={15} />
+          Go back
+        </Button>
+      )}
     </div>
   );
 }

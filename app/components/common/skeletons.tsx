@@ -1,11 +1,7 @@
 import { Suspense, use, type ReactNode } from "react";
 import { Skeleton } from "~/components/ui/skeleton";
+import { InlineErrorBoundary } from "./error-boundary";
 
-/**
- * Suspends on `resolve` (React 19 `use()`), showing `fallback` until it
- * settles, then renders `children(value)`. The promise must be stable across
- * renders (compose it in the route's clientLoader, not inline in JSX).
- */
 export function Resolve<T>({
   resolve,
   fallback,
@@ -16,9 +12,11 @@ export function Resolve<T>({
   children: (value: T) => ReactNode;
 }) {
   return (
-    <Suspense fallback={fallback}>
-      <Unwrap resolve={resolve}>{children}</Unwrap>
-    </Suspense>
+    <InlineErrorBoundary>
+      <Suspense fallback={fallback}>
+        <Unwrap resolve={resolve}>{children}</Unwrap>
+      </Suspense>
+    </InlineErrorBoundary>
   );
 }
 
@@ -32,9 +30,6 @@ function Unwrap<T>({
   return <>{children(use(resolve))}</>;
 }
 
-// ---- shaped skeletons ----
-
-/** Mirrors DataTable: header bar + N rows. */
 export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: number }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -61,7 +56,6 @@ export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: nu
   );
 }
 
-/** Pill filter row + table. */
 export function ListSkeleton({ cols = 5 }: { cols?: number }) {
   return (
     <div>
@@ -75,7 +69,6 @@ export function ListSkeleton({ cols = 5 }: { cols?: number }) {
   );
 }
 
-/** Dashboard stat-card grid. */
 export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
@@ -98,7 +91,6 @@ export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-/** Two-column key/value detail panel. */
 export function KeyValueSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="grid grid-cols-1 gap-x-7 gap-y-4 sm:grid-cols-2">
@@ -137,7 +129,6 @@ export function DetailSkeleton() {
   );
 }
 
-/** Dashboard "needs attention" list of cards. */
 export function AttentionListSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div className="flex flex-col gap-2.5">
@@ -158,7 +149,6 @@ export function AttentionListSkeleton({ rows = 4 }: { rows?: number }) {
   );
 }
 
-/** Full app shell skeleton for the initial-load HydrateFallback. */
 export function AppShellSkeleton() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">

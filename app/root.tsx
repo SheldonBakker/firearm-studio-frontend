@@ -11,6 +11,8 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { Toaster } from "~/components/ui/sonner";
 import { AppShellSkeleton } from "~/components/common/skeletons";
+import { PageWrap, ErrorState } from "~/components/common/misc";
+import { ApiError } from "~/lib/api/client";
 
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
@@ -64,36 +66,34 @@ export default function App() {
   return <Outlet />;
 }
 
-// Shown during the initial client load while the app-layout auth gate resolves.
 export function HydrateFallback() {
   return <AppShellSkeleton />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404
         ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+        : error.statusText || `Error ${error.status}`;
+  } else if (error instanceof ApiError) {
+    details = error.message;
+  } else if (import.meta.env.DEV && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <PageWrap>
+      <ErrorState message={details} onBack={() => window.history.back()} />
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="mt-4 w-full overflow-x-auto rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
           <code>{stack}</code>
         </pre>
       )}
-    </main>
+    </PageWrap>
   );
 }
