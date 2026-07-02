@@ -6,6 +6,7 @@ import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 import { pageMeta } from "~/lib/utils/seo";
 import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
+import { api } from "~/lib/api/client";
 
 const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined;
 const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as string | undefined;
@@ -62,16 +63,30 @@ export default function Contact() {
   const [email, setEmail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [turnstileStatus, setTurnstileStatus] = useState<"loading" | "ready" | "unavailable">(
+    TURNSTILE_SITEKEY ? "loading" : "unavailable",
+  );
   const turnstileRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function clearFieldError(name: string) {
+    setFieldErrors((previous) => {
+      if (!previous[name]) return previous;
+      const next = { ...previous };
+      delete next[name];
+      return next;
+    });
+  }
 
   useEffect(() => {
-    const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-
     if (!TURNSTILE_SITEKEY) {
       console.warn("VITE_TURNSTILE_SITEKEY is not set; contact form bot protection is disabled.");
       return;
     }
+
+    const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
     function renderWidget() {
       if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
@@ -81,22 +96,29 @@ export default function Contact() {
         theme: "dark",
         callback: (token: string) => {
           setTurnstileToken(token);
-          setFieldErrors((previous) => {
-            if (!previous.turnstile) return previous;
-            const next = { ...previous };
-            delete next.turnstile;
-            return next;
-          });
+          clearFieldError("turnstile");
         },
-        "error-callback": () => setTurnstileToken(""),
-        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => {
+          setTurnstileToken("");
+          setFieldErrors({ turnstile: "Verification couldn't load. Please refresh and try again." });
+        },
+        "expired-callback": () => {
+          setTurnstileToken("");
+          setFieldErrors({ turnstile: "Verification expired. Please complete it again below." });
+        },
       });
+      setTurnstileStatus("ready");
     }
 
+    function handleScriptError() {
+      setTurnstileStatus("unavailable");
+    }
+
+    let script: HTMLScriptElement | null = null;
     if (window.turnstile) {
       renderWidget();
     } else {
-      let script = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
+      script = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
       if (!script) {
         script = document.createElement("script");
         script.src = SCRIPT_SRC;
@@ -105,9 +127,14 @@ export default function Contact() {
         document.head.appendChild(script);
       }
       script.addEventListener("load", renderWidget);
+      script.addEventListener("error", handleScriptError);
     }
 
     return () => {
+      if (script) {
+        script.removeEventListener("load", renderWidget);
+        script.removeEventListener("error", handleScriptError);
+      }
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
@@ -117,15 +144,19 @@ export default function Contact() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return; // guard against double-submit reusing a single-use token
+
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const result = z
       .object({
         fullName: requiredTextSchema("Full name"),
         email: requiredEmailSchema,
+        message: requiredTextSchema("Message"),
       })
       .safeParse({
         fullName: formData.get("fullName"),
         email: formData.get("email"),
+        message: formData.get("message"),
       });
 
     if (!result.success) {
@@ -141,35 +172,62 @@ export default function Contact() {
       return;
     }
 
-    if (!turnstileToken) {
+    if (turnstileStatus !== "unavailable" && !turnstileToken) {
       setFieldErrors({ turnstile: "Please complete the verification below." });
       setSent(false);
       return;
     }
 
-    let verified = false;
-    try {
-      if (!TURNSTILE_WORKER_URL) throw new Error("VITE_TURNSTILE_WORKER_URL is not set");
-      const response = await fetch(TURNSTILE_WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: turnstileToken }),
-      });
-      const data = (await response.json()) as { success?: boolean };
-      verified = data.success === true;
-    } catch {
-      verified = false;
+    setSubmitting(true);
+
+    if (turnstileStatus !== "unavailable") {
+      let outcome: "pass" | "reject" | "infra" = "infra";
+      try {
+        if (!TURNSTILE_WORKER_URL) throw new Error("VITE_TURNSTILE_WORKER_URL is not set");
+        const response = await fetch(TURNSTILE_WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: turnstileToken }),
+        });
+        if (response.ok) {
+          const data = (await response.json()) as { success?: boolean };
+          outcome = data.success === true ? "pass" : "reject";
+        }
+      } catch {
+        outcome = "infra";
+      }
+
+      if (outcome === "reject") {
+        setFieldErrors({ turnstile: "Verification failed. Please try again." });
+        if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+        setTurnstileToken("");
+        setSent(false);
+        setSubmitting(false);
+        return;
+      }
     }
 
-    if (!verified) {
-      setFieldErrors({ turnstile: "Verification failed. Please try again." });
+    try {
+      await api.contact({
+        fullName: (formData.get("fullName") as string | null)?.trim() || null,
+        email: (formData.get("email") as string | null)?.trim() || null,
+        company: (formData.get("company") as string | null)?.trim() || null,
+        message: (formData.get("message") as string | null)?.trim() || null,
+      });
+    } catch {
+      setFieldErrors({ submit: "Something went wrong sending your message. Please try again." });
       if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
       setTurnstileToken("");
-      setSent(false);
+      setSubmitting(false);
       return;
     }
 
+    if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+    setTurnstileToken("");
     setFieldErrors({});
+    formRef.current?.reset();
+    setEmail("");
+    setSubmitting(false);
     setSent(true);
   }
 
@@ -221,7 +279,7 @@ export default function Contact() {
         </div>
 
         <div style={{ flex: "1.4 1 380px", minWidth: 300 }}>
-          <form noValidate onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
+          <form ref={formRef} noValidate onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
             <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", color: "#e6eaf0" }}>Send us a message</div>
             <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8a93a2" }}>We typically reply within one business day.</p>
 
@@ -249,14 +307,7 @@ export default function Contact() {
                   style={inputStyle}
                   aria-invalid={Boolean(fieldErrors.fullName)}
                   aria-describedby={fieldErrors.fullName ? "contact-name-error" : undefined}
-                  onChange={() => {
-                    setFieldErrors((previous) => {
-                      if (!previous.fullName) return previous;
-                      const next = { ...previous };
-                      delete next.fullName;
-                      return next;
-                    });
-                  }}
+                  onChange={() => clearFieldError("fullName")}
                 />
                 {fieldErrors.fullName && (
                   <span id="contact-name-error" style={{ fontSize: 12, color: "#ef6b73" }}>
@@ -277,12 +328,7 @@ export default function Contact() {
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value);
-                    setFieldErrors((previous) => {
-                      if (!previous.email) return previous;
-                      const next = { ...previous };
-                      delete next.email;
-                      return next;
-                    });
+                    clearFieldError("email");
                   }}
                   onBlur={() => {
                     const result = requiredEmailSchema.safeParse(email);
@@ -305,17 +351,28 @@ export default function Contact() {
               </label>
             </div>
             <label style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
-              <span style={labelText}>Company</span>
-              <input className="mk-input" type="text" placeholder="Your storage facility" style={inputStyle} />
+              <span style={labelText}>Company <span style={{ color: "#5c6573", fontWeight: 400 }}>(optional)</span></span>
+              <input name="company" className="mk-input" type="text" placeholder="Your storage facility" style={inputStyle} />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
               <span style={labelText}>How can we help?</span>
               <textarea
+                id="contact-message"
+                name="message"
                 className="mk-input"
                 rows={4}
+                required
                 placeholder="Tell us a little about your operation and what you're looking for…"
                 style={{ ...inputStyle, height: "auto", padding: "12px 13px", resize: "vertical" }}
+                aria-invalid={Boolean(fieldErrors.message)}
+                aria-describedby={fieldErrors.message ? "contact-message-error" : undefined}
+                onChange={() => clearFieldError("message")}
               />
+              {fieldErrors.message && (
+                <span id="contact-message-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                  {fieldErrors.message}
+                </span>
+              )}
             </label>
             <div ref={turnstileRef} style={{ marginTop: 16 }} />
             {fieldErrors.turnstile && (
@@ -326,6 +383,7 @@ export default function Contact() {
             <button
               className="mk-cta-lg"
               type="submit"
+              disabled={submitting}
               style={{
                 marginTop: 20,
                 width: "100%",
@@ -337,12 +395,18 @@ export default function Contact() {
                 color: "#1a1206",
                 background: "#e8973c",
                 boxShadow: "0 8px 24px rgba(232,151,60,.25)",
-                cursor: "pointer",
+                cursor: submitting ? "not-allowed" : "pointer",
+                opacity: submitting ? 0.7 : 1,
                 fontFamily: "inherit",
               }}
             >
-              Send message
+              {submitting ? "Verifying…" : "Send message"}
             </button>
+            {fieldErrors.submit && (
+              <span style={{ display: "block", marginTop: 10, fontSize: 12.5, color: "#ef6b73", textAlign: "center" }}>
+                {fieldErrors.submit}
+              </span>
+            )}
             <p style={{ margin: "14px 0 0", fontSize: 11.5, lineHeight: 1.5, color: "#5c6573", textAlign: "center" }}>
               By submitting, you agree to our{" "}
               <Link to="/privacy" style={{ color: "#8a93a2" }}>

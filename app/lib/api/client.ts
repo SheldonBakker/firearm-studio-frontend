@@ -5,6 +5,7 @@ import type {
   AuditLogListItemDtoPaginatedResponse,
   AuditLogResponse,
   CompanyDetailsResponse,
+  ContactFormRequest,
   CreateCompanyRequest,
   CreateCustomerRequest,
   CreateFirearmRequest,
@@ -56,6 +57,7 @@ interface RequestOptions {
   method?: string;
   body?: unknown;
   query?: Record<string, string | number | undefined>;
+  skipAuthRedirect?: boolean;
 }
 
 async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
@@ -78,7 +80,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 && !opts.skipAuthRedirect) {
     await supabase.auth.signOut();
     if (typeof window !== "undefined") window.location.assign("/login");
     throw new ApiError(401, "Unauthorized");
@@ -383,6 +385,10 @@ export const api = {
 
   // ---- Dashboard ----
   dashboardStats: getDashboardStats,
+
+  // ---- Contact (public) ----
+  contact: (body: ContactFormRequest) =>
+    request<void>("/api/v1/contact", { method: "POST", body, skipAuthRedirect: true }),
 
   // ---- Onboarding ----
   createCompany: (body: CreateCompanyRequest) =>

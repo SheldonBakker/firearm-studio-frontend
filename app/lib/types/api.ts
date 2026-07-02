@@ -137,6 +137,13 @@ export interface CreateCompanyRequest {
 
 export type UpdateCompanyRequest = CreateCompanyRequest;
 
+export interface ContactFormRequest {
+  fullName: string | null;
+  email: string | null;
+  company: string | null;
+  message: string | null;
+}
+
 export interface CompanyDetailsResponse {
   id: string;
   name: string | null;
