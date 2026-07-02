@@ -14,6 +14,9 @@ import { AppShellSkeleton } from "~/components/common/skeletons";
 
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
+const KLAVIYO_COMPANY_ID = "Thy6Vv";
+const KLAVIYO_INIT = `!function(){if(!window.klaviyo){window._klOnsite=window._klOnsite||[];try{window.klaviyo=new Proxy({},{get:function(n,i){return"push"===i?function(){var n;(n=window._klOnsite).push.apply(n,arguments)}:function(){for(var n=arguments.length,o=new Array(n),w=0;w<n;w++)o[w]=arguments[w];var t="function"==typeof o[o.length-1]?o.pop():void 0,e=new Promise((function(n){window._klOnsite.push([i].concat(o,[function(i){t&&t(i),n(i)}]))}));return e}}})}catch(n){window.klaviyo=window.klaviyo||[],window.klaviyo.push=function(){var n;(n=window._klOnsite).push.apply(n,arguments)}}}}();`;
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -45,6 +48,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <Toaster position="bottom-center" />
         <ScrollRestoration />
+        <script
+          async
+          type="text/javascript"
+          src={`https://static.klaviyo.com/onsite/js/${KLAVIYO_COMPANY_ID}/klaviyo.js?company_id=${KLAVIYO_COMPANY_ID}`}
+        />
+        <script dangerouslySetInnerHTML={{ __html: KLAVIYO_INIT }} />
         <Scripts />
       </body>
     </html>
