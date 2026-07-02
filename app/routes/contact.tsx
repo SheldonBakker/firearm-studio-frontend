@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Link } from "react-router";
 import type { Route } from "./+types/contact";
@@ -6,6 +6,20 @@ import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 import { pageMeta } from "~/lib/utils/seo";
 import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
+
+const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined;
+const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as string | undefined;
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+      reset: (id?: string) => void;
+      remove: (id?: string) => void;
+      getResponse: (id?: string) => string | undefined;
+    };
+  }
+}
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -28,7 +42,7 @@ const ic = {
 
 const methods = [
   { title: "Email us", detail: "For sales, support, and onboarding.", value: "support@firearmstudio.com", color: AMBER, svg: ic.mail },
-  { title: "Call us", detail: "Mon–Fri, business hours (SAST).", value: "+27 21 000 0000", color: GREEN, svg: ic.phone },
+  { title: "Call us", detail: "Mon–Fri, business hours (SAST).", value: "+27 68 150 1196", color: GREEN, svg: ic.phone },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -47,8 +61,61 @@ export default function Contact() {
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
-  function onSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+    if (!TURNSTILE_SITEKEY) {
+      console.warn("VITE_TURNSTILE_SITEKEY is not set; contact form bot protection is disabled.");
+      return;
+    }
+
+    function renderWidget() {
+      if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITEKEY,
+        action: "turnstile-spin-v1",
+        theme: "dark",
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setFieldErrors((previous) => {
+            if (!previous.turnstile) return previous;
+            const next = { ...previous };
+            delete next.turnstile;
+            return next;
+          });
+        },
+        "error-callback": () => setTurnstileToken(""),
+        "expired-callback": () => setTurnstileToken(""),
+      });
+    }
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      let script = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
+      if (!script) {
+        script = document.createElement("script");
+        script.src = SCRIPT_SRC;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+      script.addEventListener("load", renderWidget);
+    }
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+    };
+  }, []);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const result = z
@@ -70,6 +137,34 @@ export default function Contact() {
         }
       }
       setFieldErrors(errors);
+      setSent(false);
+      return;
+    }
+
+    if (!turnstileToken) {
+      setFieldErrors({ turnstile: "Please complete the verification below." });
+      setSent(false);
+      return;
+    }
+
+    let verified = false;
+    try {
+      if (!TURNSTILE_WORKER_URL) throw new Error("VITE_TURNSTILE_WORKER_URL is not set");
+      const response = await fetch(TURNSTILE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      const data = (await response.json()) as { success?: boolean };
+      verified = data.success === true;
+    } catch {
+      verified = false;
+    }
+
+    if (!verified) {
+      setFieldErrors({ turnstile: "Verification failed. Please try again." });
+      if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+      setTurnstileToken("");
       setSent(false);
       return;
     }
@@ -222,6 +317,12 @@ export default function Contact() {
                 style={{ ...inputStyle, height: "auto", padding: "12px 13px", resize: "vertical" }}
               />
             </label>
+            <div ref={turnstileRef} style={{ marginTop: 16 }} />
+            {fieldErrors.turnstile && (
+              <span style={{ display: "block", marginTop: 8, fontSize: 12, color: "#ef6b73" }}>
+                {fieldErrors.turnstile}
+              </span>
+            )}
             <button
               className="mk-cta-lg"
               type="submit"
