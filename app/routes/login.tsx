@@ -8,6 +8,7 @@ import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/common/password-input";
 import { requiredEmailSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
@@ -134,9 +135,8 @@ export default function Login() {
               Forgot password?
             </Link>
           </div>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             required
             value={password}

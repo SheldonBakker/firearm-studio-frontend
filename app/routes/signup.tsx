@@ -8,6 +8,7 @@ import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/common/password-input";
 import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
@@ -186,9 +187,8 @@ export default function Signup() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
             required
             minLength={6}

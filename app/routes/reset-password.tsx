@@ -7,8 +7,8 @@ import { useAuth } from "~/context/auth-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { AuthShell } from "~/components/common/auth-shell";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/common/password-input";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -119,9 +119,8 @@ export default function ResetPassword() {
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">New password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
             required
             minLength={6}
@@ -149,9 +148,8 @@ export default function ResetPassword() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="confirm">Confirm new password</Label>
-          <Input
+          <PasswordInput
             id="confirm"
-            type="password"
             autoComplete="new-password"
             required
             minLength={6}
