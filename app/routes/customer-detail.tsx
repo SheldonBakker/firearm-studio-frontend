@@ -3,7 +3,7 @@ import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customer-detail";
 import { api } from "~/lib/api/client";
-import { customerLabel, firearmLabel, inv } from "~/lib/utils/entities";
+import { customerLabel, firearmLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -18,24 +18,22 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { CustomerType, FirearmStatus, enumKey } from "~/lib/types/enums";
+import {
+  CustomerType,
+  FirearmStatus,
+  InvoiceStatus,
+  StorageStatus,
+  enumKey,
+} from "~/lib/types/enums";
 import type {
-  CustomerResponse,
-  FirearmResponse,
-  InvoiceResponse,
-  StorageRecordResponse,
+  CustomerDetailResponse,
+  CustomerFirearmListItemDto,
+  CustomerInvoiceListItemDto,
+  CustomerStorageRecordDto,
 } from "~/lib/types/api";
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  const id = params.id;
-  return {
-    data: Promise.all([
-      api.customer(id),
-      api.customerFirearms(id).catch(() => [] as FirearmResponse[]),
-      api.customerInvoices(id).catch(() => [] as InvoiceResponse[]),
-      api.storageByCustomer(id).catch(() => [] as StorageRecordResponse[]),
-    ]),
-  };
+export function clientLoader({ params }: Route.ClientLoaderArgs) {
+  return { data: api.customer(params.id) };
 }
 
 export default function CustomerDetail({ loaderData }: Route.ComponentProps) {
@@ -44,39 +42,28 @@ export default function CustomerDetail({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <BackLink label="Back to customers" onClick={() => navigate("/customers")} />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
-        {([customer, firearms, invoices, storage]) => (
-          <CustomerView
-            customer={customer}
-            firearms={firearms}
-            invoices={invoices}
-            storage={storage}
-          />
-        )}
+        {(customer) => <CustomerView customer={customer} />}
       </Resolve>
     </PageWrap>
   );
 }
 
-function CustomerView({
-  customer,
-  firearms,
-  invoices,
-  storage,
-}: {
-  customer: CustomerResponse;
-  firearms: FirearmResponse[];
-  invoices: InvoiceResponse[];
-  storage: StorageRecordResponse[];
-}) {
+function CustomerView({ customer }: { customer: CustomerDetailResponse }) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
+  const firearms = customer.firearms ?? [];
+  const invoices = customer.invoices ?? [];
+  const storage = customer.storageRecords ?? [];
   const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
   const [editOpen, setEditOpen] = useState(false);
 
   const outstanding = invoices
-    .filter((i) => ["Sent", "Overdue"].includes(inv.status(i)))
-    .reduce((a, i) => a + inv.total(i), 0);
+    .filter(
+      (i) =>
+        i.status === InvoiceStatus.Sent || i.status === InvoiceStatus.Overdue,
+    )
+    .reduce((a, i) => a + (i.total ?? 0), 0);
 
   return (
     <>
@@ -112,7 +99,7 @@ function CustomerView({
         </TabsList>
 
         <TabsContent value="firearms" className="mt-5">
-          <DataTable<FirearmResponse>
+          <DataTable<CustomerFirearmListItemDto>
             rows={firearms}
             onRowClick={(r) => navigate(`/firearms/${r.id}`)}
             empty="No firearms for this customer."
@@ -136,15 +123,6 @@ function CustomerView({
                 ),
               },
               {
-                key: "cal",
-                header: "Calibre",
-                cell: (r) => (
-                  <span className="text-[12.5px] text-muted-foreground">
-                    {r.calibre ?? "—"}
-                  </span>
-                ),
-              },
-              {
                 key: "status",
                 header: "Status",
                 align: "right",
@@ -155,7 +133,7 @@ function CustomerView({
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-5">
-          <DataTable<InvoiceResponse>
+          <DataTable<CustomerInvoiceListItemDto>
             rows={invoices}
             onRowClick={(r) => navigate(`/invoices/${r.id}`)}
             empty="No invoices for this customer."
@@ -165,7 +143,7 @@ function CustomerView({
                 header: "Invoice",
                 cell: (r) => (
                   <Mono className="text-[12.5px] font-semibold text-foreground">
-                    {inv.number(r)}
+                    {r.invoiceNumber ?? r.id.slice(0, 8)}
                   </Mono>
                 ),
               },
@@ -174,7 +152,7 @@ function CustomerView({
                 header: "Month",
                 cell: (r) => (
                   <Mono className="text-[12.5px] text-muted-foreground">
-                    {inv.month(r)}
+                    {r.invoiceMonth ?? "—"}
                   </Mono>
                 ),
               },
@@ -184,7 +162,7 @@ function CustomerView({
                 align: "right",
                 cell: (r) => (
                   <Mono className="text-[12.5px] font-semibold">
-                    {fmtMoney(inv.total(r))}
+                    {fmtMoney(r.total)}
                   </Mono>
                 ),
               },
@@ -192,15 +170,18 @@ function CustomerView({
                 key: "status",
                 header: "Status",
                 align: "right",
-                cell: (r) => <StatusBadge status={inv.status(r)} />,
+                cell: (r) => (
+                  <StatusBadge status={enumKey(InvoiceStatus, r.status)} />
+                ),
               },
             ]}
           />
         </TabsContent>
 
         <TabsContent value="storage" className="mt-5">
-          <DataTable<StorageRecordResponse>
+          <DataTable<CustomerStorageRecordDto>
             rows={storage}
+            onRowClick={(r) => navigate(`/storage/${r.id}`)}
             empty="No storage records for this customer."
             columns={[
               {
@@ -208,19 +189,8 @@ function CustomerView({
                 header: "Firearm",
                 cell: (r) => (
                   <span className="text-[13px] font-semibold text-foreground">
-                    {firearmLabel(fireMap[r.firearmId ?? ""])}
+                    {firearmLabel(fireMap[r.firearmId])}
                   </span>
-                ),
-              },
-              {
-                key: "loc",
-                header: "Location",
-                cell: (r) => (
-                  <Mono className="text-[12.5px] text-muted-foreground">
-                    {[r.storageLocation, r.rackNumber, r.safeNumber]
-                      .filter(Boolean)
-                      .join(" · ") || "—"}
-                  </Mono>
                 ),
               },
               {
@@ -230,6 +200,22 @@ function CustomerView({
                   <span className="text-[12.5px] text-muted-foreground">
                     {fmtDate(r.storedFrom)}
                   </span>
+                ),
+              },
+              {
+                key: "until",
+                header: "Until",
+                cell: (r) => (
+                  <span className="text-[12.5px] text-muted-foreground">
+                    {fmtDate(r.storedUntil)}
+                  </span>
+                ),
+              },
+              {
+                key: "status",
+                header: "Status",
+                cell: (r) => (
+                  <StatusBadge status={enumKey(StorageStatus, r.storageStatus)} />
                 ),
               },
               {

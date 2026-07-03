@@ -17,11 +17,12 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey, enumNames } from "~/lib/types/enums";
-import type { FirearmResponse, StorageRecordResponse } from "~/lib/types/api";
+import type {
+  FirearmDetailResponse,
+  StorageRecordResponse,
+} from "~/lib/types/api";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  // No single-record GET exists; derive the record from the list, then enrich
-  // with the firearm for make/model/calibre.
   const data = api
     .storageActive({ pageSize: 200 })
     .catch(() => ({ items: [] as StorageRecordResponse[], pageNumber: 1, pageSize: 200, totalCount: 0 }))
@@ -31,7 +32,7 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
       const firearm = record?.firearmId
         ? await api.firearm(record.firearmId).catch(() => null)
         : null;
-      return { record, firearm: firearm as FirearmResponse | null };
+      return { record, firearm: firearm as FirearmDetailResponse | null };
     });
   return { data };
 }
@@ -61,7 +62,7 @@ function StorageView({
   firearm,
 }: {
   record: StorageRecordResponse;
-  firearm: FirearmResponse | null;
+  firearm: FirearmDetailResponse | null;
 }) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();

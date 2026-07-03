@@ -17,11 +17,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import { FirearmStatus, LicenceStatus, enumKey } from "~/lib/types/enums";
-import type {
-  CustomerResponse,
-  FirearmResponse,
-  LicenceResponse,
-} from "~/lib/types/api";
+import type { LicenceDetailDto } from "~/lib/types/api";
 
 const LICENCE_STATUS_NAMES = Object.keys(LicenceStatus);
 
@@ -29,34 +25,10 @@ function dateInputValue(value: string | null | undefined) {
   return value?.slice(0, 10) ?? "";
 }
 
-// The API has no GET /licences/{id}, so the licence is resolved from its
-// firearm's licence list. The firearm id is passed via the `?firearm=` query
-// param from the licences list row (LicenceListItemDto carries firearmId).
-export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
-  const licenceId = params.id;
-  const firearmId =
-    new URL(request.url).searchParams.get("firearm")?.trim() || "";
-
-  const data = (async () => {
-    if (!firearmId) {
-      return {
-        licence: null as LicenceResponse | null,
-        firearm: null as FirearmResponse | null,
-        customer: null as CustomerResponse | null,
-      };
-    }
-    const [firearm, licences] = await Promise.all([
-      api.firearm(firearmId).catch(() => null),
-      api.firearmLicences(firearmId).catch(() => [] as LicenceResponse[]),
-    ]);
-    const customer = firearm?.customerId
-      ? await api.customer(firearm.customerId).catch(() => null)
-      : null;
-    const licence = licences.find((l) => l.id === licenceId) ?? null;
-    return { licence, firearm, customer };
-  })();
-
-  return { data };
+// GET /api/v1/licences/{id} returns the licence with its firearm and customer
+// embedded, so a single call resolves the whole page.
+export function clientLoader({ params }: Route.ClientLoaderArgs) {
+  return { data: api.licence(params.id) };
 }
 
 export default function LicenceDetail({ loaderData }: Route.ComponentProps) {
@@ -65,33 +37,15 @@ export default function LicenceDetail({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <BackLink label="Back to licences" onClick={() => navigate("/licences")} />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
-        {({ licence, firearm, customer }) =>
-          licence ? (
-            <LicenceView
-              licence={licence}
-              firearm={firearm}
-              customer={customer}
-            />
-          ) : (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center text-[13px] text-muted-foreground">
-              Licence not found.
-            </div>
-          )
-        }
+        {(licence) => <LicenceView licence={licence} />}
       </Resolve>
     </PageWrap>
   );
 }
 
-function LicenceView({
-  licence,
-  firearm,
-  customer,
-}: {
-  licence: LicenceResponse;
-  firearm: FirearmResponse | null;
-  customer: CustomerResponse | null;
-}) {
+function LicenceView({ licence }: { licence: LicenceDetailDto }) {
+  const firearm = licence.firearm;
+  const customer = licence.customer;
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();

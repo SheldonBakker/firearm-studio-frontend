@@ -1,12 +1,15 @@
 import { CustomerType, InvoiceStatus, enumKey } from "../types/enums";
-import type {
-  CustomerListItemDto,
-  CustomerResponse,
-  FirearmResponse,
-  InvoiceResponse,
-} from "../types/api";
+import type { InvoiceResponse } from "../types/api";
+type CustomerDisplay = {
+  customerType: CustomerType;
+  fullName?: string | null;
+  companyName?: string | null;
+};
 
-type CustomerDisplay = CustomerResponse | CustomerListItemDto;
+type FirearmDisplay = {
+  make?: string | null;
+  model?: string | null;
+};
 
 export function customerLabel(c: CustomerDisplay | undefined | null): string {
   if (!c) return "—";
@@ -16,21 +19,19 @@ export function customerLabel(c: CustomerDisplay | undefined | null): string {
   return c.fullName || c.companyName || "Unnamed";
 }
 
-export function firearmLabel(f: FirearmResponse | undefined | null): string {
+export function firearmLabel(f: FirearmDisplay | undefined | null): string {
   if (!f) return "—";
   return `${f.make ?? ""} ${f.model ?? ""}`.trim() || "Firearm";
 }
 
-/** Map of customer id → display name. */
 export function customerNameMap(
-  customers: CustomerDisplay[],
+  customers: (CustomerDisplay & { id: string })[],
 ): Record<string, string> {
   const map: Record<string, string> = {};
   for (const c of customers) map[c.id] = customerLabel(c);
   return map;
 }
 
-// Invoice responses have no declared schema; read fields defensively.
 export const inv = {
   number: (i: InvoiceResponse) =>
     i.number ?? (i.invoiceNumber as string) ?? i.id.slice(0, 8),

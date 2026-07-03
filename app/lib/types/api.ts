@@ -88,6 +88,67 @@ export interface FirearmResponse {
   notes: string | null;
 }
 
+export interface FirearmLicenceListItemDto {
+  id: string;
+  licenceNumber: string | null;
+  issuedOn: string | null;
+  expiresOn: string;
+  renewalDueOn: string;
+  status: LicenceStatus;
+}
+
+export interface FirearmDetailResponse {
+  id: string;
+  customer: CustomerResponse | null;
+  make: string | null;
+  model: string | null;
+  calibre: string | null;
+  firearmType: string | null;
+  serialNumber: string | null;
+  status: FirearmStatus;
+  notes: string | null;
+  licences: FirearmLicenceListItemDto[] | null;
+}
+
+export interface CustomerFirearmListItemDto {
+  id: string;
+  make: string | null;
+  model: string | null;
+  serialNumber: string | null;
+  status: FirearmStatus;
+}
+
+export interface CustomerInvoiceListItemDto {
+  id: string;
+  invoiceNumber: string | null;
+  invoiceMonth: string;
+  total: number;
+  status: InvoiceStatus;
+}
+
+export interface CustomerStorageRecordDto {
+  id: string;
+  firearmId: string;
+  monthlyRate: number;
+  storageStatus: StorageStatus;
+  storedFrom: string;
+  storedUntil: string | null;
+}
+
+export interface CustomerDetailResponse {
+  id: string;
+  customerType: CustomerType;
+  fullName: string | null;
+  companyName: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  isActive: boolean;
+  firearms: CustomerFirearmListItemDto[] | null;
+  invoices: CustomerInvoiceListItemDto[] | null;
+  storageRecords: CustomerStorageRecordDto[] | null;
+}
+
 export interface CreateFirearmRequest {
   customerId: string;
   make?: string | null;
@@ -199,7 +260,7 @@ export interface UpdateUserRoleRequest {
   role?: AppRole | null;
 }
 
-export interface InvoiceLineResponse {
+interface InvoiceLineResponse {
   id: string;
   description?: string | null;
   quantity?: number | null;
@@ -224,7 +285,7 @@ export interface InvoiceResponse {
   [k: string]: unknown;
 }
 
-export interface PaymentResponse {
+interface PaymentResponse {
   amount?: number | null;
   paidOn?: string | null;
   method?: string | null;
@@ -232,9 +293,37 @@ export interface PaymentResponse {
   [k: string]: unknown;
 }
 
-// Mirrors swagger StorageRecordDto (GET /api/v1/storage). The customer variant
-// (GET /api/v1/storage/customer/{id}, CustomerStorageRecordDto) returns a subset,
-// so all fields stay optional and the index signature is retained.
+export interface InvoiceLineDto {
+  id: string;
+  description: string | null;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface InvoicePaymentDto {
+  id: string;
+  amount: number;
+  paidOn: string;
+  method: PaymentMethod;
+  reference: string | null;
+}
+
+export interface InvoiceDetailDto {
+  id: string;
+  customerId: string;
+  invoiceNumber: string | null;
+  invoiceMonth: string;
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  status: InvoiceStatus;
+  sentAt: string | null;
+  dueOn: string | null;
+  lines: InvoiceLineDto[] | null;
+  payments: InvoicePaymentDto[] | null;
+}
+
 export interface StorageRecordResponse {
   id: string;
   firearmId?: string | null;
@@ -262,6 +351,38 @@ export interface LicenceResponse {
   status?: LicenceStatus | string | null;
   documentUrl?: string | null;
   [k: string]: unknown;
+}
+
+interface LicenceFirearmDto {
+  id: string;
+  make: string | null;
+  model: string | null;
+  calibre: string | null;
+  firearmType: string | null;
+  serialNumber: string | null;
+  status: FirearmStatus;
+}
+
+interface LicenceCustomerDto {
+  id: string;
+  customerType: CustomerType;
+  fullName: string | null;
+  companyName: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface LicenceDetailDto {
+  id: string;
+  firearmId: string;
+  licenceNumber: string | null;
+  issuedOn: string | null;
+  expiresOn: string;
+  renewalDueOn: string;
+  status: LicenceStatus;
+  documentUrl: string | null;
+  firearm: LicenceFirearmDto | null;
+  customer: LicenceCustomerDto | null;
 }
 
 export interface UserResponse {

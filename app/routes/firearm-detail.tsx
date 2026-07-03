@@ -25,22 +25,12 @@ import {
   enumNames,
 } from "~/lib/types/enums";
 import type {
-  CustomerResponse,
-  FirearmResponse,
-  LicenceResponse,
+  FirearmDetailResponse,
+  FirearmLicenceListItemDto,
 } from "~/lib/types/api";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  const data = api.firearm(params.id).then(async (firearm) => {
-    const [licences, customer] = await Promise.all([
-      api.firearmLicences(params.id).catch(() => [] as LicenceResponse[]),
-      firearm.customerId
-        ? api.customer(firearm.customerId).catch(() => null)
-        : Promise.resolve(null),
-    ]);
-    return { firearm, licences, customer: customer as CustomerResponse | null };
-  });
-  return { data };
+  return { data: api.firearm(params.id) };
 }
 
 const STATUSES = enumNames(FirearmStatus);
@@ -51,23 +41,15 @@ export default function FirearmDetail({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <BackLink label="Back to firearms" onClick={() => navigate("/firearms")} />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
-        {({ firearm, licences, customer }) => (
-          <FirearmView firearm={firearm} licences={licences} customer={customer} />
-        )}
+        {(firearm) => <FirearmView firearm={firearm} />}
       </Resolve>
     </PageWrap>
   );
 }
 
-function FirearmView({
-  firearm,
-  licences,
-  customer,
-}: {
-  firearm: FirearmResponse;
-  licences: LicenceResponse[];
-  customer: CustomerResponse | null;
-}) {
+function FirearmView({ firearm }: { firearm: FirearmDetailResponse }) {
+  const licences = firearm.licences ?? [];
+  const customer = firearm.customer;
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
@@ -151,8 +133,9 @@ function FirearmView({
               </Button>
             </div>
           )}
-          <DataTable<LicenceResponse>
+          <DataTable<FirearmLicenceListItemDto>
             rows={licences}
+            onRowClick={(r) => navigate(`/licences/${r.id}`)}
             empty="No licences recorded."
             columns={[
               {
@@ -179,6 +162,15 @@ function FirearmView({
                 cell: (r) => (
                   <span className="text-[12.5px] text-muted-foreground">
                     {fmtDate(r.expiresOn)}
+                  </span>
+                ),
+              },
+              {
+                key: "renewal",
+                header: "Renewal due",
+                cell: (r) => (
+                  <span className="text-[12.5px] text-muted-foreground">
+                    {fmtDate(r.renewalDueOn)}
                   </span>
                 ),
               },

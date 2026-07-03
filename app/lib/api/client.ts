@@ -12,17 +12,19 @@ import type {
   CreateLicenceRequest,
   CurrentUserResponse,
   DashboardStatsResponse,
+  CustomerDetailResponse,
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
   CustomerResponse,
+  FirearmDetailResponse,
   FirearmResponse,
   FirearmResponsePaginatedResponse,
+  InvoiceDetailDto,
   InvoiceListItemDtoPaginatedResponse,
-  InvoiceResponse,
+  LicenceDetailDto,
   LicenceStatus,
   InviteUserRequest,
   LicenceListItemDtoPaginatedResponse,
-  LicenceResponse,
   RecordPaymentRequest,
   StartStorageRequest,
   StorageRecordDtoPaginatedResponse,
@@ -401,28 +403,26 @@ export const api = {
   customers: getCustomers,
   allCustomers: getAllCustomers,
   customer: (id: string) =>
-    request<CustomerResponse>(`/api/v1/customers/${id}`),
+    request<CustomerDetailResponse>(`/api/v1/customers/${id}`),
   createCustomer: (body: CreateCustomerRequest) =>
     request<CustomerResponse>("/api/v1/customers", { method: "POST", body }),
   updateCustomer: (id: string, body: UpdateCustomerRequest) =>
     request<void>(`/api/v1/customers/${id}`, { method: "PATCH", body }),
-  customerFirearms: (id: string) =>
-    request<FirearmResponse[]>(`/api/v1/customers/${id}/firearms`),
-  customerInvoices: (id: string) =>
-    request<InvoiceResponse[]>(`/api/v1/customers/${id}/invoices`),
 
   // ---- Firearms ----
   firearms: getFirearms,
   allFirearms: getAllFirearms,
-  firearm: (id: string) => request<FirearmResponse>(`/api/v1/firearms/${id}`),
+  firearm: (id: string) =>
+    request<FirearmDetailResponse>(`/api/v1/firearms/${id}`),
   createFirearm: (body: CreateFirearmRequest) =>
     request<FirearmResponse>("/api/v1/firearms", { method: "POST", body }),
   updateFirearm: (id: string, body: UpdateFirearmRequest) =>
     request<void>(`/api/v1/firearms/${id}`, { method: "PATCH", body }),
-  firearmLicences: (id: string) =>
-    request<LicenceResponse[]>(`/api/v1/firearms/${id}/licences`),
+
   // ---- Licences ----
   licences: getLicences,
+  licence: (id: string) =>
+    request<LicenceDetailDto>(`/api/v1/licences/${id}`),
   createLicence: (firearmId: string, body: CreateLicenceRequest) =>
     request<void>(`/api/v1/firearms/${firearmId}/licences`, {
       method: "POST",
@@ -445,7 +445,7 @@ export const api = {
 
   // ---- Invoices ----
   invoices: getInvoices,
-  invoice: (id: string) => request<InvoiceResponse>(`/api/v1/invoices/${id}`),
+  invoice: (id: string) => request<InvoiceDetailDto>(`/api/v1/invoices/${id}`),
   sendInvoice: (id: string) =>
     request<void>(`/api/v1/invoices/${id}/send`, { method: "POST" }),
   recordPayment: (id: string, body: RecordPaymentRequest) =>

@@ -3,7 +3,6 @@ import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/invoice-detail";
 import { api, ApiError } from "~/lib/api/client";
-import { inv } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -17,12 +16,20 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { PaymentMethod, enumKey, enumNames } from "~/lib/types/enums";
+import {
+  InvoiceStatus,
+  PaymentMethod,
+  enumKey,
+  enumNames,
+} from "~/lib/types/enums";
 import type {
-  InvoiceLineResponse,
-  InvoiceResponse,
-  PaymentResponse,
+  InvoiceDetailDto,
+  InvoiceLineDto,
+  InvoicePaymentDto,
 } from "~/lib/types/api";
+
+const invoiceNumber = (invoice: InvoiceDetailDto) =>
+  invoice.invoiceNumber ?? invoice.id.slice(0, 8);
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
   return { data: api.invoice(params.id) };
@@ -42,13 +49,15 @@ export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
   );
 }
 
-function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
+function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
   const revalidator = useRevalidator();
   const user = useSessionUser();
   const writable = can(user, "invoices:write");
   const [payOpen, setPayOpen] = useState(false);
-  const payments = (invoice.payments ?? []) as PaymentResponse[];
-  const lines = (invoice.lines ?? []) as InvoiceLineResponse[];
+  const payments = invoice.payments ?? [];
+  const lines = invoice.lines ?? [];
+  const status = enumKey(InvoiceStatus, invoice.status) ?? "Draft";
+  const isPaid = invoice.status === InvoiceStatus.Paid;
 
   async function send() {
     try {
@@ -72,28 +81,23 @@ function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
   return (
     <>
       <PageHeader
-        title={inv.number(invoice)}
-        subtitle={<StatusBadge status={inv.status(invoice)} />}
+        title={invoiceNumber(invoice)}
+        subtitle={<StatusBadge status={status} />}
         actions={
-          writable && (
+          writable &&
+          !isPaid && (
             <>
-              {inv.status(invoice) !== "Paid" && (
-                <Button variant="ghost" onClick={() => setPayOpen(true)}>
-                  <Icon name="money" size={16} />
-                  Record payment
-                </Button>
-              )}
-              {inv.status(invoice) !== "Paid" && (
-                <Button variant="ghost" onClick={send}>
-                  <Icon name="send" size={16} />
-                  Send
-                </Button>
-              )}
-              {inv.status(invoice) !== "Paid" && (
-                <Button variant="ghost" onClick={cancel}>
-                  Cancel invoice
-                </Button>
-              )}
+              <Button variant="ghost" onClick={() => setPayOpen(true)}>
+                <Icon name="money" size={16} />
+                Record payment
+              </Button>
+              <Button variant="ghost" onClick={send}>
+                <Icon name="send" size={16} />
+                Send
+              </Button>
+              <Button variant="ghost" onClick={cancel}>
+                Cancel invoice
+              </Button>
             </>
           )
         }
@@ -104,15 +108,19 @@ function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
           <SectionTitle>Summary</SectionTitle>
           <KeyValue
             pairs={[
-              { k: "Invoice", v: <Mono>{inv.number(invoice)}</Mono>, strong: true },
-              { k: "Month", v: <Mono>{inv.month(invoice)}</Mono> },
-              { k: "Issued", v: fmtDate(inv.issuedOn(invoice)) },
-              { k: "Due", v: fmtDate(inv.dueOn(invoice)) },
-              { k: "Subtotal", v: fmtMoney(inv.subtotal(invoice)) },
-              { k: "VAT", v: fmtMoney(inv.vat(invoice)) },
+              {
+                k: "Invoice",
+                v: <Mono>{invoiceNumber(invoice)}</Mono>,
+                strong: true,
+              },
+              { k: "Month", v: <Mono>{invoice.invoiceMonth ?? "—"}</Mono> },
+              { k: "Sent", v: fmtDate(invoice.sentAt) },
+              { k: "Due", v: fmtDate(invoice.dueOn) },
+              { k: "Subtotal", v: fmtMoney(invoice.subtotal) },
+              { k: "VAT", v: fmtMoney(invoice.vatAmount) },
               {
                 k: "Total",
-                v: <span className="text-base">{fmtMoney(inv.total(invoice))}</span>,
+                v: <span className="text-base">{fmtMoney(invoice.total)}</span>,
                 strong: true,
                 full: true,
               },
@@ -122,7 +130,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
 
         <div>
           <SectionTitle>Items</SectionTitle>
-          <DataTable<InvoiceLineResponse>
+          <DataTable<InvoiceLineDto>
             rows={lines}
             empty="No line items."
             columns={[
@@ -171,7 +179,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
 
         <div className="lg:col-span-2">
           <SectionTitle>Payments</SectionTitle>
-          <DataTable<PaymentResponse>
+          <DataTable<InvoicePaymentDto>
             rows={payments}
             empty="No payments recorded."
             columns={[
@@ -221,7 +229,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
         open={payOpen}
         onOpenChange={setPayOpen}
         title="Record payment"
-        description={`Apply a payment against ${inv.number(invoice)}.`}
+        description={`Apply a payment against ${invoiceNumber(invoice)}.`}
         submitLabel="Record payment"
         fields={[
           { name: "amount", label: "Amount", type: "number", required: true },

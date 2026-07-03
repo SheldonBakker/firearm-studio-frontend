@@ -3,7 +3,7 @@ import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/firearms";
 import { api } from "~/lib/api/client";
-import { customerLabel, customerNameMap } from "~/lib/utils/entities";
+import { customerLabel } from "~/lib/utils/entities";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
@@ -18,7 +18,6 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import { FirearmStatus, enumKey } from "~/lib/types/enums";
 import type {
-  CustomerListItemDto,
   FirearmResponse,
   FirearmResponsePaginatedResponse,
 } from "~/lib/types/api";
@@ -57,10 +56,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies FirearmResponsePaginatedResponse,
     );
-  const customersP = api
-    .allCustomers()
-    .catch(() => [] as CustomerListItemDto[]);
-  return { data: Promise.all([firearmsP, customersP]) };
+  return { data: firearmsP };
 }
 
 export default function Firearms({ loaderData }: Route.ComponentProps) {
@@ -102,10 +98,9 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
           )
         }
       />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
-        {([firearmsPage, customers]) => {
+      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={4} />}>
+        {(firearmsPage) => {
           const firearms = firearmsPage.items ?? [];
-          const names = customerNameMap(customers);
           return (
             <>
               <FilterBar
@@ -142,15 +137,6 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                       <Mono className="text-[12.5px] text-muted-foreground">
                         {r.serialNumber ?? "—"}
                       </Mono>
-                    ),
-                  },
-                  {
-                    key: "customer",
-                    header: "Customer",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {names[r.customerId] ?? "—"}
-                      </span>
                     ),
                   },
                   {
@@ -243,16 +229,6 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                           .join(" · "),
                       }));
                     },
-                    options: customers.map((c) => ({
-                      value: c.id,
-                      label: customerLabel(c),
-                      description: [c.email, c.phone]
-                        .filter(Boolean)
-                        .join(" · "),
-                      searchText: [customerLabel(c), c.email, c.phone]
-                        .filter(Boolean)
-                        .join(" "),
-                    })),
                   },
                   { name: "make", label: "Make", required: true },
                   { name: "model", label: "Model", required: true },
