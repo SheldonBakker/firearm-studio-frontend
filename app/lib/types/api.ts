@@ -199,6 +199,15 @@ export interface UpdateUserRoleRequest {
   role?: AppRole | null;
 }
 
+export interface InvoiceLineResponse {
+  id: string;
+  description?: string | null;
+  quantity?: number | null;
+  unitPrice?: number | null;
+  lineTotal?: number | null;
+  [k: string]: unknown;
+}
+
 export interface InvoiceResponse {
   id: string;
   number?: string | null;
@@ -210,6 +219,7 @@ export interface InvoiceResponse {
   status?: InvoiceStatus | null;
   dueOn?: string | null;
   issuedOn?: string | null;
+  lines?: InvoiceLineResponse[] | null;
   payments?: PaymentResponse[] | null;
   [k: string]: unknown;
 }

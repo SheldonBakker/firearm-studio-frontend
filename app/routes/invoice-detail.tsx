@@ -3,7 +3,7 @@ import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/invoice-detail";
 import { api, ApiError } from "~/lib/api/client";
-import { customerLabel, inv } from "~/lib/utils/entities";
+import { inv } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -19,18 +19,13 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import { PaymentMethod, enumKey, enumNames } from "~/lib/types/enums";
 import type {
-  CustomerResponse,
+  InvoiceLineResponse,
   InvoiceResponse,
   PaymentResponse,
 } from "~/lib/types/api";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  const data = api.invoice(params.id).then(async (invoice) => {
-    const cid = inv.customerId(invoice);
-    const customer = cid ? await api.customer(cid).catch(() => null) : null;
-    return { invoice, customer: customer as CustomerResponse | null };
-  });
-  return { data };
+  return { data: api.invoice(params.id) };
 }
 
 const METHODS = enumNames(PaymentMethod);
@@ -41,27 +36,19 @@ export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <BackLink label="Back to invoices" onClick={() => navigate("/invoices")} />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
-        {({ invoice, customer }) => (
-          <InvoiceView invoice={invoice} customer={customer} />
-        )}
+        {(invoice) => <InvoiceView invoice={invoice} />}
       </Resolve>
     </PageWrap>
   );
 }
 
-function InvoiceView({
-  invoice,
-  customer,
-}: {
-  invoice: InvoiceResponse;
-  customer: CustomerResponse | null;
-}) {
-  const navigate = useNavigate();
+function InvoiceView({ invoice }: { invoice: InvoiceResponse }) {
   const revalidator = useRevalidator();
   const user = useSessionUser();
   const writable = can(user, "invoices:write");
   const [payOpen, setPayOpen] = useState(false);
   const payments = (invoice.payments ?? []) as PaymentResponse[];
+  const lines = (invoice.lines ?? []) as InvoiceLineResponse[];
 
   async function send() {
     try {
@@ -86,19 +73,7 @@ function InvoiceView({
     <>
       <PageHeader
         title={inv.number(invoice)}
-        subtitle={
-          <span className="flex items-center gap-2">
-            <StatusBadge status={inv.status(invoice)} />
-            {customer && (
-              <button
-                onClick={() => navigate(`/customers/${customer.id}`)}
-                className="hover:text-foreground"
-              >
-                · {customerLabel(customer)}
-              </button>
-            )}
-          </span>
-        }
+        subtitle={<StatusBadge status={inv.status(invoice)} />}
         actions={
           writable && (
             <>
@@ -146,6 +121,55 @@ function InvoiceView({
         </div>
 
         <div>
+          <SectionTitle>Items</SectionTitle>
+          <DataTable<InvoiceLineResponse>
+            rows={lines}
+            empty="No line items."
+            columns={[
+              {
+                key: "description",
+                header: "Description",
+                cell: (r) => (
+                  <span className="text-[12.5px] text-foreground">
+                    {r.description ?? "—"}
+                  </span>
+                ),
+              },
+              {
+                key: "qty",
+                header: "Qty",
+                align: "right",
+                cell: (r) => (
+                  <Mono className="text-[12.5px] text-muted-foreground">
+                    {r.quantity ?? "—"}
+                  </Mono>
+                ),
+              },
+              {
+                key: "unit",
+                header: "Unit price",
+                align: "right",
+                cell: (r) => (
+                  <Mono className="text-[12.5px] text-muted-foreground">
+                    {fmtMoney(r.unitPrice)}
+                  </Mono>
+                ),
+              },
+              {
+                key: "lineTotal",
+                header: "Total",
+                align: "right",
+                cell: (r) => (
+                  <Mono className="text-[12.5px] font-semibold text-foreground">
+                    {fmtMoney(r.lineTotal)}
+                  </Mono>
+                ),
+              },
+            ]}
+          />
+        </div>
+
+        <div className="lg:col-span-2">
           <SectionTitle>Payments</SectionTitle>
           <DataTable<PaymentResponse>
             rows={payments}
