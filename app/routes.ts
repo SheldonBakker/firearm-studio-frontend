@@ -30,6 +30,7 @@ export default [
     route("storage", "routes/storage.tsx"),
     route("storage/:id", "routes/storage-detail.tsx"),
     route("licences", "routes/licences.tsx"),
+    route("licences/:id", "routes/licence-detail.tsx"),
     route("invoices", "routes/invoices.tsx"),
     route("invoices/:id", "routes/invoice-detail.tsx"),
     route("team", "routes/team.tsx"),

@@ -99,8 +99,9 @@ function CustomerView({
         }
       />
 
-      <Tabs defaultValue="firearms">
+      <Tabs defaultValue="details">
         <TabsList className="max-w-full overflow-x-auto">
+          <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="firearms">
             Firearms ({firearms.length})
           </TabsTrigger>
@@ -108,7 +109,6 @@ function CustomerView({
             Invoices ({invoices.length})
           </TabsTrigger>
           <TabsTrigger value="storage">Storage ({storage.length})</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
 
         <TabsContent value="firearms" className="mt-5">

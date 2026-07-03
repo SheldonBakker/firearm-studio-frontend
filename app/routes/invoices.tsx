@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/invoices";
 import { api } from "~/lib/api/client";
-import { customerNameMap, inv } from "~/lib/utils/entities";
+import { inv } from "~/lib/utils/entities";
 import { fmtMoney } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
@@ -14,7 +14,6 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import type {
-  CustomerListItemDto,
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
 } from "~/lib/types/api";
@@ -40,10 +39,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies InvoiceListItemDtoPaginatedResponse,
     );
-  const customersP = api
-    .allCustomers()
-    .catch(() => [] as CustomerListItemDto[]);
-  return { data: Promise.all([invoicesP, customersP]) };
+  return { data: invoicesP };
 }
 
 export default function Invoices({ loaderData }: Route.ComponentProps) {
@@ -62,9 +58,8 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <PageHeader title="Invoices" />
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
-        {([invoicesPage, customers]) => {
+        {(invoicesPage) => {
           const invoices = invoicesPage.items ?? [];
-          const names = customerNameMap(customers);
           const rows =
             filter === "all"
               ? invoices
@@ -92,14 +87,9 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
                     key: "num",
                     header: "Invoice",
                     cell: (r) => (
-                      <div>
-                        <Mono className="text-[12.5px] font-semibold text-foreground">
-                          {inv.number(r)}
-                        </Mono>
-                        <div className="mt-0.5 text-[11.5px] text-dim">
-                          {names[inv.customerId(r)] ?? "—"}
-                        </div>
-                      </div>
+                      <Mono className="text-[12.5px] font-semibold text-foreground">
+                        {inv.number(r)}
+                      </Mono>
                     ),
                   },
                   {

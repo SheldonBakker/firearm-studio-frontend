@@ -21,7 +21,6 @@ import { CustomerType, enumKey } from "~/lib/types/enums";
 import type {
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
-  FirearmResponse,
 } from "~/lib/types/api";
 
 const PAGE_SIZE = 20;
@@ -41,8 +40,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies CustomerListItemDtoPaginatedResponse,
     );
-  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
-  return { data: Promise.all([customersP, firearmsP]) };
+  return { data: customersP };
 }
 
 export default function Customers({ loaderData }: Route.ComponentProps) {
@@ -65,11 +63,9 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           )
         }
       />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={6} />}>
-        {([customerPage, firearms]) => {
+      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
+        {(customerPage) => {
           const customers = customerPage.items ?? [];
-          const fireCount = (id: string) =>
-            firearms.filter((f) => f.customerId === id).length;
           const activeN = customers.filter((c) => c.isActive).length;
           let rows = customers;
           if (filter === "individual")
@@ -158,18 +154,6 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
             cell: (r) => (
               <Mono className="text-[12px] text-muted-foreground">
                 {r.phone ?? "—"}
-              </Mono>
-            ),
-          },
-          {
-            key: "firearms",
-            header: "Firearms",
-            align: "center",
-            cell: (r) => (
-              <Mono
-                className={`text-[13px] font-semibold ${fireCount(r.id) ? "text-foreground" : "text-dim"}`}
-              >
-                {fireCount(r.id)}
               </Mono>
             ),
           },

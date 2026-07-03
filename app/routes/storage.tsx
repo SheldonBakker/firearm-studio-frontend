@@ -3,7 +3,6 @@ import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
 import { api } from "~/lib/api/client";
-import { firearmLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -18,7 +17,6 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/types/enums";
 import type {
-  FirearmResponse,
   StorageRecordDtoPaginatedResponse,
   StorageRecordResponse,
 } from "~/lib/types/api";
@@ -58,8 +56,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies StorageRecordDtoPaginatedResponse,
     );
-  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
-  return { data: Promise.all([storageP, firearmsP]) };
+  return { data: storageP };
 }
 
 export default function Storage({ loaderData }: Route.ComponentProps) {
@@ -99,9 +96,8 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
     <PageWrap>
       <PageHeader title="Storage Records" />
       <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
-        {([storagePage, firearms]) => {
+        {(storagePage) => {
           const storage = storagePage.items ?? [];
-          const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           return (
             <>
               <FilterBar
@@ -122,16 +118,9 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     key: "firearm",
                     header: "Firearm",
                     cell: (r) => (
-                      <div>
-                        <div className="text-[13px] font-semibold text-foreground">
-                          {firearmLabel(fireMap[r.firearmId ?? ""])}
-                        </div>
-                        <Mono className="text-[11.5px] text-dim">
-                          {r.serialNumber ??
-                            fireMap[r.firearmId ?? ""]?.serialNumber ??
-                            "—"}
-                        </Mono>
-                      </div>
+                      <Mono className="text-[13px] font-semibold text-foreground">
+                        {r.serialNumber ?? "—"}
+                      </Mono>
                     ),
                   },
                   {
@@ -257,7 +246,7 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                   open={!!releasing}
                   onOpenChange={(v) => !v && setReleasing(null)}
                   title="Release from storage"
-                  description={`${firearmLabel(fireMap[releasing.firearmId ?? ""])} - confirm release date.`}
+                  description={`${releasing.serialNumber ?? "Firearm"} - confirm release date.`}
                   submitLabel="Release"
                   fields={[
                     {

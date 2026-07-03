@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useRevalidator, useSearchParams } from "react-router";
+import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/licences";
 import { api } from "~/lib/api/client";
-import { firearmLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -19,7 +18,6 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/types/enums";
 import type {
-  FirearmResponse,
   LicenceListItemDtoPaginatedResponse,
   LicenceResponse,
 } from "~/lib/types/api";
@@ -65,11 +63,11 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
           totalCount: 0,
         }) satisfies LicenceListItemDtoPaginatedResponse,
     );
-  const firearmsP = api.allFirearms().catch(() => [] as FirearmResponse[]);
-  return { data: Promise.all([licencesP, firearmsP]) };
+  return { data: licencesP };
 }
 
 export default function Licences({ loaderData }: Route.ComponentProps) {
+  const navigate = useNavigate();
   const revalidator = useRevalidator();
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useSessionUser();
@@ -99,10 +97,9 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <PageHeader title="Licences" />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={7} />}>
-        {([licencesPage, firearms]) => {
+      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={6} />}>
+        {(licencesPage) => {
           const licences = licencesPage.items ?? [];
-          const fireMap = Object.fromEntries(firearms.map((f) => [f.id, f]));
           return (
             <>
               <FilterBar
@@ -112,6 +109,11 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
               />
               <DataTable<LicenceResponse>
                 rows={licences}
+                onRowClick={(r) =>
+                  navigate(
+                    `/licences/${r.id}?firearm=${encodeURIComponent(r.firearmId ?? "")}`,
+                  )
+                }
                 empty={
                   hasFilters
                     ? "No licences match these filters."
@@ -125,15 +127,6 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                       <Mono className="text-[12.5px] font-semibold text-foreground">
                         {r.licenceNumber ?? "—"}
                       </Mono>
-                    ),
-                  },
-                  {
-                    key: "firearm",
-                    header: "Firearm",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {firearmLabel(fireMap[r.firearmId ?? ""])}
-                      </span>
                     ),
                   },
                   {
