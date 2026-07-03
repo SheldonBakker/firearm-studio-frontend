@@ -20,6 +20,8 @@ export default [
   ),
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
+  route("forgot-password", "routes/forgot-password.tsx"),
+  route("reset-password", "routes/reset-password.tsx"),
   route("onboarding", "routes/onboarding.tsx"),
   layout("routes/app-layout.tsx", [
     route("dashboard", "routes/dashboard.tsx"),
