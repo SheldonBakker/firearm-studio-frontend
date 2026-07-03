@@ -11,11 +11,15 @@ if (!url || !anonKey) {
   );
 }
 
+const projectRef = new URL(url ?? "http://localhost").hostname.split(".")[0];
+export const SUPABASE_STORAGE_KEY = `sb-${projectRef}-auth-token`;
+
 export const supabase = createClient(url ?? "http://localhost", anonKey ?? "public-anon-key", {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    storageKey: SUPABASE_STORAGE_KEY,
   },
 });
 

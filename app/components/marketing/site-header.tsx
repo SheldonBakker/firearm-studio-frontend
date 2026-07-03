@@ -28,7 +28,7 @@ const NAV = [
 ];
 
 export function SiteHeader() {
-  const { isLoggedIn } = useAuth();
+  const { status, isLoggedIn } = useAuth();
   return (
     <header
       style={{
@@ -122,7 +122,9 @@ export function SiteHeader() {
             flexShrink: 0,
           }}
         >
-          {isLoggedIn ? (
+          {status === "loading" ? (
+            <div aria-hidden style={{ width: 176, height: 34 }} />
+          ) : isLoggedIn ? (
             <Link
               to="/dashboard"
               prefetch="viewport"
