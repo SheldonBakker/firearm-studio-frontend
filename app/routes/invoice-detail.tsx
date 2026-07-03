@@ -19,6 +19,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import {
+  CustomerType,
   InvoiceStatus,
   PaymentMethod,
   enumKey,
@@ -129,22 +130,6 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
                 v: <Mono>{invoiceNumber(invoice)}</Mono>,
                 strong: true,
               },
-              {
-                k: "Customer",
-                v: customer ? (
-                  <button
-                    onClick={() => navigate(`/customers/${customer.id}`)}
-                    className="text-primary hover:underline"
-                  >
-                    {customerLabel(customer)}
-                  </button>
-                ) : (
-                  "—"
-                ),
-                strong: true,
-              },
-              { k: "Email", v: customer?.email || "—" },
-              { k: "Phone", v: customer?.phone || "—" },
               { k: "Month", v: <Mono>{invoice.invoiceMonth ?? "—"}</Mono> },
               { k: "Sent", v: fmtDate(invoice.sentAt) },
               { k: "Due", v: fmtDate(invoice.dueOn) },
@@ -207,6 +192,46 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
               },
             ]}
           />
+        </div>
+
+        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-6">
+          <SectionTitle
+            right={
+              customer && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate(`/customers/${customer.id}`)}
+                >
+                  View customer
+                  <Icon name="arrow" size={14} />
+                </Button>
+              )
+            }
+          >
+            Customer
+          </SectionTitle>
+          {customer ? (
+            <KeyValue
+              pairs={[
+                { k: "Name", v: customerLabel(customer), strong: true },
+                {
+                  k: "Type",
+                  v: enumKey(CustomerType, customer.customerType) ?? "—",
+                },
+                { k: "Full name", v: customer.fullName || "—" },
+                { k: "Company", v: customer.companyName || "—" },
+                { k: "Email", v: customer.email || "—" },
+                { k: "Phone", v: customer.phone || "—" },
+                { k: "Status", v: customer.isActive ? "Active" : "Inactive" },
+                { k: "Notes", v: customer.notes || "—", full: true },
+              ]}
+            />
+          ) : (
+            <p className="text-[12.5px] text-muted-foreground">
+              Customer details unavailable.
+            </p>
+          )}
         </div>
 
         <div className="lg:col-span-2">
