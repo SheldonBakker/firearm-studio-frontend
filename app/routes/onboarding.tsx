@@ -132,7 +132,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="flex flex-1 items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-155 animate-fade-up">
         <div className="mb-7 flex flex-col items-center text-center">
           <BrandMark size={46} />

@@ -198,6 +198,15 @@
 .mk-ghost:hover {
   background: #1a1f28;
 }
+.mk-logout {
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.mk-logout:hover {
+  background: #222834;
+  border-color: #3d4655;
+}
 .mk-cta {
   transition: background 0.15s;
 }

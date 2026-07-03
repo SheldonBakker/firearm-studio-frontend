@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Link } from "react-router";
 import type { Route } from "./+types/contact";
-import { SiteHeader } from "~/components/marketing/site-header";
-import { SiteFooter } from "~/components/marketing/site-footer";
 import { pageMeta } from "~/lib/utils/seo";
 import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
 import { api } from "~/lib/api/client";
@@ -232,9 +230,7 @@ export default function Contact() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader />
-
+    <div style={{ background: "#0e1116", overflow: "hidden" }}>
       <section style={{ position: "relative" }}>
         <div
           style={{
@@ -417,8 +413,6 @@ export default function Contact() {
           </form>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }

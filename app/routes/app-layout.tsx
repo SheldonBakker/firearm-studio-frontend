@@ -29,7 +29,8 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
   const [navOpen, setNavOpen] = useState(false);
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+    // 63px = sticky SiteHeader height (14px padding ×2 + 34px row + 1px border)
+    <div className="flex h-[calc(100dvh-63px)] w-full overflow-hidden bg-background text-foreground">
       <Sidebar user={user} />
       <MobileSidebar user={user} open={navOpen} onOpenChange={setNavOpen} />
       <div className="flex min-w-0 flex-1 flex-col">

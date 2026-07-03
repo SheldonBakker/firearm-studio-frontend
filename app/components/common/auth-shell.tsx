@@ -1,7 +1,5 @@
 import { BrandMark } from "./brand";
-import { SiteHeader } from "~/components/marketing/site-header";
 
-/** Centered dark card layout for login / signup, under the public site header. */
 export function AuthShell({
   title,
   subtitle,
@@ -14,8 +12,7 @@ export function AuthShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <SiteHeader />
+    <div className="flex flex-1 flex-col bg-background">
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-100 animate-fade-up">
           <div className="mb-7 flex flex-col items-center text-center">

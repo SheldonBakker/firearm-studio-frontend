@@ -1,6 +1,4 @@
 import { Link } from "react-router";
-import { SiteHeader } from "./site-header";
-import { SiteFooter } from "./site-footer";
 
 export type LegalSection = {
   id: string;
@@ -19,9 +17,7 @@ export type LegalDocProps = {
 
 export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocProps) {
   return (
-    <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader />
-
+    <div style={{ background: "#0e1116", overflow: "hidden" }}>
       <section style={{ borderBottom: "1px solid #1f252e", background: "#0b0e12" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "clamp(40px,6vw,72px) clamp(18px,5vw,40px)" }}>
           <div
@@ -184,8 +180,6 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }

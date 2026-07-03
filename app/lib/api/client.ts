@@ -98,7 +98,6 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
         if (typeof m === "string") message = m;
       }
     } catch {
-      /* non-JSON error body */
     }
     throw new ApiError(res.status, message, body);
   }

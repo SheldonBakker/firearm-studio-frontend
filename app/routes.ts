@@ -14,6 +14,10 @@ export default [
   route("popia", "routes/popia.tsx"),
   route("fca-notice", "routes/fca-notice.tsx"),
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
+  route(
+    ".well-known/appspecific/com.chrome.devtools.json",
+    "routes/devtools-json.tsx",
+  ),
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
   route("onboarding", "routes/onboarding.tsx"),

@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useMatches,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -14,6 +15,8 @@ import { AppShellSkeleton } from "~/components/common/skeletons";
 import { PageWrap, ErrorState } from "~/components/common/misc";
 import { ApiError } from "~/lib/api/client";
 import { AuthProvider } from "~/context/auth-context";
+import { SiteHeader } from "~/components/marketing/site-header";
+import { SiteFooter } from "~/components/marketing/site-footer";
 
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
@@ -63,10 +66,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SiteChrome({ children }: { children: React.ReactNode }) {
+  const inApp = useMatches().some((m) => m.id === "routes/app-layout");
+  return (
+    <div className="flex min-h-dvh flex-col bg-background">
+      <SiteHeader />
+      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      {!inApp && <SiteFooter />}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <Outlet />
+      <SiteChrome>
+        <Outlet />
+      </SiteChrome>
     </AuthProvider>
   );
 }
@@ -92,13 +108,17 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <PageWrap>
-      <ErrorState message={details} onBack={() => window.history.back()} />
-      {stack && (
-        <pre className="mt-4 w-full overflow-x-auto rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </PageWrap>
+    <AuthProvider>
+      <SiteChrome>
+        <PageWrap>
+          <ErrorState message={details} onBack={() => window.history.back()} />
+          {stack && (
+            <pre className="mt-4 w-full overflow-x-auto rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+              <code>{stack}</code>
+            </pre>
+          )}
+        </PageWrap>
+      </SiteChrome>
+    </AuthProvider>
   );
 }

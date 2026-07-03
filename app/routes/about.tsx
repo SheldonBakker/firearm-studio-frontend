@@ -1,7 +1,5 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/about";
-import { SiteHeader } from "~/components/marketing/site-header";
-import { SiteFooter } from "~/components/marketing/site-footer";
 import { pageMeta } from "~/lib/utils/seo";
 
 export function meta({ location }: Route.MetaArgs) {
@@ -67,9 +65,7 @@ const eyebrow: React.CSSProperties = {
 
 export default function About() {
   return (
-    <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader />
-
+    <div style={{ background: "#0e1116", overflow: "hidden" }}>
       <section style={{ position: "relative" }}>
         <div
           style={{
@@ -183,8 +179,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }

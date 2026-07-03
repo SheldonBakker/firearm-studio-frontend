@@ -1,7 +1,7 @@
-import { useNavigate, useLocation, Link } from "react-router";
+import { useState } from "react";
+import { useLocation, Link } from "react-router";
 import { Icon, type IconName } from "~/components/common/icon";
-import { BrandLockup } from "~/components/common/brand";
-import { useAuth } from "~/context/auth-context";
+import { LogoutDialog } from "~/components/modals/logout-dialog";
 import { canSeeNav, primaryRole, type NavKey, type SessionUser } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { cn } from "~/lib/utils/cn";
@@ -53,26 +53,15 @@ function SidebarBody({
   user: SessionUser;
   onNavigate?: () => void;
 }) {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { signOut } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const isActive = (to: string) =>
     pathname === to || pathname.startsWith(to + "/");
 
-  async function logout() {
-    onNavigate?.();
-    await signOut();
-    navigate("/login", { replace: true });
-  }
-
   return (
     <div className="flex h-full flex-col bg-sidebar">
-      <div className="px-4.5 pb-4.5 pt-5">
-        <BrandLockup />
-      </div>
-
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-1">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-1 pt-4">
         {GROUPS.map((g, gi) => {
           const items = g.items.filter((it) => canSeeNav(user, it.key));
           if (!items.length) return null;
@@ -129,7 +118,7 @@ function SidebarBody({
           </div>
           <button
             type="button"
-            onClick={logout}
+            onClick={() => setConfirmOpen(true)}
             title="Sign out"
             className="flex text-dim transition-colors hover:text-foreground"
           >
@@ -137,13 +126,20 @@ function SidebarBody({
           </button>
         </div>
       </div>
+
+      <LogoutDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        redirectTo="/login"
+        onConfirmed={onNavigate}
+      />
     </div>
   );
 }
 
 export function Sidebar({ user }: { user: SessionUser }) {
   return (
-    <aside className="hidden h-screen w-62 shrink-0 border-r border-border lg:block">
+    <aside className="hidden h-full w-62 shrink-0 border-r border-border lg:block">
       <SidebarBody user={user} />
     </aside>
   );

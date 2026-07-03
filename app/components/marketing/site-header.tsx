@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "~/context/auth-context";
+import { Icon } from "~/components/common/icon";
+import { LogoutDialog } from "~/components/modals/logout-dialog";
 
 export function MarketingLogo({ size = 19 }: { size?: number }) {
   const box = Math.round((size / 19) * 34);
@@ -29,6 +32,7 @@ const NAV = [
 
 export function SiteHeader() {
   const { status, isLoggedIn } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   return (
     <header
       style={{
@@ -43,9 +47,7 @@ export function SiteHeader() {
     >
       <div
         style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "14px clamp(18px,5vw,40px)",
+          padding: "14px clamp(18px,3vw,28px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -125,26 +127,50 @@ export function SiteHeader() {
           {status === "loading" ? (
             <div aria-hidden style={{ width: 176, height: 34 }} />
           ) : isLoggedIn ? (
-            <Link
-              to="/dashboard"
-              prefetch="viewport"
-              className="mk-cta"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                height: 34,
-                padding: "0 16px",
-                borderRadius: 9,
-                fontSize: 13.5,
-                fontWeight: 600,
-                color: "#1a1206",
-                background: "#e8973c",
-                boxShadow: "0 4px 14px rgba(232,151,60,.25)",
-                textDecoration: "none",
-              }}
-            >
-              Go to Dashboard
-            </Link>
+            <>
+              <Link
+                to="/dashboard"
+                prefetch="viewport"
+                className="mk-cta"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 34,
+                  padding: "0 16px",
+                  borderRadius: 9,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: "#1a1206",
+                  background: "#e8973c",
+                  boxShadow: "0 4px 14px rgba(232,151,60,.25)",
+                  textDecoration: "none",
+                }}
+              >
+                Go to Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(true)}
+                className="mk-logout"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  height: 34,
+                  padding: "0 14px",
+                  borderRadius: 9,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: "#e6eaf0",
+                  background: "#1a1f28",
+                  border: "1px solid #333b49",
+                  cursor: "pointer",
+                }}
+              >
+                <Icon name="logout" size={15} />
+                Log out
+              </button>
+            </>
           ) : (
             <>
               <Link
@@ -189,6 +215,8 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+
+      <LogoutDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
     </header>
   );
 }

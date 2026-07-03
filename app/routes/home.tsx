@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
-import { SiteHeader, MarketingLogo } from "~/components/marketing/site-header";
-import { SiteFooter } from "~/components/marketing/site-footer";
+import { MarketingLogo } from "~/components/marketing/site-header";
 import { organizationLd, pageMeta, websiteLd } from "~/lib/utils/seo";
 import { useAuth } from "~/context/auth-context";
 
@@ -199,9 +198,7 @@ function StatusPill({ inv, big = false }: { inv: Invoice; big?: boolean }) {
 export default function Home() {
   const { isLoggedIn } = useAuth();
   return (
-    <div style={{ minHeight: "100vh", background: "#0e1116", overflow: "hidden" }}>
-      <SiteHeader />
-
+    <div style={{ background: "#0e1116", overflow: "hidden" }}>
       <section id="top" style={{ position: "relative" }}>
         <div
           style={{
@@ -632,8 +629,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }
