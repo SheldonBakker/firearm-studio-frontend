@@ -297,7 +297,7 @@ export function Topbar({
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2.5 border-b border-border bg-card/70 px-4 backdrop-blur sm:gap-4 sm:px-6">
+    <header className="relative z-50 flex h-16 shrink-0 items-center gap-2.5 border-b border-border bg-card/70 px-4 backdrop-blur sm:gap-4 sm:px-6">
       <button
         type="button"
         onClick={onMenuClick}
