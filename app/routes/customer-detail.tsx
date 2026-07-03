@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customer-detail";
-import { api } from "~/lib/api/client";
+import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel, firearmLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -30,10 +30,10 @@ import type {
   CustomerFirearmListItemDto,
   CustomerInvoiceListItemDto,
   CustomerStorageRecordDto,
-} from "~/lib/types/api";
+} from "~/lib/api/customers/types";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return { data: api.customer(params.id) };
+  return { data: customersApi.get(params.id) };
 }
 
 export default function CustomerDetail({ loaderData }: Route.ComponentProps) {
@@ -283,7 +283,7 @@ function CustomerView({ customer }: { customer: CustomerDetailResponse }) {
           { name: "notes", label: "Notes", type: "textarea", full: true, defaultValue: customer.notes ?? "" },
         ]}
         onSubmit={async (v) => {
-          await api.updateCustomer(customer.id, {
+          await customersApi.update(customer.id, {
             fullName: v.fullName || null,
             companyName: v.companyName || null,
             email: v.email || null,

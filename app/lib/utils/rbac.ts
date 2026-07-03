@@ -1,4 +1,4 @@
-import type { Role } from "../types/api";
+import type { Role } from "../api/users/types";
 
 export interface SessionUser {
   id: string;

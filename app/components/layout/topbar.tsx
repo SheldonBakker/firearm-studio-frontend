@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Icon } from "~/components/common/icon";
-import { api } from "~/lib/api/client";
+import { customersApi } from "~/lib/api/customers/customers";
+import { firearmsApi } from "~/lib/api/firearms/firearms";
+import { storageApi } from "~/lib/api/storage/storage";
 import { CustomerType } from "~/lib/types/enums";
 import { can, type SessionUser } from "~/lib/utils/rbac";
 import { Button } from "~/components/ui/button";
-import type {
-  CustomerListItemDto,
-  FirearmResponse,
-  StorageRecordResponse,
-} from "~/lib/types/api";
+import type { CustomerListItemDto } from "~/lib/api/customers/types";
+import type { FirearmResponse } from "~/lib/api/firearms/types";
+import type { StorageRecordResponse } from "~/lib/api/storage/types";
 
 const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },
@@ -164,13 +164,13 @@ export function Topbar({
     debounceRef.current = setTimeout(async () => {
       try {
         if (isCustomers) {
-          const result = await api.customers({ [customerSearchType]: trimmed, pageSize: 6 });
+          const result = await customersApi.list({ [customerSearchType]: trimmed, pageSize: 6 });
           setLiveCustomers(result.items ?? []);
         } else if (isFirearms) {
-          const results = await api.firearms({ [firearmSearchType]: trimmed });
+          const results = await firearmsApi.list({ [firearmSearchType]: trimmed });
           setLiveFirearms((results?.items ?? []).slice(0, 6));
         } else {
-          const results = await api.storageActive({ [storageSearchType]: trimmed });
+          const results = await storageApi.listActive({ [storageSearchType]: trimmed });
           setLiveStorage((results?.items ?? []).slice(0, 6));
         }
       } catch {
@@ -200,7 +200,7 @@ export function Topbar({
     if (cacheLoaded.current) return;
     cacheLoaded.current = true;
     try {
-      const [cs, fs] = await Promise.all([api.allCustomers(), api.allFirearms()]);
+      const [cs, fs] = await Promise.all([customersApi.all(), firearmsApi.all()]);
       setCachedCustomers(cs ?? []);
       setCachedFirearms(fs ?? []);
     } catch {

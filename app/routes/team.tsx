@@ -2,7 +2,7 @@ import { useState } from "react";
 import { redirect, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/team";
-import { api } from "~/lib/api/client";
+import { usersApi } from "~/lib/api/users/users";
 import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
@@ -22,7 +22,7 @@ import {
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
-import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/types/api";
+import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/api/users/types";
 
 const PAGE_SIZE = 20;
 
@@ -35,7 +35,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   return {
-    users: api.users({ pageNumber, pageSize: PAGE_SIZE }).catch(
+    users: usersApi.list({ pageNumber, pageSize: PAGE_SIZE }).catch(
       () =>
         ({
           items: [],
@@ -63,7 +63,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
   };
 
   async function deactivate(u: UserResponse) {
-    await api.deactivateUser(u.id);
+    await usersApi.deactivate(u.id);
     toast.success("User deactivated");
     revalidator.revalidate();
   }
@@ -229,7 +229,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           },
         ]}
         onSubmit={async (v) => {
-          await api.inviteUser({
+          await usersApi.invite({
             email: v.email,
             fullName: v.fullName || null,
             role: AppRole[v.role as keyof typeof AppRole],
@@ -261,7 +261,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
             },
           ]}
           onSubmit={async (v) => {
-            await api.updateUserRole(roleFor.id, {
+            await usersApi.updateRole(roleFor.id, {
               role: AppRole[v.role as keyof typeof AppRole],
             });
             toast.success("Role updated");

@@ -1,5 +1,5 @@
 import { CustomerType, InvoiceStatus, enumKey } from "../types/enums";
-import type { InvoiceResponse } from "../types/api";
+import type { InvoiceResponse } from "../api/invoices/types";
 type CustomerDisplay = {
   customerType: CustomerType;
   fullName?: string | null;

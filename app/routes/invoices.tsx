@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/invoices";
-import { api } from "~/lib/api/client";
+import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { inv } from "~/lib/utils/entities";
 import { fmtMoney } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
@@ -16,7 +16,7 @@ import { Resolve, ListSkeleton } from "~/components/common/skeletons";
 import type {
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/invoices/types";
 
 const PAGE_SIZE = 20;
 const STATUSES = ["Paid", "Sent", "Overdue", "Draft", "Cancelled"];
@@ -28,8 +28,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
-  const invoicesP = api
-    .invoices({ pageNumber, pageSize: PAGE_SIZE })
+  const invoicesP = invoicesApi
+    .list({ pageNumber, pageSize: PAGE_SIZE })
     .catch(
       () =>
         ({

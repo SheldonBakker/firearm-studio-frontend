@@ -1,6 +1,6 @@
 import { redirect, useLocation, useNavigate } from "react-router";
 import type { Route } from "./+types/audit";
-import { api } from "~/lib/api/client";
+import { auditApi } from "~/lib/api/audit/audit";
 import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
@@ -20,7 +20,7 @@ import {
 import type {
   AuditLogListItemDtoPaginatedResponse,
   AuditLogResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/audit/types";
 
 const PAGE_SIZE = 20;
 const MAX_DETAIL_FIELDS = 4;
@@ -57,8 +57,8 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const createdOn = searchParams.get("createdOn")?.trim() || undefined;
 
   return {
-    logs: api
-      .auditLogs({
+    logs: auditApi
+      .list({
         pageNumber,
         pageSize: PAGE_SIZE,
         fullName,

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage-detail";
-import { api } from "~/lib/api/client";
+import { firearmsApi } from "~/lib/api/firearms/firearms";
+import { storageApi } from "~/lib/api/storage/storage";
 import { firearmLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -17,20 +18,18 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import { StorageStatus, enumKey, enumNames } from "~/lib/types/enums";
-import type {
-  FirearmDetailResponse,
-  StorageRecordResponse,
-} from "~/lib/types/api";
+import type { FirearmDetailResponse } from "~/lib/api/firearms/types";
+import type { StorageRecordResponse } from "~/lib/api/storage/types";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  const data = api
-    .storageActive({ pageSize: 200 })
+  const data = storageApi
+    .listActive({ pageSize: 200 })
     .catch(() => ({ items: [] as StorageRecordResponse[], pageNumber: 1, pageSize: 200, totalCount: 0 }))
     .then(async (response) => {
       const records = response.items ?? [];
       const record = records.find((r) => r.id === params.id) ?? null;
       const firearm = record?.firearmId
-        ? await api.firearm(record.firearmId).catch(() => null)
+        ? await firearmsApi.get(record.firearmId).catch(() => null)
         : null;
       return { record, firearm: firearm as FirearmDetailResponse | null };
     });
@@ -174,7 +173,7 @@ function StorageView({
           },
         ]}
         onSubmit={async (v) => {
-          await api.updateStorage(record.id, {
+          await storageApi.update(record.id, {
             storageStatus: StorageStatus.Released,
             storedUntil: v.storedUntil || null,
           });
@@ -231,7 +230,7 @@ function StorageView({
           },
         ]}
         onSubmit={async (v) => {
-          await api.updateStorage(record.id, {
+          await storageApi.update(record.id, {
             storedFrom: v.storedFrom || null,
             storedUntil: v.storedUntil || null,
             monthlyRate: v.monthlyRate ? Number(v.monthlyRate) : null,

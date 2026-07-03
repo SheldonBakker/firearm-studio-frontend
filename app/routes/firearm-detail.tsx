@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/firearm-detail";
-import { api } from "~/lib/api/client";
+import { firearmsApi } from "~/lib/api/firearms/firearms";
+import { licencesApi } from "~/lib/api/licences/licences";
+import { storageApi } from "~/lib/api/storage/storage";
 import { customerLabel, firearmLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -27,10 +29,10 @@ import {
 import type {
   FirearmDetailResponse,
   FirearmLicenceListItemDto,
-} from "~/lib/types/api";
+} from "~/lib/api/firearms/types";
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return { data: api.firearm(params.id) };
+  return { data: firearmsApi.get(params.id) };
 }
 
 const STATUSES = enumNames(FirearmStatus);
@@ -206,7 +208,7 @@ function FirearmView({ firearm }: { firearm: FirearmDetailResponse }) {
           { name: "notes", label: "Notes", type: "textarea", full: true, defaultValue: firearm.notes ?? "" },
         ]}
         onSubmit={async (v) => {
-          await api.updateFirearm(firearm.id, {
+          await firearmsApi.update(firearm.id, {
             model: v.model || null,
             calibre: v.calibre || null,
             firearmType: v.firearmType || null,
@@ -230,7 +232,7 @@ function FirearmView({ firearm }: { firearm: FirearmDetailResponse }) {
           { name: "documentUrl", label: "Document URL", full: true },
         ]}
         onSubmit={async (v) => {
-          await api.createLicence(firearm.id, {
+          await licencesApi.create(firearm.id, {
             licenceNumber: v.licenceNumber || null,
             issuedOn: v.issuedOn || null,
             expiresOn: v.expiresOn,
@@ -256,7 +258,7 @@ function FirearmView({ firearm }: { firearm: FirearmDetailResponse }) {
           { name: "notes", label: "Notes", type: "textarea", full: true },
         ]}
         onSubmit={async (v) => {
-          await api.startStorage(firearm.id, {
+          await storageApi.start(firearm.id, {
             storedFrom: v.storedFrom,
             monthlyRate: Number(v.monthlyRate || 0),
             storageLocation: v.storageLocation || null,

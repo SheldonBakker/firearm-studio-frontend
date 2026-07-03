@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/licences";
-import { api } from "~/lib/api/client";
+import { licencesApi } from "~/lib/api/licences/licences";
 import { fmtDate } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -20,7 +20,7 @@ import { LicenceStatus, enumKey } from "~/lib/types/enums";
 import type {
   LicenceListItemDtoPaginatedResponse,
   LicenceResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/licences/types";
 
 const PAGE_SIZE = 20;
 
@@ -52,8 +52,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const licenceNumber =
     searchParams.get("licenceNumber")?.trim() || undefined;
 
-  const licencesP = api
-    .licences({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status })
+  const licencesP = licencesApi
+    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status })
     .catch(
       () =>
         ({
@@ -266,7 +266,7 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                     },
                   ]}
                   onSubmit={async (values) => {
-                    await api.updateLicence(editing.id, {
+                    await licencesApi.update(editing.id, {
                       licenceNumber: values.licenceNumber || null,
                       issuedOn: values.issuedOn || null,
                       expiresOn: values.expiresOn,

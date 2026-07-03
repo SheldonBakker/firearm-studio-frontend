@@ -2356,6 +2356,9 @@
             "format": "date",
             "nullable": true
           },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerResponse"
+          },
           "lines": {
             "type": "array",
             "items": {

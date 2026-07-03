@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/firearms";
-import { api } from "~/lib/api/client";
+import { firearmsApi } from "~/lib/api/firearms/firearms";
+import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel } from "~/lib/utils/entities";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -20,7 +21,7 @@ import { FirearmStatus, enumKey } from "~/lib/types/enums";
 import type {
   FirearmResponse,
   FirearmResponsePaginatedResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/firearms/types";
 
 const PAGE_SIZE = 20;
 
@@ -45,8 +46,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       ? requestedStatus
       : undefined;
 
-  const firearmsP = api
-    .firearms({ pageNumber, pageSize: PAGE_SIZE, status })
+  const firearmsP = firearmsApi
+    .list({ pageNumber, pageSize: PAGE_SIZE, status })
     .catch(
       () =>
         ({
@@ -218,7 +219,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                       { value: "phone", label: "Phone" },
                     ],
                     onSearch: async (query, searchType) => {
-                      const results = await api.customers({
+                      const results = await customersApi.list({
                         [searchType]: query,
                       });
                       return (results.items ?? []).map((c) => ({
@@ -262,7 +263,7 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                   },
                 ]}
                 onSubmit={async (v) => {
-                  await api.createFirearm({
+                  await firearmsApi.create({
                     customerId: v.customerId,
                     make: v.make || null,
                     model: v.model || null,

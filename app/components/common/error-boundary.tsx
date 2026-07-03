@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { ErrorState } from "./misc";
-import { ApiError } from "~/lib/api/client";
+import { ApiError } from "~/lib/api/http";
 
 export class InlineErrorBoundary extends Component<
   { children: ReactNode },

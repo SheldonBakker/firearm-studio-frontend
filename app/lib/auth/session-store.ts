@@ -1,6 +1,8 @@
 import { redirect } from "react-router";
 import { supabase, SUPABASE_STORAGE_KEY } from "~/lib/api/supabase";
-import { api, ApiError } from "~/lib/api/client";
+import { ApiError } from "~/lib/api/http";
+import { meApi } from "~/lib/api/me/me";
+import { companyApi } from "~/lib/api/company/company";
 import { normalizeRoles, type SessionUser } from "~/lib/utils/rbac";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
@@ -62,7 +64,7 @@ async function resolveSessionUser(): Promise<SessionUser | null> {
   }
 
   try {
-    const me = await api.me();
+    const me = await meApi.me();
     return {
       id: me.id,
       email: me.email,
@@ -117,7 +119,7 @@ export async function hasCompanyAccess(): Promise<boolean> {
 
   const probe = async (): Promise<"ok" | "forbidden" | "missing" | "error"> => {
     try {
-      const company = await api.company();
+      const company = await companyApi.get();
       return company && company.id ? "ok" : "missing";
     } catch (err) {
       if (err instanceof ApiError) {

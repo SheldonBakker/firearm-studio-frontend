@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/licence-detail";
-import { api } from "~/lib/api/client";
+import { licencesApi } from "~/lib/api/licences/licences";
 import { customerLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
 import { FirearmStatus, LicenceStatus, enumKey } from "~/lib/types/enums";
-import type { LicenceDetailDto } from "~/lib/types/api";
+import type { LicenceDetailDto } from "~/lib/api/licences/types";
 
 const LICENCE_STATUS_NAMES = Object.keys(LicenceStatus);
 
@@ -25,10 +25,8 @@ function dateInputValue(value: string | null | undefined) {
   return value?.slice(0, 10) ?? "";
 }
 
-// GET /api/v1/licences/{id} returns the licence with its firearm and customer
-// embedded, so a single call resolves the whole page.
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return { data: api.licence(params.id) };
+  return { data: licencesApi.get(params.id) };
 }
 
 export default function LicenceDetail({ loaderData }: Route.ComponentProps) {
@@ -195,7 +193,7 @@ function LicenceView({ licence }: { licence: LicenceDetailDto }) {
             },
           ]}
           onSubmit={async (values) => {
-            await api.updateLicence(licence.id, {
+            await licencesApi.update(licence.id, {
               licenceNumber: values.licenceNumber || null,
               issuedOn: values.issuedOn || null,
               expiresOn: values.expiresOn,

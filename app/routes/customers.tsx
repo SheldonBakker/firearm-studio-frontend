@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customers";
-import { api } from "~/lib/api/client";
+import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel } from "~/lib/utils/entities";
 import { initials } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -21,7 +21,7 @@ import { CustomerType, enumKey } from "~/lib/types/enums";
 import type {
   CustomerListItemDto,
   CustomerListItemDtoPaginatedResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/customers/types";
 
 const PAGE_SIZE = 20;
 
@@ -29,8 +29,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedPage = Number(new URL(request.url).searchParams.get("page"));
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const customersP = api
-    .customers({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" })
+  const customersP = customersApi
+    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" })
     .catch(
       () =>
         ({
@@ -261,7 +261,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           { name: "notes", label: "Notes", type: "textarea", full: true },
         ]}
         onSubmit={async (v) => {
-          await api.createCustomer({
+          await customersApi.create({
             customerType:
               CustomerType[v.customerType as keyof typeof CustomerType],
             fullName: v.fullName || null,

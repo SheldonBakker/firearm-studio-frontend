@@ -13,7 +13,7 @@ import "./app.css";
 import { Toaster } from "~/components/ui/sonner";
 import { AppShellSkeleton } from "~/components/common/skeletons";
 import { PageWrap, ErrorState } from "~/components/common/misc";
-import { ApiError } from "~/lib/api/client";
+import { ApiError } from "~/lib/api/http";
 import { AuthProvider } from "~/context/auth-context";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";

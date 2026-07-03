@@ -2,7 +2,8 @@ import { useState } from "react";
 import { z } from "zod";
 import { redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/onboarding";
-import { api, ApiError } from "~/lib/api/client";
+import { ApiError } from "~/lib/api/http";
+import { companyApi } from "~/lib/api/company/company";
 import {
   grantCompanyAccess,
   hasCompanyAccess,
@@ -15,7 +16,7 @@ import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import type { CreateCompanyRequest } from "~/lib/types/api";
+import type { CreateCompanyRequest } from "~/lib/api/company/types";
 import {
   getSouthAfricanPhoneError,
   optionalSouthAfricanPhoneSchema,
@@ -102,19 +103,16 @@ export default function Onboarding() {
     }
     setLoading(true);
     try {
-      await api.createCompany({
+      await companyApi.createOnboarding({
         ...values,
         name: result.data.name,
         email: result.data.email || undefined,
         phone: result.data.phone || undefined,
       });
-      // New company joined → refresh the session so the JWT carries the new
-      // company/role claims, then enter the dashboard.
       await refreshSession();
       grantCompanyAccess();
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      // 409 = the user already belongs to a company; just refresh and proceed.
       if (err instanceof ApiError && err.status === 409) {
         await refreshSession();
         grantCompanyAccess();

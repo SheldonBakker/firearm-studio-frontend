@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
-import { api } from "~/lib/api/client";
+import { storageApi } from "~/lib/api/storage/storage";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -19,7 +19,7 @@ import { StorageStatus, enumKey } from "~/lib/types/enums";
 import type {
   StorageRecordDtoPaginatedResponse,
   StorageRecordResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/storage/types";
 
 const PAGE_SIZE = 20;
 
@@ -45,8 +45,8 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const serialNumber = searchParams.get("serialNumber")?.trim() || undefined;
   const customerName = searchParams.get("customerName")?.trim() || undefined;
 
-  const storageP = api
-    .storageActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName })
+  const storageP = storageApi
+    .listActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName })
     .catch(
       () =>
         ({
@@ -257,7 +257,7 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     },
                   ]}
                   onSubmit={async (v) => {
-                    await api.updateStorage(releasing.id, {
+                    await storageApi.update(releasing.id, {
                       storageStatus: StorageStatus.Released,
                       storedUntil: v.storedUntil || null,
                     });

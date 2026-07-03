@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import type { Route } from "./+types/contact";
 import { pageMeta } from "~/lib/utils/seo";
 import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
-import { api } from "~/lib/api/client";
+import { contactApi } from "~/lib/api/contact/contact";
 
 const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined;
 const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as string | undefined;
@@ -206,7 +206,7 @@ export default function Contact() {
     }
 
     try {
-      await api.contact({
+      await contactApi.submit({
         fullName: (formData.get("fullName") as string | null)?.trim() || null,
         email: (formData.get("email") as string | null)?.trim() || null,
         company: (formData.get("company") as string | null)?.trim() || null,

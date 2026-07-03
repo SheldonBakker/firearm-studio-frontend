@@ -2,7 +2,7 @@ import { useState } from "react";
 import { redirect, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/settings";
-import { api } from "~/lib/api/client";
+import { companyApi } from "~/lib/api/company/company";
 import { requireAuth } from "~/context/auth-context";
 import { canSeeNav, primaryRole } from "~/lib/utils/rbac";
 import { useSessionUser } from "~/context/auth-context";
@@ -15,12 +15,12 @@ import { KeyValue } from "~/components/common/key-value";
 import { Mono } from "~/components/common/mono";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
-import type { CompanyDetailsResponse } from "~/lib/types/api";
+import type { CompanyDetailsResponse } from "~/lib/api/company/types";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);
   if (!canSeeNav(user, "settings")) throw redirect("/dashboard");
-  return { company: api.company().catch(() => null) };
+  return { company: companyApi.get().catch(() => null) };
 }
 
 export default function Settings({ loaderData }: Route.ComponentProps) {
@@ -150,7 +150,7 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
             { name: "postalCode", label: "Postal code", defaultValue: c.postalCode ?? "" },
           ]}
           onSubmit={async (v) => {
-            await api.updateCompany({
+            await companyApi.update({
               name: v.name || null,
               registrationNumber: v.registrationNumber || null,
               vatNumber: v.vatNumber || null,

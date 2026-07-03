@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/invoice-detail";
-import { api, ApiError } from "~/lib/api/client";
+import { ApiError } from "~/lib/api/http";
+import { invoicesApi } from "~/lib/api/invoices/invoices";
+import { customerLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -26,13 +28,13 @@ import type {
   InvoiceDetailDto,
   InvoiceLineDto,
   InvoicePaymentDto,
-} from "~/lib/types/api";
+} from "~/lib/api/invoices/types";
 
 const invoiceNumber = (invoice: InvoiceDetailDto) =>
   invoice.invoiceNumber ?? invoice.id.slice(0, 8);
 
 export function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return { data: api.invoice(params.id) };
+  return { data: invoicesApi.get(params.id) };
 }
 
 const METHODS = enumNames(PaymentMethod);
@@ -50,10 +52,12 @@ export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
 }
 
 function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
+  const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
   const writable = can(user, "invoices:write");
   const [payOpen, setPayOpen] = useState(false);
+  const customer = invoice.customer;
   const payments = invoice.payments ?? [];
   const lines = invoice.lines ?? [];
   const status = enumKey(InvoiceStatus, invoice.status) ?? "Draft";
@@ -61,7 +65,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
 
   async function send() {
     try {
-      await api.sendInvoice(invoice.id);
+      await invoicesApi.send(invoice.id);
       toast.success("Invoice sent");
       revalidator.revalidate();
     } catch (e) {
@@ -70,7 +74,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
   }
   async function cancel() {
     try {
-      await api.cancelInvoice(invoice.id);
+      await invoicesApi.cancel(invoice.id);
       toast.success("Invoice cancelled");
       revalidator.revalidate();
     } catch (e) {
@@ -82,7 +86,19 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
     <>
       <PageHeader
         title={invoiceNumber(invoice)}
-        subtitle={<StatusBadge status={status} />}
+        subtitle={
+          <span className="flex items-center gap-2">
+            <StatusBadge status={status} />
+            {customer && (
+              <button
+                onClick={() => navigate(`/customers/${customer.id}`)}
+                className="hover:text-foreground"
+              >
+                · {customerLabel(customer)}
+              </button>
+            )}
+          </span>
+        }
         actions={
           writable &&
           !isPaid && (
@@ -113,6 +129,22 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
                 v: <Mono>{invoiceNumber(invoice)}</Mono>,
                 strong: true,
               },
+              {
+                k: "Customer",
+                v: customer ? (
+                  <button
+                    onClick={() => navigate(`/customers/${customer.id}`)}
+                    className="text-primary hover:underline"
+                  >
+                    {customerLabel(customer)}
+                  </button>
+                ) : (
+                  "—"
+                ),
+                strong: true,
+              },
+              { k: "Email", v: customer?.email || "—" },
+              { k: "Phone", v: customer?.phone || "—" },
               { k: "Month", v: <Mono>{invoice.invoiceMonth ?? "—"}</Mono> },
               { k: "Sent", v: fmtDate(invoice.sentAt) },
               { k: "Due", v: fmtDate(invoice.dueOn) },
@@ -246,7 +278,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
           { name: "notes", label: "Notes", type: "textarea", full: true },
         ]}
         onSubmit={async (v) => {
-          await api.recordPayment(invoice.id, {
+          await invoicesApi.recordPayment(invoice.id, {
             amount: Number(v.amount || 0),
             paidOn: v.paidOn || null,
             method: PaymentMethod[v.method as keyof typeof PaymentMethod],

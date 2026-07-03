@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/dashboard";
-import { api } from "~/lib/api/client";
+import { invoicesApi } from "~/lib/api/invoices/invoices";
+import { licencesApi } from "~/lib/api/licences/licences";
+import { customersApi } from "~/lib/api/customers/customers";
+import { dashboardApi } from "~/lib/api/dashboard/dashboard";
 import { fmtMoneyShort, fmtMoney, fmtDate } from "~/lib/utils/format";
 import { customerNameMap, inv, firearmLabel } from "~/lib/utils/entities";
 import { PageWrap, SectionTitle, StatDot } from "~/components/common/misc";
@@ -16,13 +19,13 @@ import {
   TableSkeleton,
   AttentionListSkeleton,
 } from "~/components/common/skeletons";
+import type { CustomerListItemDto } from "~/lib/api/customers/types";
+import type { DashboardStatsResponse } from "~/lib/api/dashboard/types";
 import type {
-  CustomerListItemDto,
-  DashboardStatsResponse,
   InvoiceListItemDtoPaginatedResponse,
   InvoiceResponse,
-  LicenceListItemDtoPaginatedResponse,
-} from "~/lib/types/api";
+} from "~/lib/api/invoices/types";
+import type { LicenceListItemDtoPaginatedResponse } from "~/lib/api/licences/types";
 
 const EMPTY_DASHBOARD_STATS: DashboardStatsResponse = {
   activeStorageCount: 0,
@@ -46,20 +49,20 @@ const EMPTY_LICENCE_PAGE: LicenceListItemDtoPaginatedResponse = {
 };
 
 export function clientLoader() {
-  const invoicesP = api
-    .invoices({ pageSize: 200 })
+  const invoicesP = invoicesApi
+    .list({ pageSize: 200 })
     .catch(() => EMPTY_INVOICE_PAGE);
-  const dueP = api
-    .licences({ sortOrder: "asc", status: LicenceStatus.RenewalDue, pageSize: 200 })
+  const dueP = licencesApi
+    .list({ sortOrder: "asc", status: LicenceStatus.RenewalDue, pageSize: 200 })
     .catch(() => EMPTY_LICENCE_PAGE);
-  const expiredP = api
-    .licences({ sortOrder: "asc", status: LicenceStatus.Expired, pageSize: 200 })
+  const expiredP = licencesApi
+    .list({ sortOrder: "asc", status: LicenceStatus.Expired, pageSize: 200 })
     .catch(() => EMPTY_LICENCE_PAGE);
-  const customersP = api
-    .allCustomers()
+  const customersP = customersApi
+    .all()
     .catch(() => [] as CustomerListItemDto[]);
   return {
-    stats: api.dashboardStats().catch(() => EMPTY_DASHBOARD_STATS),
+    stats: dashboardApi.stats().catch(() => EMPTY_DASHBOARD_STATS),
     recent: Promise.all([invoicesP, customersP]),
     attention: Promise.all([expiredP, invoicesP, dueP, customersP]),
   };
