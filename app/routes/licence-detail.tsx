@@ -16,7 +16,12 @@ import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, DetailSkeleton } from "~/components/common/skeletons";
-import { FirearmStatus, LicenceStatus, enumKey } from "~/lib/types/enums";
+import {
+  CustomerType,
+  FirearmStatus,
+  LicenceStatus,
+  enumKey,
+} from "~/lib/types/enums";
 import type { LicenceDetailDto } from "~/lib/api/licences/types";
 
 const LICENCE_STATUS_NAMES = Object.keys(LicenceStatus);
@@ -111,6 +116,43 @@ function LicenceView({ licence }: { licence: LicenceDetailDto }) {
               },
             ]}
           />
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-[13px] font-semibold text-foreground">
+              Customer
+            </h2>
+            {customer && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/customers/${customer.id}`)}
+              >
+                View customer
+                <Icon name="arrow" size={14} />
+              </Button>
+            )}
+          </div>
+          {customer ? (
+            <KeyValue
+              pairs={[
+                { k: "Name", v: customerLabel(customer), strong: true },
+                {
+                  k: "Type",
+                  v: enumKey(CustomerType, customer.customerType) ?? "—",
+                },
+                { k: "Full name", v: customer.fullName || "—" },
+                { k: "Company", v: customer.companyName || "—" },
+                { k: "Email", v: customer.email || "—" },
+                { k: "Phone", v: customer.phone || "—" },
+              ]}
+            />
+          ) : (
+            <p className="text-[12.5px] text-muted-foreground">
+              Customer details unavailable.
+            </p>
+          )}
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6">
