@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/invoices";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
@@ -6,7 +5,6 @@ import { inv } from "~/lib/utils/entities";
 import { fmtMoney } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
@@ -19,7 +17,6 @@ import type {
 } from "~/lib/api/invoices/types";
 
 const PAGE_SIZE = 20;
-const STATUSES = ["Paid", "Sent", "Overdue", "Draft", "Cancelled"];
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedPage = Number(
@@ -45,7 +42,6 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 export default function Invoices({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filter, setFilter] = useState("all");
 
   const navigatePage = (newPage: number) => {
     const next = new URLSearchParams(searchParams);
@@ -60,28 +56,12 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
         {(invoicesPage) => {
           const invoices = invoicesPage.items ?? [];
-          const rows =
-            filter === "all"
-              ? invoices
-              : invoices.filter((i) => inv.status(i) === filter);
           return (
             <>
-              <FilterBar
-                active={filter}
-                onChange={setFilter}
-                options={[
-                  { id: "all", label: "All", n: invoicesPage.totalCount },
-                  ...STATUSES.map((s) => ({
-                    id: s,
-                    label: s,
-                    n: invoices.filter((i) => inv.status(i) === s).length,
-                  })),
-                ]}
-              />
               <DataTable<InvoiceResponse>
-                rows={rows}
+                rows={invoices}
                 onRowClick={(r) => navigate(`/invoices/${r.id}`)}
-                empty="No invoices match this filter."
+                empty="No invoices yet."
                 columns={[
                   {
                     key: "num",

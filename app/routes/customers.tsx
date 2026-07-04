@@ -9,7 +9,6 @@ import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
@@ -47,7 +46,6 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const user = useSessionUser();
-  const [filter, setFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
 
   return (
@@ -66,49 +64,12 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
       <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
         {(customerPage) => {
           const customers = customerPage.items ?? [];
-          const activeN = customers.filter((c) => c.isActive).length;
-          let rows = customers;
-          if (filter === "individual")
-            rows = rows.filter(
-              (c) => c.customerType === CustomerType.Individual,
-            );
-          if (filter === "company")
-            rows = rows.filter(
-              (c) => c.customerType === CustomerType.Company,
-            );
-          if (filter === "inactive") rows = rows.filter((c) => !c.isActive);
           return (
             <>
-              <FilterBar
-                active={filter}
-                onChange={setFilter}
-                options={[
-                  { id: "all", label: "All", n: customerPage.totalCount },
-                  {
-                    id: "individual",
-                    label: "Individuals",
-                    n: customers.filter(
-                      (c) => c.customerType === CustomerType.Individual,
-                    ).length,
-                  },
-                  {
-                    id: "company",
-                    label: "Companies",
-                    n: customers.filter(
-                      (c) => c.customerType === CustomerType.Company,
-                    ).length,
-                  },
-                  {
-                    id: "inactive",
-                    label: "Inactive",
-                    n: customers.length - activeN,
-                  },
-                ]}
-              />
               <DataTable<CustomerListItemDto>
-                rows={rows}
+                rows={customers}
                 onRowClick={(r) => navigate(`/customers/${r.id}`)}
-                empty="No customers match this filter."
+                empty="No customers yet."
                 columns={[
           {
             key: "customer",
