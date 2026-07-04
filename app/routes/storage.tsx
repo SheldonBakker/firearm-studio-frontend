@@ -7,7 +7,6 @@ import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -184,7 +183,6 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader title="Storage Records" />
       <FilterBar
         active={activeStatus}
         onChange={setStatusFilter}

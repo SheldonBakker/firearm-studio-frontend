@@ -4,7 +4,6 @@ import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { inv } from "~/lib/utils/entities";
 import { fmtMoney } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -186,7 +185,6 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader title="Invoices" />
       <FilterBar
         active={activeStatus}
         onChange={setStatusFilter}

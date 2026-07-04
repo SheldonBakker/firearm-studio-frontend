@@ -7,7 +7,6 @@ import { fmtDate } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -161,7 +160,6 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader title="Licences" />
       <FilterBar
         active={activeStatus}
         onChange={setStatusFilter}

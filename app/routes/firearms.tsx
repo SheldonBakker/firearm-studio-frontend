@@ -8,7 +8,7 @@ import { customerLabel } from "~/lib/utils/entities";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
+import { PageActions } from "~/context/page-actions";
 import { FilterBar } from "~/components/common/filter-bar";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -130,17 +130,14 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader
-        title="Firearms"
-        actions={
-          can(user, "registry:write") && (
-            <Button onClick={() => setAddOpen(true)}>
-              <Icon name="plus" size={16} />
-              Add firearm
-            </Button>
-          )
-        }
-      />
+      {can(user, "registry:write") && (
+        <PageActions>
+          <Button onClick={() => setAddOpen(true)}>
+            <Icon name="plus" size={16} />
+            Add firearm
+          </Button>
+        </PageActions>
+      )}
       <FilterBar
         active={activeStatus}
         onChange={setStatusFilter}

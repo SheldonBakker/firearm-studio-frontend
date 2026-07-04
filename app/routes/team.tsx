@@ -7,7 +7,7 @@ import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
+import { PageActions } from "~/context/page-actions";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Icon } from "~/components/common/icon";
@@ -133,15 +133,12 @@ export default function Team({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader
-        title="Team"
-        actions={
-          <Button onClick={() => setInviteOpen(true)}>
-            <Icon name="plus" size={16} />
-            Invite user
-          </Button>
-        }
-      />
+      <PageActions>
+        <Button onClick={() => setInviteOpen(true)}>
+          <Icon name="plus" size={16} />
+          Invite user
+        </Button>
+      </PageActions>
       <Resolve
         resolve={loaderData.users}
         fallback={

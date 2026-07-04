@@ -5,8 +5,7 @@ import { customersApi } from "~/lib/api/customers/customers";
 import { firearmsApi } from "~/lib/api/firearms/firearms";
 import { storageApi } from "~/lib/api/storage/storage";
 import { CustomerType } from "~/lib/types/enums";
-import { can, type SessionUser } from "~/lib/utils/rbac";
-import { Button } from "~/components/ui/button";
+import { PageActionsSlot } from "~/context/page-actions";
 import type { CustomerListItemDto } from "~/lib/api/customers/types";
 import type { FirearmResponse } from "~/lib/api/firearms/types";
 import type { StorageRecordResponse } from "~/lib/api/storage/types";
@@ -84,13 +83,7 @@ const INVOICE_SEARCH_TYPES: {
   { value: "invoiceNumber", label: "Invoice #", placeholder: "Search invoices by number…" },
 ];
 
-export function Topbar({
-  user,
-  onMenuClick,
-}: {
-  user: SessionUser;
-  onMenuClick: () => void;
-}) {
+export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const title =
@@ -593,15 +586,7 @@ export function Topbar({
         />
       </button>
 
-      {can(user, "team:manage") && (
-        <Button
-          onClick={() => navigate("/team")}
-          className="hidden shrink-0 sm:inline-flex"
-        >
-          <Icon name="plus" size={16} />
-          Invite user
-        </Button>
-      )}
+      <PageActionsSlot className="flex shrink-0 items-center gap-2.5" />
     </header>
   );
 }

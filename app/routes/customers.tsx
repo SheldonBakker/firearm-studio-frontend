@@ -8,7 +8,7 @@ import { initials } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
+import { PageActions } from "~/context/page-actions";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
@@ -123,17 +123,14 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader
-        title="Customers"
-        actions={
-          can(user, "registry:write") && (
-            <Button onClick={() => setAddOpen(true)}>
-              <Icon name="plus" size={16} />
-              Add customer
-            </Button>
-          )
-        }
-      />
+      {can(user, "registry:write") && (
+        <PageActions>
+          <Button onClick={() => setAddOpen(true)}>
+            <Icon name="plus" size={16} />
+            Add customer
+          </Button>
+        </PageActions>
+      )}
       <Resolve
         resolve={loaderData.data}
         fallback={

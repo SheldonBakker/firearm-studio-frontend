@@ -28,10 +28,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader
-        title="Settings"
-        subtitle="Manage your company profile and account"
-      />
+      <PageHeader subtitle="Manage your company profile and account" />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="rounded-2xl border border-border bg-card p-6">

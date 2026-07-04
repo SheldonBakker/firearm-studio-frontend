@@ -4,7 +4,6 @@ import { auditApi } from "~/lib/api/audit/audit";
 import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
-import { PageHeader } from "~/components/common/page-header";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
@@ -143,7 +142,6 @@ export default function Audit({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      <PageHeader title="Audit Log" />
       <Resolve
         resolve={loaderData.logs}
         fallback={

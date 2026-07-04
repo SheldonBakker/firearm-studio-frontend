@@ -4,6 +4,7 @@ import type { Route } from "./+types/app-layout";
 import { hasCompanyAccess, requireAuth } from "~/context/auth-context";
 import { Sidebar, MobileSidebar } from "~/components/layout/sidebar";
 import { Topbar } from "~/components/layout/topbar";
+import { PageActionsProvider } from "~/context/page-actions";
 import { AppShellSkeleton } from "~/components/common/skeletons";
 
 export function meta() {
@@ -33,12 +34,14 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
     <div className="flex h-[calc(100dvh-63px)] w-full overflow-hidden bg-background text-foreground">
       <Sidebar user={user} />
       <MobileSidebar user={user} open={navOpen} onOpenChange={setNavOpen} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar user={user} onMenuClick={() => setNavOpen(true)} />
-        <div className="flex-1 overflow-y-auto">
-          <Outlet />
+      <PageActionsProvider>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar onMenuClick={() => setNavOpen(true)} />
+          <div className="flex-1 overflow-y-auto">
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </PageActionsProvider>
     </div>
   );
 }
