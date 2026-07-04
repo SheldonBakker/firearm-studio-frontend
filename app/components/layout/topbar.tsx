@@ -86,6 +86,7 @@ export function Topbar({
   const title =
     TITLES.find((t) => pathname.startsWith(t.prefix))?.title ?? "Firearm Studio";
 
+  const isDashboard = pathname.startsWith("/dashboard");
   const isCustomers = pathname.startsWith("/customers");
   const isFirearms = pathname.startsWith("/firearms");
   const isStorage = pathname.startsWith("/storage");
@@ -310,6 +311,7 @@ export function Topbar({
         {title}
       </div>
 
+      {!isDashboard && (
       <div className="relative ml-auto w-full min-w-0 sm:w-85">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
           <Icon name="search" size={16} />
@@ -485,12 +487,15 @@ export function Topbar({
           </div>
         )}
       </div>
+      )}
 
       <button
         type="button"
         onClick={() => navigate("/licences")}
         title="Alerts"
-        className="relative flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-[9px] border border-border2 bg-secondary text-muted-foreground hover:text-foreground"
+        className={`relative flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-[9px] border border-border2 bg-secondary text-muted-foreground hover:text-foreground${
+          isDashboard ? " ml-auto" : ""
+        }`}
       >
         <Icon name="bell" size={17} />
         <span

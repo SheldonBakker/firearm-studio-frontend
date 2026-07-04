@@ -1,4 +1,5 @@
 import { Suspense, use, type ReactNode } from "react";
+import { useLocation } from "react-router";
 import { Skeleton } from "~/components/ui/skeleton";
 import { InlineErrorBoundary } from "./error-boundary";
 
@@ -11,8 +12,9 @@ export function Resolve<T>({
   fallback: ReactNode;
   children: (value: T) => ReactNode;
 }) {
+  const { pathname, search } = useLocation();
   return (
-    <InlineErrorBoundary>
+    <InlineErrorBoundary key={`${pathname}${search}`}>
       <Suspense fallback={fallback}>
         <Unwrap resolve={resolve}>{children}</Unwrap>
       </Suspense>

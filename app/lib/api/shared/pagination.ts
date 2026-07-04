@@ -5,10 +5,6 @@ export interface PaginatedResponse<T> {
   totalCount: number;
 }
 
-/**
- * Coerce a (possibly missing / malformed) paginated payload into a stable
- * shape with sane defaults. Shared by every feature's list endpoint.
- */
 export function normalizePage<T>(
   response: PaginatedResponse<T> | null | undefined,
   params: { pageNumber?: number; pageSize?: number } = {},
