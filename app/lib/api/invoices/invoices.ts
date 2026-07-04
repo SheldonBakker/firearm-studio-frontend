@@ -1,5 +1,6 @@
 import { request } from "../http";
 import { normalizePage } from "../shared/pagination";
+import type { InvoiceStatus } from "~/lib/types/enums";
 import type {
   InvoiceDetailDto,
   InvoiceListItemDtoPaginatedResponse,
@@ -9,6 +10,11 @@ import type {
 interface InvoiceListParams {
   pageNumber?: number;
   pageSize?: number;
+  sortBy?: string;
+  sortOrder?: string;
+  status?: InvoiceStatus | string | number;
+  invoiceNumber?: string;
+  customerName?: string;
 }
 
 async function list(
@@ -20,6 +26,12 @@ async function list(
       query: {
         pageNumber: params.pageNumber,
         pageSize: params.pageSize,
+        sortBy: params.sortBy,
+        sortOrder: params.sortOrder,
+        status:
+          params.status !== undefined ? String(params.status) : undefined,
+        invoiceNumber: params.invoiceNumber,
+        customerName: params.customerName,
       },
     },
   );
