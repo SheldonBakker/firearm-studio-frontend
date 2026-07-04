@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { InvoiceStatus } from "~/lib/types/enums";
 import type {
   InvoiceListItemDtoPaginatedResponse,
@@ -139,52 +139,46 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <PageHeader title="Invoices" />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
+      <FilterBar
+        active={activeStatus}
+        onChange={setStatusFilter}
+        options={STATUS_FILTERS}
+        right={
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-dim">
+              Sort
+            </span>
+            <Select value={sortBy} onValueChange={(v) => setSort(v, sortOrder)}>
+              <SelectTrigger size="sm" className="w-30">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setSort(sortBy, sortOrder === "asc" ? "desc" : "asc")
+              }
+              title={sortOrder === "asc" ? "Ascending" : "Descending"}
+            >
+              {sortOrder === "asc" ? "Asc" : "Desc"}
+            </Button>
+          </div>
+        }
+      />
+      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={5} />}>
         {(invoicesPage) => {
           const invoices = invoicesPage.items ?? [];
           return (
             <>
-              <FilterBar
-                active={activeStatus}
-                onChange={setStatusFilter}
-                options={[
-                  { id: "all", label: "All", n: invoicesPage.totalCount },
-                  ...STATUS_FILTERS.slice(1),
-                ]}
-                right={
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-dim">
-                      Sort
-                    </span>
-                    <Select
-                      value={sortBy}
-                      onValueChange={(v) => setSort(v, sortOrder)}
-                    >
-                      <SelectTrigger size="sm" className="w-30">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SORT_OPTIONS.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setSort(sortBy, sortOrder === "asc" ? "desc" : "asc")
-                      }
-                      title={sortOrder === "asc" ? "Ascending" : "Descending"}
-                    >
-                      {sortOrder === "asc" ? "Asc" : "Desc"}
-                    </Button>
-                  </div>
-                }
-              />
               <DataTable<InvoiceResponse>
                 rows={invoices}
                 onRowClick={(r) => navigate(`/invoices/${r.id}`)}

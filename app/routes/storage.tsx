@@ -95,16 +95,16 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <PageHeader title="Storage Records" />
+      <FilterBar
+        active={activeStatus}
+        onChange={setStatusFilter}
+        options={STATUS_FILTERS}
+      />
       <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
         {(storagePage) => {
           const storage = storagePage.items ?? [];
           return (
             <>
-              <FilterBar
-                active={activeStatus}
-                onChange={setStatusFilter}
-                options={STATUS_FILTERS}
-              />
               <DataTable<StorageRecordResponse>
                 rows={storage}
                 onRowClick={(r) => navigate(`/storage/${r.id}`)}

@@ -15,7 +15,7 @@ import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/types/enums";
 import type {
   LicenceListItemDtoPaginatedResponse,
@@ -97,16 +97,16 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <PageHeader title="Licences" />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={6} />}>
+      <FilterBar
+        active={activeStatus}
+        onChange={setStatusFilter}
+        options={STATUS_FILTERS}
+      />
+      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={6} />}>
         {(licencesPage) => {
           const licences = licencesPage.items ?? [];
           return (
             <>
-              <FilterBar
-                active={activeStatus}
-                onChange={setStatusFilter}
-                options={STATUS_FILTERS}
-              />
               <DataTable<LicenceResponse>
                 rows={licences}
                 onRowClick={(r) =>

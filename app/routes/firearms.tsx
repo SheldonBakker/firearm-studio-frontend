@@ -16,7 +16,7 @@ import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { Resolve, TableSkeleton } from "~/components/common/skeletons";
 import { FirearmStatus, enumKey } from "~/lib/types/enums";
 import type {
   FirearmResponse,
@@ -99,19 +99,16 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
           )
         }
       />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={4} />}>
+      <FilterBar
+        active={activeStatus}
+        onChange={setStatusFilter}
+        options={STATUS_FILTERS}
+      />
+      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={4} />}>
         {(firearmsPage) => {
           const firearms = firearmsPage.items ?? [];
           return (
             <>
-              <FilterBar
-                active={activeStatus}
-                onChange={setStatusFilter}
-                options={[
-                  { id: "all", label: "All", n: firearmsPage.totalCount },
-                  ...STATUS_FILTERS.slice(1),
-                ]}
-              />
               <DataTable<FirearmResponse>
                 rows={firearms}
                 onRowClick={(r) => navigate(`/firearms/${r.id}`)}
