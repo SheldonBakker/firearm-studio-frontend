@@ -125,9 +125,43 @@ export function SiteHeader() {
           }}
         >
           {status === "loading" ? (
-            <div aria-hidden style={{ width: 176, height: 34 }} />
+            <div aria-hidden style={{ width: 220, height: 34 }} />
           ) : isLoggedIn ? (
             <>
+              <Link
+                to="/licences"
+                aria-label="Alerts"
+                title="Alerts"
+                className="mk-logout"
+                style={{
+                  position: "relative",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 34,
+                  width: 34,
+                  borderRadius: 9,
+                  color: "#e6eaf0",
+                  background: "#1a1f28",
+                  border: "1px solid #333b49",
+                  textDecoration: "none",
+                  flexShrink: 0,
+                }}
+              >
+                <Icon name="bell" size={16} />
+                <span
+                  style={{
+                    position: "absolute",
+                    right: 8,
+                    top: 7,
+                    height: 7,
+                    width: 7,
+                    borderRadius: 9999,
+                    background: "var(--status-red)",
+                    border: "2px solid #1a1f28",
+                  }}
+                />
+              </Link>
               <Link
                 to="/dashboard"
                 prefetch="viewport"

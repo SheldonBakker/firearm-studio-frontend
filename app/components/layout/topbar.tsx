@@ -571,22 +571,11 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => navigate("/licences")}
-        title="Alerts"
-        className={`relative flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-[9px] border border-border2 bg-secondary text-muted-foreground hover:text-foreground${
+      <PageActionsSlot
+        className={`flex shrink-0 items-center gap-2.5${
           isDashboard ? " ml-auto" : ""
         }`}
-      >
-        <Icon name="bell" size={17} />
-        <span
-          className="absolute right-2.5 top-2 h-1.75 w-1.75 rounded-full"
-          style={{ background: "var(--status-red)", border: "2px solid var(--secondary)" }}
-        />
-      </button>
-
-      <PageActionsSlot className="flex shrink-0 items-center gap-2.5" />
+      />
     </header>
   );
 }
