@@ -9,13 +9,13 @@ import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/types/enums";
 import type {
   LicenceListItemDtoPaginatedResponse,
@@ -94,6 +94,71 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
     setSearchParams(next);
   };
 
+  const columns: Column<LicenceResponse>[] = [
+    {
+      key: "num",
+      header: "Licence",
+      cell: (r) => (
+        <Mono className="text-[12.5px] font-semibold text-foreground">
+          {r.licenceNumber ?? "—"}
+        </Mono>
+      ),
+    },
+    {
+      key: "issued",
+      header: "Issued",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {fmtDate(r.issuedOn)}
+        </span>
+      ),
+    },
+    {
+      key: "expires",
+      header: "Expires",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {fmtDate(r.expiresOn)}
+        </span>
+      ),
+    },
+    {
+      key: "renewalDue",
+      header: "Renewal due",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {fmtDate(r.renewalDueOn)}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      align: "right",
+      cell: (r) => <StatusBadge status={enumKey(LicenceStatus, r.status)} />,
+    },
+    {
+      key: "action",
+      header: "",
+      align: "right",
+      width: "90px",
+      cell: (r) =>
+        writable ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation();
+              setEditing(r);
+            }}
+          >
+            <Icon name="edit" size={14} />
+            Edit
+          </Button>
+        ) : null,
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader title="Licences" />
@@ -102,12 +167,18 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
         onChange={setStatusFilter}
         options={STATUS_FILTERS}
       />
-      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={6} />}>
+      <Resolve
+        resolve={loaderData.data}
+        fallback={
+          <DataTable<LicenceResponse> columns={columns} rows={[]} loading />
+        }
+      >
         {(licencesPage) => {
           const licences = licencesPage.items ?? [];
           return (
             <>
               <DataTable<LicenceResponse>
+                columns={columns}
                 rows={licences}
                 onRowClick={(r) =>
                   navigate(
@@ -119,72 +190,6 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                     ? "No licences match these filters."
                     : "No licences recorded."
                 }
-                columns={[
-                  {
-                    key: "num",
-                    header: "Licence",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] font-semibold text-foreground">
-                        {r.licenceNumber ?? "—"}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "issued",
-                    header: "Issued",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {fmtDate(r.issuedOn)}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "expires",
-                    header: "Expires",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {fmtDate(r.expiresOn)}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "renewalDue",
-                    header: "Renewal due",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {fmtDate(r.renewalDueOn)}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    align: "right",
-                    cell: (r) => (
-                      <StatusBadge status={enumKey(LicenceStatus, r.status)} />
-                    ),
-                  },
-                  {
-                    key: "action",
-                    header: "",
-                    align: "right",
-                    width: "90px",
-                    cell: (r) =>
-                      writable ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setEditing(r);
-                          }}
-                        >
-                          <Icon name="edit" size={14} />
-                          Edit
-                        </Button>
-                      ) : null,
-                  },
-                ]}
               />
 
               {licencesPage.totalCount > licencesPage.pageSize && (

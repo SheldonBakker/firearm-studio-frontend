@@ -8,7 +8,7 @@ import { canSeeNav } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
 import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/api/users/types";
 
@@ -68,6 +68,69 @@ export default function Team({ loaderData }: Route.ComponentProps) {
     revalidator.revalidate();
   }
 
+  const columns: Column<UserResponse>[] = [
+    {
+      key: "user",
+      header: "Member",
+      cell: (r) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg bg-raised font-mono text-[12px] font-bold text-foreground">
+            {initials(r.fullName || r.email)}
+          </div>
+          <div>
+            <div className="text-[13px] font-semibold text-foreground">
+              {r.fullName || "—"}
+            </div>
+            <div className="text-[11.5px] text-dim">{r.email ?? "—"}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "role",
+      header: "Role",
+      cell: (r) => (
+        <StatusBadge status={enumKey(AppRole, r.role)} dot={false} />
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) => <StatusBadge status={r.isActive ? "Active" : "Inactive"} />,
+    },
+    {
+      key: "linked",
+      header: "Linked",
+      cell: (r) => <StatusBadge status={r.isLinked ? "Linked" : "NotLinked"} />,
+    },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      width: "48px",
+      cell: (r) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex justify-end text-dim hover:text-foreground">
+              <Icon name="dots" size={18} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setRoleFor(r)}>
+              Change role
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => deactivate(r)}
+            >
+              Deactivate
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader
@@ -79,89 +142,20 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           </Button>
         }
       />
-      <Resolve resolve={loaderData.users} fallback={<TableSkeleton cols={5} />}>
+      <Resolve
+        resolve={loaderData.users}
+        fallback={
+          <DataTable<UserResponse> columns={columns} rows={[]} loading />
+        }
+      >
         {(usersPage) => {
           const users = usersPage.items ?? [];
           return (
             <>
               <DataTable<UserResponse>
+                columns={columns}
                 rows={users}
                 empty="No team members yet."
-                columns={[
-                  {
-                    key: "user",
-                    header: "Member",
-                    cell: (r) => (
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg bg-raised font-mono text-[12px] font-bold text-foreground">
-                          {initials(r.fullName || r.email)}
-                        </div>
-                        <div>
-                          <div className="text-[13px] font-semibold text-foreground">
-                            {r.fullName || "—"}
-                          </div>
-                          <div className="text-[11.5px] text-dim">
-                            {r.email ?? "—"}
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: "role",
-                    header: "Role",
-                    cell: (r) => (
-                      <StatusBadge
-                        status={enumKey(AppRole, r.role)}
-                        dot={false}
-                      />
-                    ),
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    cell: (r) => (
-                      <StatusBadge
-                        status={r.isActive ? "Active" : "Inactive"}
-                      />
-                    ),
-                  },
-                  {
-                    key: "linked",
-                    header: "Linked",
-                    cell: (r) => (
-                      <StatusBadge
-                        status={r.isLinked ? "Linked" : "NotLinked"}
-                      />
-                    ),
-                  },
-                  {
-                    key: "actions",
-                    header: "",
-                    align: "right",
-                    width: "48px",
-                    cell: (r) => (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="flex justify-end text-dim hover:text-foreground">
-                            <Icon name="dots" size={18} />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setRoleFor(r)}>
-                            Change role
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => deactivate(r)}
-                          >
-                            Deactivate
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ),
-                  },
-                ]}
               />
 
               {usersPage.totalCount > usersPage.pageSize && (

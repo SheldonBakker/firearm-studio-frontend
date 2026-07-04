@@ -6,7 +6,7 @@ import { fmtMoney } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { InvoiceStatus } from "~/lib/types/enums";
 import type {
   InvoiceListItemDtoPaginatedResponse,
@@ -136,6 +136,54 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
     setSearchParams(next);
   };
 
+  const columns: Column<InvoiceResponse>[] = [
+    {
+      key: "num",
+      header: "Invoice",
+      cell: (r) => (
+        <Mono className="text-[12.5px] font-semibold text-foreground">
+          {inv.number(r)}
+        </Mono>
+      ),
+    },
+    {
+      key: "month",
+      header: "Month",
+      cell: (r) => (
+        <Mono className="text-[12.5px] text-muted-foreground">
+          {inv.month(r)}
+        </Mono>
+      ),
+    },
+    {
+      key: "total",
+      header: "Total",
+      align: "right",
+      cell: (r) => (
+        <Mono className="text-[12.5px] font-semibold">
+          {fmtMoney(inv.total(r))}
+        </Mono>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      align: "right",
+      cell: (r) => <StatusBadge status={inv.status(r)} />,
+    },
+    {
+      key: "go",
+      header: "",
+      align: "right",
+      width: "40px",
+      cell: () => (
+        <span className="flex justify-end text-dim">
+          <Icon name="arrow" size={16} />
+        </span>
+      ),
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader title="Invoices" />
@@ -174,12 +222,18 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
           </div>
         }
       />
-      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={5} />}>
+      <Resolve
+        resolve={loaderData.data}
+        fallback={
+          <DataTable<InvoiceResponse> columns={columns} rows={[]} loading />
+        }
+      >
         {(invoicesPage) => {
           const invoices = invoicesPage.items ?? [];
           return (
             <>
               <DataTable<InvoiceResponse>
+                columns={columns}
                 rows={invoices}
                 onRowClick={(r) => navigate(`/invoices/${r.id}`)}
                 empty={
@@ -187,53 +241,6 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
                     ? "No invoices match these filters."
                     : "No invoices yet."
                 }
-                columns={[
-                  {
-                    key: "num",
-                    header: "Invoice",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] font-semibold text-foreground">
-                        {inv.number(r)}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "month",
-                    header: "Month",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] text-muted-foreground">
-                        {inv.month(r)}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "total",
-                    header: "Total",
-                    align: "right",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] font-semibold">
-                        {fmtMoney(inv.total(r))}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    align: "right",
-                    cell: (r) => <StatusBadge status={inv.status(r)} />,
-                  },
-                  {
-                    key: "go",
-                    header: "",
-                    align: "right",
-                    width: "40px",
-                    cell: () => (
-                      <span className="flex justify-end text-dim">
-                        <Icon name="arrow" size={16} />
-                      </span>
-                    ),
-                  },
-                ]}
               />
 
               {invoicesPage.totalCount > invoicesPage.pageSize && (

@@ -10,13 +10,13 @@ import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { FirearmStatus, enumKey } from "~/lib/types/enums";
 import type {
   FirearmResponse,
@@ -86,6 +86,48 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
     setSearchParams(next);
   };
 
+  const columns: Column<FirearmResponse>[] = [
+    {
+      key: "firearm",
+      header: "Firearm",
+      cell: (r) => (
+        <div>
+          <div className="text-[13px] font-semibold text-foreground">
+            {`${r.make ?? ""} ${r.model ?? ""}`.trim() || "—"}
+          </div>
+          <div className="text-[11.5px] text-dim">
+            {[r.firearmType, r.calibre].filter(Boolean).join(" · ") || "—"}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "serial",
+      header: "Serial",
+      cell: (r) => (
+        <Mono className="text-[12.5px] text-muted-foreground">
+          {r.serialNumber ?? "—"}
+        </Mono>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) => <StatusBadge status={enumKey(FirearmStatus, r.status)} />,
+    },
+    {
+      key: "go",
+      header: "",
+      align: "right",
+      width: "40px",
+      cell: () => (
+        <span className="flex justify-end text-dim">
+          <Icon name="arrow" size={16} />
+        </span>
+      ),
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader
@@ -104,58 +146,21 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
         onChange={setStatusFilter}
         options={STATUS_FILTERS}
       />
-      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={4} />}>
+      <Resolve
+        resolve={loaderData.data}
+        fallback={
+          <DataTable<FirearmResponse> columns={columns} rows={[]} loading />
+        }
+      >
         {(firearmsPage) => {
           const firearms = firearmsPage.items ?? [];
           return (
             <>
               <DataTable<FirearmResponse>
+                columns={columns}
                 rows={firearms}
                 onRowClick={(r) => navigate(`/firearms/${r.id}`)}
                 empty="No firearms match this filter."
-                columns={[
-                  {
-                    key: "firearm",
-                    header: "Firearm",
-                    cell: (r) => (
-                      <div>
-                        <div className="text-[13px] font-semibold text-foreground">
-                          {`${r.make ?? ""} ${r.model ?? ""}`.trim() || "—"}
-                        </div>
-                        <div className="text-[11.5px] text-dim">
-                          {[r.firearmType, r.calibre].filter(Boolean).join(" · ") || "—"}
-                        </div>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: "serial",
-                    header: "Serial",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] text-muted-foreground">
-                        {r.serialNumber ?? "—"}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    cell: (r) => (
-                      <StatusBadge status={enumKey(FirearmStatus, r.status)} />
-                    ),
-                  },
-                  {
-                    key: "go",
-                    header: "",
-                    align: "right",
-                    width: "40px",
-                    cell: () => (
-                      <span className="flex justify-end text-dim">
-                        <Icon name="arrow" size={16} />
-                      </span>
-                    ),
-                  },
-                ]}
               />
 
               {firearmsPage.totalCount > firearmsPage.pageSize && (

@@ -9,12 +9,12 @@ import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { FilterBar } from "~/components/common/filter-bar";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/types/enums";
 import type {
   StorageRecordDtoPaginatedResponse,
@@ -92,6 +92,96 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
     setSearchParams(next);
   };
 
+  const columns: Column<StorageRecordResponse>[] = [
+    {
+      key: "firearm",
+      header: "Firearm",
+      cell: (r) => (
+        <Mono className="text-[13px] font-semibold text-foreground">
+          {r.serialNumber ?? "—"}
+        </Mono>
+      ),
+    },
+    {
+      key: "customer",
+      header: "Customer",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {r.customerName ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "location",
+      header: "Location",
+      cell: (r) => (
+        <Mono className="text-[12.5px] text-muted-foreground">
+          {[r.storageLocation, r.rackNumber, r.safeNumber]
+            .filter(Boolean)
+            .join(" · ") || "—"}
+        </Mono>
+      ),
+    },
+    {
+      key: "from",
+      header: "Stored from",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {fmtDate(r.storedFrom)}
+        </span>
+      ),
+    },
+    {
+      key: "until",
+      header: "Stored until",
+      cell: (r) => (
+        <span className="text-[12.5px] text-muted-foreground">
+          {fmtDate(r.storedUntil)}
+        </span>
+      ),
+    },
+    {
+      key: "rate",
+      header: "Monthly",
+      align: "right",
+      cell: (r) => (
+        <Mono className="text-[12.5px] font-semibold">
+          {fmtMoney(r.monthlyRate)}
+        </Mono>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) =>
+        r.storageStatus != null ? (
+          <StatusBadge status={enumKey(StorageStatus, r.storageStatus)} />
+        ) : (
+          <span className="text-[12px] text-dim">—</span>
+        ),
+    },
+    {
+      key: "action",
+      header: "",
+      align: "right",
+      width: "120px",
+      cell: (r) =>
+        can(user, "registry:write") &&
+        r.storageStatus === StorageStatus.Active ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setReleasing(r);
+            }}
+          >
+            Release
+          </Button>
+        ) : null,
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader title="Storage Records" />
@@ -100,12 +190,22 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
         onChange={setStatusFilter}
         options={STATUS_FILTERS}
       />
-      <Resolve resolve={loaderData.data} fallback={<TableSkeleton cols={7} />}>
+      <Resolve
+        resolve={loaderData.data}
+        fallback={
+          <DataTable<StorageRecordResponse>
+            columns={columns}
+            rows={[]}
+            loading
+          />
+        }
+      >
         {(storagePage) => {
           const storage = storagePage.items ?? [];
           return (
             <>
               <DataTable<StorageRecordResponse>
+                columns={columns}
                 rows={storage}
                 onRowClick={(r) => navigate(`/storage/${r.id}`)}
                 empty={
@@ -113,97 +213,6 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                     ? "No storage records match these filters."
                     : "No storage records yet."
                 }
-                columns={[
-                  {
-                    key: "firearm",
-                    header: "Firearm",
-                    cell: (r) => (
-                      <Mono className="text-[13px] font-semibold text-foreground">
-                        {r.serialNumber ?? "—"}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "customer",
-                    header: "Customer",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {r.customerName ?? "—"}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "location",
-                    header: "Location",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] text-muted-foreground">
-                        {[r.storageLocation, r.rackNumber, r.safeNumber]
-                          .filter(Boolean)
-                          .join(" · ") || "—"}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "from",
-                    header: "Stored from",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {fmtDate(r.storedFrom)}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "until",
-                    header: "Stored until",
-                    cell: (r) => (
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {fmtDate(r.storedUntil)}
-                      </span>
-                    ),
-                  },
-                  {
-                    key: "rate",
-                    header: "Monthly",
-                    align: "right",
-                    cell: (r) => (
-                      <Mono className="text-[12.5px] font-semibold">
-                        {fmtMoney(r.monthlyRate)}
-                      </Mono>
-                    ),
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    cell: (r) =>
-                      r.storageStatus != null ? (
-                        <StatusBadge
-                          status={enumKey(StorageStatus, r.storageStatus)}
-                        />
-                      ) : (
-                        <span className="text-[12px] text-dim">—</span>
-                      ),
-                  },
-                  {
-                    key: "action",
-                    header: "",
-                    align: "right",
-                    width: "120px",
-                    cell: (r) =>
-                      can(user, "registry:write") &&
-                      r.storageStatus === StorageStatus.Active ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setReleasing(r);
-                          }}
-                        >
-                          Release
-                        </Button>
-                      ) : null,
-                  },
-                ]}
               />
 
               {storagePage.totalCount > storagePage.pageSize && (

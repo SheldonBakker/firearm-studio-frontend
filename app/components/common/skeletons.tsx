@@ -58,19 +58,6 @@ export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: nu
   );
 }
 
-export function ListSkeleton({ cols = 5 }: { cols?: number }) {
-  return (
-    <div>
-      <div className="mb-4 flex gap-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-8 w-24 rounded-lg" />
-        ))}
-      </div>
-      <TableSkeleton cols={cols} />
-    </div>
-  );
-}
-
 export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">

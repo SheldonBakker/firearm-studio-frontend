@@ -9,13 +9,13 @@ import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
-import { Resolve, ListSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import { CustomerType, enumKey } from "~/lib/types/enums";
 import type {
   CustomerListItemDto,
@@ -48,6 +48,79 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
   const user = useSessionUser();
   const [addOpen, setAddOpen] = useState(false);
 
+  const columns: Column<CustomerListItemDto>[] = [
+    {
+      key: "customer",
+      header: "Customer",
+      cell: (r) => {
+        const isCompany = r.customerType === CustomerType.Company;
+        return (
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
+              style={{
+                color: isCompany
+                  ? "var(--status-purple)"
+                  : "var(--status-teal)",
+                background: `color-mix(in srgb, ${isCompany ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
+              }}
+            >
+              {initials(customerLabel(r))}
+            </div>
+            <div>
+              <div className="text-[13px] font-semibold text-foreground">
+                {customerLabel(r)}
+              </div>
+              <div className="text-[11.5px] text-dim">
+                {isCompany
+                  ? [r.fullName, r.email].filter(Boolean).join(" - ") || "—"
+                  : r.email ?? "—"}
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "type",
+      header: "Type",
+      cell: (r) => (
+        <StatusBadge status={enumKey(CustomerType, r.customerType)} />
+      ),
+    },
+    {
+      key: "contact",
+      header: "Contact",
+      cell: (r) => (
+        <Mono className="text-[12px] text-muted-foreground">
+          {r.phone ?? "—"}
+        </Mono>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      align: "center",
+      cell: (r) =>
+        r.isActive ? (
+          <StatusBadge status="Valid" />
+        ) : (
+          <span className="text-[12px] text-dim">Inactive</span>
+        ),
+    },
+    {
+      key: "go",
+      header: "",
+      align: "right",
+      width: "40px",
+      cell: () => (
+        <span className="flex justify-end text-dim">
+          <Icon name="arrow" size={16} />
+        </span>
+      ),
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader
@@ -61,86 +134,21 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           )
         }
       />
-      <Resolve resolve={loaderData.data} fallback={<ListSkeleton cols={5} />}>
+      <Resolve
+        resolve={loaderData.data}
+        fallback={
+          <DataTable<CustomerListItemDto> columns={columns} rows={[]} loading />
+        }
+      >
         {(customerPage) => {
           const customers = customerPage.items ?? [];
           return (
             <>
               <DataTable<CustomerListItemDto>
+                columns={columns}
                 rows={customers}
                 onRowClick={(r) => navigate(`/customers/${r.id}`)}
                 empty="No customers yet."
-                columns={[
-          {
-            key: "customer",
-            header: "Customer",
-            cell: (r) => {
-              const isCompany = r.customerType === CustomerType.Company;
-              return (
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-bold"
-                    style={{
-                      color: isCompany
-                        ? "var(--status-purple)"
-                        : "var(--status-teal)",
-                      background: `color-mix(in srgb, ${isCompany ? "var(--status-purple)" : "var(--status-teal)"} 13%, transparent)`,
-                    }}
-                  >
-                    {initials(customerLabel(r))}
-                  </div>
-                  <div>
-                    <div className="text-[13px] font-semibold text-foreground">
-                      {customerLabel(r)}
-                    </div>
-                    <div className="text-[11.5px] text-dim">
-                      {isCompany
-                        ? [r.fullName, r.email].filter(Boolean).join(" - ") ||
-                          "—"
-                        : r.email ?? "—"}
-                    </div>
-                  </div>
-                </div>
-              );
-            },
-          },
-          {
-            key: "type",
-            header: "Type",
-            cell: (r) => <StatusBadge status={enumKey(CustomerType, r.customerType)} />,
-          },
-          {
-            key: "contact",
-            header: "Contact",
-            cell: (r) => (
-              <Mono className="text-[12px] text-muted-foreground">
-                {r.phone ?? "—"}
-              </Mono>
-            ),
-          },
-          {
-            key: "status",
-            header: "Status",
-            align: "center",
-            cell: (r) =>
-              r.isActive ? (
-                <StatusBadge status="Valid" />
-              ) : (
-                <span className="text-[12px] text-dim">Inactive</span>
-              ),
-          },
-          {
-            key: "go",
-            header: "",
-            align: "right",
-            width: "40px",
-            cell: () => (
-              <span className="flex justify-end text-dim">
-                <Icon name="arrow" size={16} />
-              </span>
-            ),
-          },
-        ]}
               />
               {customerPage.totalCount > customerPage.pageSize && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

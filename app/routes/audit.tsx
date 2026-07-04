@@ -5,10 +5,10 @@ import { requireAuth } from "~/context/auth-context";
 import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
-import { DataTable } from "~/components/common/data-table";
+import { DataTable, type Column } from "~/components/common/data-table";
 import { Mono } from "~/components/common/mono";
 import { Button } from "~/components/ui/button";
-import { Resolve, TableSkeleton } from "~/components/common/skeletons";
+import { Resolve } from "~/components/common/skeletons";
 import {
   AppRole,
   CustomerType,
@@ -89,70 +89,73 @@ export default function Audit({ loaderData }: Route.ComponentProps) {
     navigate(`/audit${next.toString() ? `?${next.toString()}` : ""}`);
   };
 
+  const columns: Column<AuditLogResponse>[] = [
+    {
+      key: "when",
+      header: "When",
+      width: "165px",
+      cell: (r) => (
+        <Mono className="text-[12px] text-muted-foreground">
+          {fmtAuditDateTime(r.createdAt)}
+        </Mono>
+      ),
+    },
+    {
+      key: "actor",
+      header: "Actor",
+      width: "220px",
+      cell: (r) => (
+        <div className="min-w-0">
+          <div className="truncate text-[12.5px] font-semibold text-foreground">
+            {actorLabel(r)}
+          </div>
+          {r.user?.email && r.user.fullName && (
+            <div className="truncate text-[11.5px] text-dim">
+              {r.user.email}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "event",
+      header: "Event",
+      width: "180px",
+      cell: (r) => (
+        <div>
+          <div className="text-[12.5px] font-semibold text-foreground">
+            {[r.action, entityLabel(r.entityType)].filter(Boolean).join(" ")}
+          </div>
+          <Mono className="text-[11px] text-dim">{shortId(r.entityId)}</Mono>
+        </div>
+      ),
+    },
+    {
+      key: "details",
+      header: "Details",
+      cell: (r) => (
+        <div className="max-w-185 text-[12.5px] text-muted-foreground">
+          {auditDetails(r)}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageWrap>
       <PageHeader title="Audit Log" />
-      <Resolve resolve={loaderData.logs} fallback={<TableSkeleton cols={4} />}>
+      <Resolve
+        resolve={loaderData.logs}
+        fallback={
+          <DataTable<AuditLogResponse> columns={columns} rows={[]} loading />
+        }
+      >
         {(page) => (
           <>
             <DataTable<AuditLogResponse>
+              columns={columns}
               rows={page.items ?? []}
               empty="No audit entries."
-              columns={[
-                {
-                  key: "when",
-                  header: "When",
-                  width: "165px",
-                  cell: (r) => (
-                    <Mono className="text-[12px] text-muted-foreground">
-                      {fmtAuditDateTime(r.createdAt)}
-                    </Mono>
-                  ),
-                },
-                {
-                  key: "actor",
-                  header: "Actor",
-                  width: "220px",
-                  cell: (r) => (
-                    <div className="min-w-0">
-                      <div className="truncate text-[12.5px] font-semibold text-foreground">
-                        {actorLabel(r)}
-                      </div>
-                      {r.user?.email && r.user.fullName && (
-                        <div className="truncate text-[11.5px] text-dim">
-                          {r.user.email}
-                        </div>
-                      )}
-                    </div>
-                  ),
-                },
-                {
-                  key: "event",
-                  header: "Event",
-                  width: "180px",
-                  cell: (r) => (
-                    <div>
-                      <div className="text-[12.5px] font-semibold text-foreground">
-                        {[r.action, entityLabel(r.entityType)]
-                          .filter(Boolean)
-                          .join(" ")}
-                      </div>
-                      <Mono className="text-[11px] text-dim">
-                        {shortId(r.entityId)}
-                      </Mono>
-                    </div>
-                  ),
-                },
-                {
-                  key: "details",
-                  header: "Details",
-                  cell: (r) => (
-                    <div className="max-w-185 text-[12.5px] text-muted-foreground">
-                      {auditDetails(r)}
-                    </div>
-                  ),
-                },
-              ]}
             />
 
             {page.totalCount > page.pageSize && (

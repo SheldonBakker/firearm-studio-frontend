@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils/cn";
 
 export interface Column<T> {
@@ -16,17 +17,20 @@ export interface Column<T> {
   cell: (row: T) => React.ReactNode;
 }
 
-/** Config-driven table styled to match the Firearm Studio prototype. */
 export function DataTable<T>({
   columns,
   rows,
   onRowClick,
   empty = "No records.",
+  loading = false,
+  loadingRows = 6,
 }: {
   columns: Column<T>[];
   rows: T[];
   onRowClick?: (row: T) => void;
   empty?: React.ReactNode;
+  loading?: boolean;
+  loadingRows?: number;
 }) {
   const alignCls = (a?: string) =>
     a === "right" ? "text-right" : a === "center" ? "text-center" : "text-left";
@@ -51,7 +55,30 @@ export function DataTable<T>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.length ? (
+          {loading ? (
+            Array.from({ length: loadingRows }).map((_, ri) => (
+              <TableRow key={ri} className="border-b border-line last:border-0">
+                {columns.map((c) => (
+                  <TableCell
+                    key={c.key}
+                    className={cn(
+                      "px-4 py-3.5 align-middle",
+                      alignCls(c.align),
+                    )}
+                  >
+                    <Skeleton
+                      className={cn(
+                        "h-4 w-full max-w-35",
+                        c.align === "right" && "ml-auto",
+                        c.align === "center" && "mx-auto",
+                      )}
+                      style={{ opacity: 1 - ri * 0.12 }}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : rows.length ? (
             rows.map((row, ri) => (
               <TableRow
                 key={ri}
