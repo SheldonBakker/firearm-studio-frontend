@@ -34,6 +34,7 @@ type CustomerSearchType = "name" | "email" | "phone";
 type FirearmSearchType = "serialNumber" | "customerName";
 type StorageSearchType = "serialNumber" | "customerName";
 type AuditSearchType = "fullName" | "action" | "entityType" | "createdOn";
+type InvoiceSearchType = "customerName" | "invoiceNumber";
 
 const CUSTOMER_SEARCH_TYPES: {
   value: CustomerSearchType;
@@ -74,6 +75,15 @@ const AUDIT_SEARCH_TYPES: {
   { value: "createdOn", label: "Date", placeholder: "Filter audit by date…" },
 ];
 
+const INVOICE_SEARCH_TYPES: {
+  value: InvoiceSearchType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "customerName", label: "Customer", placeholder: "Search invoices by customer name…" },
+  { value: "invoiceNumber", label: "Invoice #", placeholder: "Search invoices by number…" },
+];
+
 export function Topbar({
   user,
   onMenuClick,
@@ -92,6 +102,7 @@ export function Topbar({
   const isStorage = pathname.startsWith("/storage");
   const isLicences = pathname.startsWith("/licences");
   const isAudit = pathname.startsWith("/audit");
+  const isInvoices = pathname.startsWith("/invoices");
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -99,6 +110,8 @@ export function Topbar({
   const [firearmSearchType, setFirearmSearchType] = useState<FirearmSearchType>("serialNumber");
   const [storageSearchType, setStorageSearchType] = useState<StorageSearchType>("serialNumber");
   const [auditSearchType, setAuditSearchType] = useState<AuditSearchType>("fullName");
+  const [invoiceSearchType, setInvoiceSearchType] =
+    useState<InvoiceSearchType>("customerName");
 
   // Cached registry for global (non-context) pages
   const [cachedCustomers, setCachedCustomers] = useState<CustomerListItemDto[]>([]);
@@ -118,12 +131,25 @@ export function Topbar({
     AUDIT_SEARCH_TYPES.find((type) => auditSearchParams.has(type.value))
       ?.value ?? auditSearchType;
   const auditSearchValue = auditSearchParams.get(activeAuditSearchType) ?? "";
+  const invoiceSearchParams = new URLSearchParams(search);
+  const activeInvoiceSearchType =
+    INVOICE_SEARCH_TYPES.find((type) => invoiceSearchParams.has(type.value))
+      ?.value ?? invoiceSearchType;
+  const invoiceSearchValue =
+    invoiceSearchParams.get(activeInvoiceSearchType) ?? "";
 
   // Reset on page navigation
   useEffect(() => {
-    if (isLicences || isAudit) {
+    if (isLicences || isAudit || isInvoices) {
       if (isAudit) setAuditSearchType(activeAuditSearchType);
-      setQuery(isAudit ? auditSearchValue : licenceNumberSearch);
+      if (isInvoices) setInvoiceSearchType(activeInvoiceSearchType);
+      setQuery(
+        isAudit
+          ? auditSearchValue
+          : isInvoices
+            ? invoiceSearchValue
+            : licenceNumberSearch,
+      );
       setOpen(false);
       setLiveCustomers([]);
       setLiveFirearms([]);
@@ -143,9 +169,12 @@ export function Topbar({
     pathname,
     isLicences,
     isAudit,
+    isInvoices,
     licenceNumberSearch,
     activeAuditSearchType,
     auditSearchValue,
+    activeInvoiceSearchType,
+    invoiceSearchValue,
   ]);
 
   // Live search — active on contextual list/detail sections
@@ -197,7 +226,15 @@ export function Topbar({
 
   // Lazy-load cache for global (non-context) pages
   async function ensureCache() {
-    if (isCustomers || isFirearms || isStorage || isLicences || isAudit) return;
+    if (
+      isCustomers ||
+      isFirearms ||
+      isStorage ||
+      isLicences ||
+      isAudit ||
+      isInvoices
+    )
+      return;
     if (cacheLoaded.current) return;
     cacheLoaded.current = true;
     try {
@@ -238,7 +275,12 @@ export function Topbar({
   const showDropdown =
     open &&
     !isLicences &&
-    (!!query.trim() || isCustomers || isFirearms || isStorage || isAudit);
+    (!!query.trim() ||
+      isCustomers ||
+      isFirearms ||
+      isStorage ||
+      isAudit ||
+      isInvoices);
   const empty =
     custMatches.length + fireMatches.length + storageMatches.length === 0;
 
@@ -256,7 +298,10 @@ export function Topbar({
           : isAudit
             ? (AUDIT_SEARCH_TYPES.find((s) => s.value === auditSearchType)
                 ?.placeholder ?? "Search audit logs…")
-            : "Search customers, firearms, serials…";
+            : isInvoices
+              ? (INVOICE_SEARCH_TYPES.find((s) => s.value === invoiceSearchType)
+                  ?.placeholder ?? "Search invoices…")
+              : "Search customers, firearms, serials…";
 
   function updateLicenceSearch(value: string) {
     setQuery(value);
@@ -282,6 +327,22 @@ export function Topbar({
     next.delete("page");
     const auditQuery = value.trim();
     if (auditQuery) next.set(searchType, auditQuery);
+    navigate(
+      {
+        pathname,
+        search: next.toString() ? `?${next.toString()}` : "",
+      },
+      { replace: true },
+    );
+  }
+
+  function updateInvoiceSearch(value: string, searchType = invoiceSearchType) {
+    setQuery(value);
+    const next = new URLSearchParams(search);
+    for (const type of INVOICE_SEARCH_TYPES) next.delete(type.value);
+    next.delete("page");
+    const invoiceQuery = value.trim();
+    if (invoiceQuery) next.set(searchType, invoiceQuery);
     navigate(
       {
         pathname,
@@ -332,6 +393,11 @@ export function Topbar({
             }
             if (isAudit) {
               updateAuditSearch(e.target.value);
+              setOpen(true);
+              return;
+            }
+            if (isInvoices) {
+              updateInvoiceSearch(e.target.value);
               setOpen(true);
               return;
             }
@@ -438,7 +504,30 @@ export function Topbar({
                 ))}
               </div>
             )}
-            {!isAudit && query.trim() ? (
+            {isInvoices && (
+              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+                {INVOICE_SEARCH_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      if (invoiceSearchType === t.value) return;
+                      setInvoiceSearchType(t.value);
+                      updateInvoiceSearch("", t.value);
+                    }}
+                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${
+                      invoiceSearchType === t.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!isAudit && !isInvoices && query.trim() ? (
               searching ? (
                 <div className="px-3.5 py-5 text-center text-[13px] text-dim">
                   Searching…

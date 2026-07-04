@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/invoices";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
@@ -12,7 +11,6 @@ import { StatusBadge } from "~/components/common/status-badge";
 import { Mono } from "~/components/common/mono";
 import { Icon } from "~/components/common/icon";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -49,13 +47,6 @@ const SORT_OPTIONS = [
 const SORT_FIELDS = new Set(SORT_OPTIONS.map(({ id }) => id));
 const DEFAULT_SORT_BY = "invoiceMonth";
 const DEFAULT_SORT_ORDER = "desc";
-
-const SEARCH_FIELDS = [
-  { id: "customerName", label: "Customer" },
-  { id: "invoiceNumber", label: "Invoice #" },
-] as const;
-
-type SearchField = (typeof SEARCH_FIELDS)[number]["id"];
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
@@ -115,36 +106,10 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
   const sortOrder =
     searchParams.get("sortOrder") === "asc" ? "asc" : DEFAULT_SORT_ORDER;
 
-  const [searchField, setSearchField] = useState<SearchField>(() =>
-    searchParams.get("invoiceNumber") ? "invoiceNumber" : "customerName",
-  );
-  const [searchText, setSearchText] = useState(
-    () =>
-      searchParams.get("customerName") ??
-      searchParams.get("invoiceNumber") ??
-      "",
-  );
-
   const hasFilters =
     activeStatus !== "all" ||
     !!searchParams.get("invoiceNumber")?.trim() ||
     !!searchParams.get("customerName")?.trim();
-
-  // Debounce the search input into the URL search params.
-  useEffect(() => {
-    const current = searchParams.get(searchField)?.trim() ?? "";
-    const next = searchText.trim();
-    if (current === next) return;
-    const timer = window.setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
-      params.delete("page");
-      params.delete("customerName");
-      params.delete("invoiceNumber");
-      if (next) params.set(searchField, next);
-      setSearchParams(params);
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, [searchText, searchField, searchParams, setSearchParams]);
 
   const setStatusFilter = (status: string) => {
     const next = new URLSearchParams(searchParams);
@@ -187,65 +152,36 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
                   ...STATUS_FILTERS.slice(1),
                 ]}
                 right={
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={searchField}
-                        onValueChange={(v) => setSearchField(v as SearchField)}
-                      >
-                        <SelectTrigger size="sm" className="w-[110px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SEARCH_FIELDS.map((f) => (
-                            <SelectItem key={f.id} value={f.id}>
-                              {f.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-dim">
-                          <Icon name="search" size={14} />
-                        </span>
-                        <Input
-                          value={searchText}
-                          onChange={(e) => setSearchText(e.target.value)}
-                          placeholder="Search…"
-                          className="h-8 w-[180px] pl-8 text-[12.5px]"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={sortBy}
-                        onValueChange={(v) => setSort(v, sortOrder)}
-                      >
-                        <SelectTrigger size="sm" className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SORT_OPTIONS.map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setSort(sortBy, sortOrder === "asc" ? "desc" : "asc")
-                        }
-                        title={
-                          sortOrder === "asc" ? "Ascending" : "Descending"
-                        }
-                      >
-                        {sortOrder === "asc" ? "Asc" : "Desc"}
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-dim">
+                      Sort
+                    </span>
+                    <Select
+                      value={sortBy}
+                      onValueChange={(v) => setSort(v, sortOrder)}
+                    >
+                      <SelectTrigger size="sm" className="w-30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SORT_OPTIONS.map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setSort(sortBy, sortOrder === "asc" ? "desc" : "asc")
+                      }
+                      title={sortOrder === "asc" ? "Ascending" : "Descending"}
+                    >
+                      {sortOrder === "asc" ? "Asc" : "Desc"}
+                    </Button>
                   </div>
                 }
               />
