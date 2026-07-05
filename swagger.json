@@ -3039,6 +3039,30 @@
             "type": "string",
             "nullable": true
           },
+          "bankName": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountHolder": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankBranchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountType": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankSwiftCode": {
+            "type": "string",
+            "nullable": true
+          },
           "isActive": {
             "type": "boolean"
           },
@@ -4939,6 +4963,24 @@
             "$ref": "#/components/schemas/StringOptional"
           },
           "postalCode": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankName": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankAccountHolder": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankAccountNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankBranchCode": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankAccountType": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "bankSwiftCode": {
             "$ref": "#/components/schemas/StringOptional"
           }
         },

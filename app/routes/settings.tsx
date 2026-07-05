@@ -110,6 +110,22 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
               },
             ]}
           />
+          <div className="mt-5 border-t border-line pt-4">
+            <SectionTitle>Banking details</SectionTitle>
+            <KeyValue
+              pairs={[
+                { k: "Bank", v: c.bankName || "—" },
+                { k: "Account holder", v: c.bankAccountHolder || "—" },
+                {
+                  k: "Account number",
+                  v: <Mono>{c.bankAccountNumber || "—"}</Mono>,
+                },
+                { k: "Branch code", v: <Mono>{c.bankBranchCode || "—"}</Mono> },
+                { k: "Account type", v: c.bankAccountType || "—" },
+                { k: "SWIFT code", v: <Mono>{c.bankSwiftCode || "—"}</Mono> },
+              ]}
+            />
+          </div>
           <div className="mt-5 border-t border-line pt-4 text-[11.5px] text-dim">
             Created {fmtDate(c.createdAt)}
             {c.updatedAt ? ` · updated ${fmtDate(c.updatedAt)}` : ""}
@@ -145,6 +161,12 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
             { name: "city", label: "City", defaultValue: c.city ?? "" },
             { name: "province", label: "Province", defaultValue: c.province ?? "" },
             { name: "postalCode", label: "Postal code", defaultValue: c.postalCode ?? "" },
+            { name: "bankName", label: "Bank name", defaultValue: c.bankName ?? "" },
+            { name: "bankAccountHolder", label: "Account holder", defaultValue: c.bankAccountHolder ?? "" },
+            { name: "bankAccountNumber", label: "Account number", defaultValue: c.bankAccountNumber ?? "" },
+            { name: "bankBranchCode", label: "Branch code", defaultValue: c.bankBranchCode ?? "" },
+            { name: "bankAccountType", label: "Account type", placeholder: "e.g. Cheque, Savings", defaultValue: c.bankAccountType ?? "" },
+            { name: "bankSwiftCode", label: "SWIFT code", defaultValue: c.bankSwiftCode ?? "" },
           ]}
           onSubmit={async (v) => {
             await companyApi.update({
@@ -158,6 +180,12 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
               city: v.city || null,
               province: v.province || null,
               postalCode: v.postalCode || null,
+              bankName: v.bankName || null,
+              bankAccountHolder: v.bankAccountHolder || null,
+              bankAccountNumber: v.bankAccountNumber || null,
+              bankBranchCode: v.bankBranchCode || null,
+              bankAccountType: v.bankAccountType || null,
+              bankSwiftCode: v.bankSwiftCode || null,
             });
             toast.success("Company details updated");
             revalidator.revalidate();

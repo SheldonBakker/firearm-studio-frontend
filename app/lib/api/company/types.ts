@@ -11,7 +11,14 @@ export interface CreateCompanyRequest {
   postalCode?: string | null;
 }
 
-export type UpdateCompanyRequest = CreateCompanyRequest;
+export interface UpdateCompanyRequest extends CreateCompanyRequest {
+  bankName?: string | null;
+  bankAccountHolder?: string | null;
+  bankAccountNumber?: string | null;
+  bankBranchCode?: string | null;
+  bankAccountType?: string | null;
+  bankSwiftCode?: string | null;
+}
 
 export interface CompanyDetailsResponse {
   id: string;
@@ -25,6 +32,12 @@ export interface CompanyDetailsResponse {
   city: string | null;
   province: string | null;
   postalCode: string | null;
+  bankName: string | null;
+  bankAccountHolder: string | null;
+  bankAccountNumber: string | null;
+  bankBranchCode: string | null;
+  bankAccountType: string | null;
+  bankSwiftCode: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string | null;
