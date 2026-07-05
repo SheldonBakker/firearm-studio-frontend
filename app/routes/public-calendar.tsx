@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { z } from "zod";
 import { MinusIcon, PlusIcon } from "lucide-react";
@@ -25,11 +25,6 @@ import {
 } from "~/components/ui/select";
 import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
 import { Resolve } from "~/components/common/skeletons";
-import {
-  TurnstileWidget,
-  type TurnstileHandle,
-  type TurnstileStatus,
-} from "~/components/common/turnstile-widget";
 import {
   requiredEmailSchema,
   requiredTextSchema,
@@ -357,10 +352,6 @@ function BookingPanel({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmation, setConfirmation] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileStatus, setTurnstileStatus] =
-    useState<TurnstileStatus>("loading");
-  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const shooters = Number(shooterCount);
 
@@ -392,10 +383,6 @@ function BookingPanel({
       setError("Shooter count must be at least 1.");
       return;
     }
-    if (turnstileStatus !== "unavailable" && !turnstileToken) {
-      setError("Please complete the verification below.");
-      return;
-    }
 
     setLoading(true);
     try {
@@ -413,8 +400,6 @@ function BookingPanel({
       setConfirmation(res?.bookingNumber ?? "confirmed");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong.");
-      turnstileRef.current?.reset();
-      setTurnstileToken("");
     } finally {
       setLoading(false);
     }
@@ -603,13 +588,6 @@ function BookingPanel({
               </span>
             </div>
           </div>
-
-          <TurnstileWidget
-            ref={turnstileRef}
-            onVerify={setTurnstileToken}
-            onExpire={() => setTurnstileToken("")}
-            onStatusChange={setTurnstileStatus}
-          />
 
           {error && (
             <p className="text-[13px] font-medium text-destructive">{error}</p>

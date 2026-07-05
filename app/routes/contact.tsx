@@ -14,6 +14,16 @@ const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as
 const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as
   string | undefined;
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+      reset: (id?: string) => void;
+      remove: (id?: string) => void;
+      getResponse: (id?: string) => string | undefined;
+    };
+  }
+}
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
