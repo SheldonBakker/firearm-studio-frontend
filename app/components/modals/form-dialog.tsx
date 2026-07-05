@@ -62,7 +62,7 @@ export interface FormField {
   ) => Promise<NonNullable<FormField["options"]>>;
 }
 
-function SearchSelectField({
+export function SearchSelectField({
   id,
   value,
   options,

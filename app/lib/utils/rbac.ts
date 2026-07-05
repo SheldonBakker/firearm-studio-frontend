@@ -46,6 +46,9 @@ export type NavKey =
   | "storage"
   | "licences"
   | "invoices"
+  | "bookings"
+  | "ranges"
+  | "packages"
   | "team"
   | "audit"
   | "settings";
@@ -54,6 +57,7 @@ export type NavKey =
 export type Action =
   | "registry:write" // create/edit customers, firearms, storage, licences
   | "invoices:write" // generate, record payment, send, cancel
+  | "bookings:write" // ranges, packages, bookings + status actions
   | "team:manage" // invite / role / deactivate users
   | "settings:write"; // company settings
 
@@ -70,6 +74,7 @@ export function can(user: SessionUser, action: Action): boolean {
   switch (action) {
     case "registry:write":
     case "invoices:write":
+    case "bookings:write":
       return isAtLeast(user, "Staff");
     case "team:manage":
     case "settings:write":

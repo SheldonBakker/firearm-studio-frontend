@@ -41,6 +41,30 @@ export type StorageStatus = (typeof StorageStatus)[keyof typeof StorageStatus];
 export const AppRole = { Admin: 0, Manager: 1, Staff: 2, Viewer: 3 } as const;
 export type AppRole = (typeof AppRole)[keyof typeof AppRole];
 
+export const BookingStatus = {
+  Pending: 0,
+  Confirmed: 1,
+  Completed: 2,
+  Cancelled: 3,
+  NoShow: 4,
+} as const;
+export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus];
+
+export const BookingSource = { Staff: 0, Online: 1 } as const;
+export type BookingSource = (typeof BookingSource)[keyof typeof BookingSource];
+
+// .NET DayOfWeek: Sunday = 0.
+export const DayOfWeek = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+} as const;
+export type DayOfWeek = (typeof DayOfWeek)[keyof typeof DayOfWeek];
+
 export function enumNames(enumObj: Record<string, number>): string[] {
   return Object.keys(enumObj);
 }

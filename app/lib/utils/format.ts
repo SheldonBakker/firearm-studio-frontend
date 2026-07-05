@@ -52,6 +52,12 @@ const STATUS: Record<string, StatusMeta> = {
   Overdue: { color: "var(--status-orange)", label: "Overdue" },
   Draft: { color: "var(--dim)", label: "Draft" },
   Cancelled: { color: "var(--status-red)", label: "Cancelled" },
+  // booking
+  Pending: { color: "var(--status-amber)", label: "Pending" },
+  Confirmed: { color: "var(--status-blue)", label: "Confirmed" },
+  Completed: { color: "var(--status-green)", label: "Completed" },
+  NoShow: { color: "var(--status-red)", label: "No-show" },
+  Online: { color: "var(--status-purple)", label: "Online" },
   // customer type
   Individual: { color: "var(--status-teal)", label: "Individual" },
   Company: { color: "var(--status-purple)", label: "Company" },
