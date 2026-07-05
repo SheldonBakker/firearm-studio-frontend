@@ -23,6 +23,7 @@ export default [
   route("forgot-password", "routes/forgot-password.tsx"),
   route("reset-password", "routes/reset-password.tsx"),
   route("onboarding", "routes/onboarding.tsx"),
+  route("book/:companyId", "routes/public-calendar.tsx"),
   layout("routes/app-layout.tsx", [
     route("dashboard", "routes/dashboard.tsx"),
     route("customers", "routes/customers.tsx"),

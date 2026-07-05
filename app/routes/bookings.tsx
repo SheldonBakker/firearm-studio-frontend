@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/bookings";
+import { Share2Icon } from "lucide-react";
 import { bookingsApi } from "~/lib/api/bookings/bookings";
 import { rangesApi } from "~/lib/api/ranges/ranges";
 import { packagesApi } from "~/lib/api/packages/packages";
+import { companyApi } from "~/lib/api/company/company";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -25,6 +27,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { BookingFormDialog } from "~/components/modals/booking-form-dialog";
+import { ShareCalendarDialog } from "~/components/modals/share-calendar-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { BookingSource, BookingStatus, enumKey } from "~/lib/types/enums";
 import type {
@@ -86,7 +89,13 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
     );
   const rangesP = rangesApi.all().catch(() => []);
   const packagesP = packagesApi.all().catch(() => []);
-  return { data: bookingsP, ranges: rangesP, packages: packagesP };
+  const companyP = companyApi.get().catch(() => null);
+  return {
+    data: bookingsP,
+    ranges: rangesP,
+    packages: packagesP,
+    company: companyP,
+  };
 }
 
 export default function Bookings({ loaderData }: Route.ComponentProps) {
@@ -96,6 +105,7 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
   const user = useSessionUser();
   const writable = can(user, "bookings:write");
   const [addOpen, setAddOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const activeStatus = BOOKING_STATUSES.has(searchParams.get("status") ?? "")
     ? searchParams.get("status")!
@@ -210,17 +220,23 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      {writable && (
-        <PageActions>
+      <PageActions>
+        <Button variant="outline" onClick={() => setShareOpen(true)}>
+          <Share2Icon />
+          Share calendar
+        </Button>
+        {writable && (
           <Button onClick={() => setAddOpen(true)}>
             <Icon name="plus" size={16} />
             New booking
           </Button>
-        </PageActions>
-      )}
+        )}
+      </PageActions>
       <FilterBar
         active={activeStatus}
-        onChange={(status) => setParam("status", status === "all" ? null : status)}
+        onChange={(status) =>
+          setParam("status", status === "all" ? null : status)
+        }
         options={STATUS_FILTERS}
         right={
           <div className="flex flex-wrap items-center gap-2">
@@ -298,8 +314,7 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[12.5px] text-muted-foreground">
                     Showing{" "}
-                    {(bookingsPage.pageNumber - 1) * bookingsPage.pageSize + 1}
-                    –
+                    {(bookingsPage.pageNumber - 1) * bookingsPage.pageSize + 1}–
                     {Math.min(
                       bookingsPage.pageNumber * bookingsPage.pageSize,
                       bookingsPage.totalCount,
@@ -351,6 +366,16 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
               />
             )}
           </Resolve>
+        )}
+      </Resolve>
+
+      <Resolve resolve={loaderData.company} fallback={null}>
+        {(company) => (
+          <ShareCalendarDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            companyId={company?.id ?? null}
+          />
         )}
       </Resolve>
     </PageWrap>

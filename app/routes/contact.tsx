@@ -3,22 +3,17 @@ import { z } from "zod";
 import { Link } from "react-router";
 import type { Route } from "./+types/contact";
 import { pageMeta } from "~/lib/utils/seo";
-import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
+import {
+  requiredEmailSchema,
+  requiredTextSchema,
+} from "~/lib/utils/validation";
 import { contactApi } from "~/lib/api/contact/contact";
 
-const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined;
-const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as string | undefined;
+const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as
+  string | undefined;
+const TURNSTILE_WORKER_URL = import.meta.env.VITE_TURNSTILE_WORKER_URL as
+  string | undefined;
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
-      reset: (id?: string) => void;
-      remove: (id?: string) => void;
-      getResponse: (id?: string) => string | undefined;
-    };
-  }
-}
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -40,8 +35,20 @@ const ic = {
 } as const;
 
 const methods = [
-  { title: "Email us", detail: "For sales, support, and onboarding.", value: "support@firearmstudio.com", color: AMBER, svg: ic.mail },
-  { title: "Call us", detail: "Mon–Fri, business hours (SAST).", value: "+27 68 150 1196", color: GREEN, svg: ic.phone },
+  {
+    title: "Email us",
+    detail: "For sales, support, and onboarding.",
+    value: "support@firearmstudio.com",
+    color: AMBER,
+    svg: ic.mail,
+  },
+  {
+    title: "Call us",
+    detail: "Mon–Fri, business hours (SAST).",
+    value: "+27 68 150 1196",
+    color: GREEN,
+    svg: ic.phone,
+  },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -54,7 +61,11 @@ const inputStyle: React.CSSProperties = {
   fontSize: 14,
   fontFamily: "inherit",
 };
-const labelText: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#e6eaf0" };
+const labelText: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 600,
+  color: "#e6eaf0",
+};
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -62,9 +73,9 @@ export default function Contact() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [turnstileToken, setTurnstileToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [turnstileStatus, setTurnstileStatus] = useState<"loading" | "ready" | "unavailable">(
-    TURNSTILE_SITEKEY ? "loading" : "unavailable",
-  );
+  const [turnstileStatus, setTurnstileStatus] = useState<
+    "loading" | "ready" | "unavailable"
+  >(TURNSTILE_SITEKEY ? "loading" : "unavailable");
   const turnstileRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -80,14 +91,18 @@ export default function Contact() {
 
   useEffect(() => {
     if (!TURNSTILE_SITEKEY) {
-      console.warn("VITE_TURNSTILE_SITEKEY is not set; contact form bot protection is disabled.");
+      console.warn(
+        "VITE_TURNSTILE_SITEKEY is not set; contact form bot protection is disabled.",
+      );
       return;
     }
 
-    const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    const SCRIPT_SRC =
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
     function renderWidget() {
-      if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
+      if (!window.turnstile || !turnstileRef.current || widgetIdRef.current)
+        return;
       widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
         sitekey: TURNSTILE_SITEKEY,
         action: "turnstile-spin-v1",
@@ -98,11 +113,16 @@ export default function Contact() {
         },
         "error-callback": () => {
           setTurnstileToken("");
-          setFieldErrors({ turnstile: "Verification couldn't load. Please refresh and try again." });
+          setFieldErrors({
+            turnstile:
+              "Verification couldn't load. Please refresh and try again.",
+          });
         },
         "expired-callback": () => {
           setTurnstileToken("");
-          setFieldErrors({ turnstile: "Verification expired. Please complete it again below." });
+          setFieldErrors({
+            turnstile: "Verification expired. Please complete it again below.",
+          });
         },
       });
       setTurnstileStatus("ready");
@@ -116,7 +136,9 @@ export default function Contact() {
     if (window.turnstile) {
       renderWidget();
     } else {
-      script = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
+      script = document.querySelector<HTMLScriptElement>(
+        `script[src="${SCRIPT_SRC}"]`,
+      );
       if (!script) {
         script = document.createElement("script");
         script.src = SCRIPT_SRC;
@@ -142,7 +164,7 @@ export default function Contact() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (submitting) return; // guard against double-submit reusing a single-use token
+    if (submitting) return;
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const result = z
@@ -181,7 +203,8 @@ export default function Contact() {
     if (turnstileStatus !== "unavailable") {
       let outcome: "pass" | "reject" | "infra" = "infra";
       try {
-        if (!TURNSTILE_WORKER_URL) throw new Error("VITE_TURNSTILE_WORKER_URL is not set");
+        if (!TURNSTILE_WORKER_URL)
+          throw new Error("VITE_TURNSTILE_WORKER_URL is not set");
         const response = await fetch(TURNSTILE_WORKER_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -197,7 +220,8 @@ export default function Contact() {
 
       if (outcome === "reject") {
         setFieldErrors({ turnstile: "Verification failed. Please try again." });
-        if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+        if (window.turnstile && widgetIdRef.current)
+          window.turnstile.reset(widgetIdRef.current);
         setTurnstileToken("");
         setSent(false);
         setSubmitting(false);
@@ -213,14 +237,18 @@ export default function Contact() {
         message: (formData.get("message") as string | null)?.trim() || null,
       });
     } catch {
-      setFieldErrors({ submit: "Something went wrong sending your message. Please try again." });
-      if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+      setFieldErrors({
+        submit: "Something went wrong sending your message. Please try again.",
+      });
+      if (window.turnstile && widgetIdRef.current)
+        window.turnstile.reset(widgetIdRef.current);
       setTurnstileToken("");
       setSubmitting(false);
       return;
     }
 
-    if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+    if (window.turnstile && widgetIdRef.current)
+      window.turnstile.reset(widgetIdRef.current);
     setTurnstileToken("");
     setFieldErrors({});
     formRef.current?.reset();
@@ -240,58 +268,232 @@ export default function Contact() {
             transform: "translateX(-50%)",
             width: "min(800px,120vw)",
             height: 420,
-            background: "radial-gradient(ellipse at center, rgba(232,151,60,0.12), rgba(232,151,60,0) 68%)",
+            background:
+              "radial-gradient(ellipse at center, rgba(232,151,60,0.12), rgba(232,151,60,0) 68%)",
             pointerEvents: "none",
           }}
         />
-        <div style={{ position: "relative", maxWidth: 760, margin: "0 auto", padding: "clamp(48px,7vw,80px) clamp(18px,5vw,40px) clamp(20px,3vw,28px)", textAlign: "center" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#e8973c" }}>
+        <div
+          style={{
+            position: "relative",
+            maxWidth: 760,
+            margin: "0 auto",
+            padding:
+              "clamp(48px,7vw,80px) clamp(18px,5vw,40px) clamp(20px,3vw,28px)",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'IBM Plex Mono',monospace",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "#e8973c",
+            }}
+          >
             Contact
           </div>
-          <h1 style={{ margin: "14px 0 0", fontSize: "clamp(32px,5vw,50px)", lineHeight: 1.06, fontWeight: 700, letterSpacing: "-0.025em", color: "#e6eaf0", textWrap: "balance" }}>
+          <h1
+            style={{
+              margin: "14px 0 0",
+              fontSize: "clamp(32px,5vw,50px)",
+              lineHeight: 1.06,
+              fontWeight: 700,
+              letterSpacing: "-0.025em",
+              color: "#e6eaf0",
+              textWrap: "balance",
+            }}
+          >
             Let's talk compliance
           </h1>
-          <p style={{ margin: "18px auto 0", maxWidth: 540, fontSize: "clamp(15px,1.7vw,18px)", lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>
-            Questions about getting set up, migrating your registry, or how Firearm Studio handles SAPS requirements? Our
-            team is here to help.
+          <p
+            style={{
+              margin: "18px auto 0",
+              maxWidth: 540,
+              fontSize: "clamp(15px,1.7vw,18px)",
+              lineHeight: 1.6,
+              color: "#8a93a2",
+              textWrap: "pretty",
+            }}
+          >
+            Questions about getting set up, migrating your registry, or how
+            Firearm Studio handles SAPS requirements? Our team is here to help.
           </p>
         </div>
       </section>
 
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(24px,3vw,32px) clamp(18px,5vw,40px) clamp(56px,8vw,96px)", display: "flex", flexWrap: "wrap", gap: "clamp(28px,4vw,48px)", alignItems: "flex-start" }}>
-        <div style={{ flex: "1 1 300px", minWidth: 280, display: "flex", flexDirection: "column", gap: 14 }}>
+      <section
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          padding:
+            "clamp(24px,3vw,32px) clamp(18px,5vw,40px) clamp(56px,8vw,96px)",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "clamp(28px,4vw,48px)",
+          alignItems: "flex-start",
+        }}
+      >
+        <div
+          style={{
+            flex: "1 1 300px",
+            minWidth: 280,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
           {methods.map((m) => (
-            <div key={m.title} className="mk-method" style={{ border: "1px solid #262d38", borderRadius: 16, background: "#14181f", padding: 18, display: "flex", gap: 14, alignItems: "flex-start" }}>
-              <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: m.color, background: chip(m.color) }}>
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: m.svg }} />
+            <div
+              key={m.title}
+              className="mk-method"
+              style={{
+                border: "1px solid #262d38",
+                borderRadius: 16,
+                background: "#14181f",
+                padding: 18,
+                display: "flex",
+                gap: 14,
+                alignItems: "flex-start",
+              }}
+            >
+              <span
+                style={{
+                  flexShrink: 0,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 11,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: m.color,
+                  background: chip(m.color),
+                }}
+              >
+                <svg
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  dangerouslySetInnerHTML={{ __html: m.svg }}
+                />
               </span>
               <span style={{ minWidth: 0 }}>
-                <span style={{ display: "block", fontSize: 14.5, fontWeight: 700, color: "#e6eaf0" }}>{m.title}</span>
-                <span style={{ display: "block", marginTop: 3, fontSize: 13, lineHeight: 1.5, color: "#8a93a2" }}>{m.detail}</span>
-                <span style={{ display: "block", marginTop: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 600, color: "#e8973c" }}>{m.value}</span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 14.5,
+                    fontWeight: 700,
+                    color: "#e6eaf0",
+                  }}
+                >
+                  {m.title}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: 3,
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: "#8a93a2",
+                  }}
+                >
+                  {m.detail}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: 6,
+                    fontFamily: "'IBM Plex Mono',monospace",
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: "#e8973c",
+                  }}
+                >
+                  {m.value}
+                </span>
               </span>
             </div>
           ))}
         </div>
 
         <div style={{ flex: "1.4 1 380px", minWidth: 300 }}>
-          <form ref={formRef} noValidate onSubmit={onSubmit} style={{ border: "1px solid #262d38", borderRadius: 20, background: "#14181f", padding: "clamp(22px,3vw,32px)", boxShadow: "0 24px 70px rgba(0,0,0,.4)" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", color: "#e6eaf0" }}>Send us a message</div>
-            <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8a93a2" }}>We typically reply within one business day.</p>
+          <form
+            ref={formRef}
+            noValidate
+            onSubmit={onSubmit}
+            style={{
+              border: "1px solid #262d38",
+              borderRadius: 20,
+              background: "#14181f",
+              padding: "clamp(22px,3vw,32px)",
+              boxShadow: "0 24px 70px rgba(0,0,0,.4)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: "-0.01em",
+                color: "#e6eaf0",
+              }}
+            >
+              Send us a message
+            </div>
+            <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8a93a2" }}>
+              We typically reply within one business day.
+            </p>
 
             {sent && (
-              <div style={{ marginTop: 20, display: "flex", gap: 12, alignItems: "center", padding: 16, borderRadius: 12, border: "1px solid color-mix(in srgb,#3fb68b 30%,transparent)", background: "color-mix(in srgb,#3fb68b 12%,transparent)" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3fb68b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <div
+                style={{
+                  marginTop: 20,
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "center",
+                  padding: 16,
+                  borderRadius: 12,
+                  border:
+                    "1px solid color-mix(in srgb,#3fb68b 30%,transparent)",
+                  background: "color-mix(in srgb,#3fb68b 12%,transparent)",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#3fb68b"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
                 <span style={{ fontSize: 14, color: "#e6eaf0" }}>
-                  Thanks - your message is on its way. We'll be in touch shortly.
+                  Thanks - your message is on its way. We'll be in touch
+                  shortly.
                 </span>
               </div>
             )}
 
-            <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14 }}>
-              <label style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            <div
+              style={{
+                marginTop: 20,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+                gap: 14,
+              }}
+            >
+              <label
+                style={{ display: "flex", flexDirection: "column", gap: 7 }}
+              >
                 <span style={labelText}>Full name</span>
                 <input
                   id="contact-full-name"
@@ -302,16 +504,23 @@ export default function Contact() {
                   placeholder="Jane Mokoena"
                   style={inputStyle}
                   aria-invalid={Boolean(fieldErrors.fullName)}
-                  aria-describedby={fieldErrors.fullName ? "contact-name-error" : undefined}
+                  aria-describedby={
+                    fieldErrors.fullName ? "contact-name-error" : undefined
+                  }
                   onChange={() => clearFieldError("fullName")}
                 />
                 {fieldErrors.fullName && (
-                  <span id="contact-name-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                  <span
+                    id="contact-name-error"
+                    style={{ fontSize: 12, color: "#ef6b73" }}
+                  >
                     {fieldErrors.fullName}
                   </span>
                 )}
               </label>
-              <label style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              <label
+                style={{ display: "flex", flexDirection: "column", gap: 7 }}
+              >
                 <span style={labelText}>Work email</span>
                 <input
                   id="contact-email"
@@ -337,20 +546,50 @@ export default function Contact() {
                     });
                   }}
                   aria-invalid={Boolean(fieldErrors.email)}
-                  aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
+                  aria-describedby={
+                    fieldErrors.email ? "contact-email-error" : undefined
+                  }
                 />
                 {fieldErrors.email && (
-                  <span id="contact-email-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                  <span
+                    id="contact-email-error"
+                    style={{ fontSize: 12, color: "#ef6b73" }}
+                  >
                     {fieldErrors.email}
                   </span>
                 )}
               </label>
             </div>
-            <label style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
-              <span style={labelText}>Company <span style={{ color: "#5c6573", fontWeight: 400 }}>(optional)</span></span>
-              <input name="company" className="mk-input" type="text" placeholder="Your storage facility" style={inputStyle} />
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 7,
+                marginTop: 14,
+              }}
+            >
+              <span style={labelText}>
+                Company{" "}
+                <span style={{ color: "#5c6573", fontWeight: 400 }}>
+                  (optional)
+                </span>
+              </span>
+              <input
+                name="company"
+                className="mk-input"
+                type="text"
+                placeholder="Your storage facility"
+                style={inputStyle}
+              />
             </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 7,
+                marginTop: 14,
+              }}
+            >
               <span style={labelText}>How can we help?</span>
               <textarea
                 id="contact-message"
@@ -359,20 +598,37 @@ export default function Contact() {
                 rows={4}
                 required
                 placeholder="Tell us a little about your operation and what you're looking for…"
-                style={{ ...inputStyle, height: "auto", padding: "12px 13px", resize: "vertical" }}
+                style={{
+                  ...inputStyle,
+                  height: "auto",
+                  padding: "12px 13px",
+                  resize: "vertical",
+                }}
                 aria-invalid={Boolean(fieldErrors.message)}
-                aria-describedby={fieldErrors.message ? "contact-message-error" : undefined}
+                aria-describedby={
+                  fieldErrors.message ? "contact-message-error" : undefined
+                }
                 onChange={() => clearFieldError("message")}
               />
               {fieldErrors.message && (
-                <span id="contact-message-error" style={{ fontSize: 12, color: "#ef6b73" }}>
+                <span
+                  id="contact-message-error"
+                  style={{ fontSize: 12, color: "#ef6b73" }}
+                >
                   {fieldErrors.message}
                 </span>
               )}
             </label>
             <div ref={turnstileRef} style={{ marginTop: 16 }} />
             {fieldErrors.turnstile && (
-              <span style={{ display: "block", marginTop: 8, fontSize: 12, color: "#ef6b73" }}>
+              <span
+                style={{
+                  display: "block",
+                  marginTop: 8,
+                  fontSize: 12,
+                  color: "#ef6b73",
+                }}
+              >
                 {fieldErrors.turnstile}
               </span>
             )}
@@ -399,11 +655,27 @@ export default function Contact() {
               {submitting ? "Verifying…" : "Send message"}
             </button>
             {fieldErrors.submit && (
-              <span style={{ display: "block", marginTop: 10, fontSize: 12.5, color: "#ef6b73", textAlign: "center" }}>
+              <span
+                style={{
+                  display: "block",
+                  marginTop: 10,
+                  fontSize: 12.5,
+                  color: "#ef6b73",
+                  textAlign: "center",
+                }}
+              >
                 {fieldErrors.submit}
               </span>
             )}
-            <p style={{ margin: "14px 0 0", fontSize: 11.5, lineHeight: 1.5, color: "#5c6573", textAlign: "center" }}>
+            <p
+              style={{
+                margin: "14px 0 0",
+                fontSize: 11.5,
+                lineHeight: 1.5,
+                color: "#5c6573",
+                textAlign: "center",
+              }}
+            >
               By submitting, you agree to our{" "}
               <Link to="/privacy" style={{ color: "#8a93a2" }}>
                 Privacy Policy

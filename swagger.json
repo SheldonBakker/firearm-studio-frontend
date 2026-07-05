@@ -1640,7 +1640,7 @@
         }
       }
     },
-    "/api/v1/public/companies/{companyId}/packages": {
+    "/api/v1/public/companies/{companyId}/bookings": {
       "get": {
         "tags": [
           "PublicBookings"
@@ -1662,35 +1662,24 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicPackageResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingOptionsResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicPackageResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingOptionsResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicPackageResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingOptionsResponse"
                 }
               }
             }
           }
         }
-      }
-    },
-    "/api/v1/public/companies/{companyId}/ranges": {
-      "get": {
+      },
+      "post": {
         "tags": [
           "PublicBookings"
         ],
@@ -1705,32 +1694,42 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublicBookingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublicBookingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublicBookingRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicRangeResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicRangeResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicRangeResponse"
-                  }
+                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
                 }
               }
             }
@@ -1869,65 +1868,6 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MonthAvailabilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/public/companies/{companyId}/bookings": {
-      "post": {
-        "tags": [
-          "PublicBookings"
-        ],
-        "parameters": [
-          {
-            "name": "companyId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePublicBookingRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePublicBookingRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePublicBookingRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
                 }
               }
             }
@@ -4537,6 +4477,71 @@
           "packagePrice": {
             "type": "number",
             "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicBookingOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "company": {
+            "$ref": "#/components/schemas/PublicCompanyResponse"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPackageResponse"
+            },
+            "nullable": true
+          },
+          "ranges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicRangeResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicCompanyResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "province": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

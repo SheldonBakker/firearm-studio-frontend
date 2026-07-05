@@ -73,7 +73,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function SiteChrome({ children }: { children: React.ReactNode }) {
-  const inApp = useMatches().some((m) => m.id === "routes/app-layout");
+  const matches = useMatches();
+  const inApp = matches.some((m) => m.id === "routes/app-layout");
+  const bare = matches.some((m) => m.id === "routes/public-calendar");
+  if (bare) {
+    return (
+      <div className="flex min-h-dvh flex-col bg-background">{children}</div>
+    );
+  }
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <SiteHeader />
