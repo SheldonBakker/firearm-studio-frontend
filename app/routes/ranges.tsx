@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { Trash2Icon } from "lucide-react";
 import type { Route } from "./+types/ranges";
 import { ApiError } from "~/lib/api/http";
 import { rangesApi } from "~/lib/api/ranges/ranges";
 import { useSessionUser } from "~/context/auth-context";
+import { useConfirm } from "~/context/confirm-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { PageActions } from "~/context/page-actions";
@@ -61,6 +63,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 export default function Ranges({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
+  const confirm = useConfirm();
   const user = useSessionUser();
   const writable = can(user, "bookings:write");
   const [addOpen, setAddOpen] = useState(false);
@@ -96,6 +99,26 @@ export default function Ranges({ loaderData }: Route.ComponentProps) {
     } catch (e) {
       toast.error(
         e instanceof ApiError ? e.message : "Could not load the range",
+      );
+    }
+  }
+
+  async function handleDelete(row: ShootingRangeListItemDto) {
+    const ok = await confirm({
+      title: "Delete range?",
+      description: `"${row.name ?? "This range"}" will be permanently deleted. This can't be undone.`,
+      confirmLabel: "Delete",
+      cancelLabel: "Keep",
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await rangesApi.remove(row.id);
+      toast.success("Range deleted");
+      revalidator.revalidate();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not delete the range",
       );
     }
   }
@@ -137,6 +160,30 @@ export default function Ranges({ loaderData }: Route.ComponentProps) {
       cell: (r) => <StatusBadge status={r.isActive ? "Active" : "Inactive"} />,
     },
   ];
+
+  if (writable) {
+    columns.push({
+      key: "actions",
+      header: "",
+      align: "right",
+      width: "48px",
+      cell: (r) => (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Delete ${r.name ?? "range"}`}
+          className="text-muted-foreground hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(r);
+          }}
+        >
+          <Trash2Icon />
+        </Button>
+      ),
+    });
+  }
 
   return (
     <PageWrap>

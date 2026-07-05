@@ -61,6 +61,8 @@ export const rangesApi = {
     request<ShootingRangeResponse>("/api/v1/ranges", { method: "POST", body }),
   update: (id: string, body: UpdateRangeRequest) =>
     request<void>(`/api/v1/ranges/${id}`, { method: "PATCH", body }),
+  remove: (id: string) =>
+    request<void>(`/api/v1/ranges/${id}`, { method: "DELETE" }),
   availability: (id: string, params: { packageId: string; date: string }) =>
     request<DayAvailabilityResponse>(`/api/v1/ranges/${id}/availability`, {
       query: params,

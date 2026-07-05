@@ -61,4 +61,6 @@ export const packagesApi = {
     request<PackageResponse>("/api/v1/packages", { method: "POST", body }),
   update: (id: string, body: UpdatePackageRequest) =>
     request<void>(`/api/v1/packages/${id}`, { method: "PATCH", body }),
+  remove: (id: string) =>
+    request<void>(`/api/v1/packages/${id}`, { method: "DELETE" }),
 };
