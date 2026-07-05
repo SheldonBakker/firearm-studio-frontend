@@ -1,19 +1,25 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { MarketingLogo } from "~/components/marketing/site-header";
-import { organizationLd, pageMeta, websiteLd } from "~/lib/utils/seo";
+import {
+  organizationLd,
+  pageMeta,
+  softwareApplicationLd,
+  websiteLd,
+} from "~/lib/utils/seo";
 import { useAuth } from "~/context/auth-context";
 
 export function meta({ location }: Route.MetaArgs) {
   return [
     ...pageMeta({
-      title: "Firearm Studio - Storage & compliance for SA firearm providers",
+      title: "Firearm Studio - Storage, compliance & range bookings",
       description:
-        "Firearm Studio keeps your registry, storage records, licences, and invoicing in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
+        "Firearm Studio keeps your registry, range bookings, storage records, licences, and invoicing in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
       pathname: location.pathname,
     }),
     { "script:ld+json": organizationLd() },
     { "script:ld+json": websiteLd() },
+    { "script:ld+json": softwareApplicationLd() },
   ];
 }
 
@@ -22,6 +28,7 @@ const GREEN = "#3fb68b";
 const RED = "#e5484d";
 const AMBER = "#e8973c";
 const PURPLE = "#9a7cf0";
+const TEAL = "#2bb3c0";
 
 const chip = (c: string, pct = 14) =>
   `color-mix(in srgb, ${c} ${pct}%, transparent)`;
@@ -43,6 +50,11 @@ const ic = {
   users:
     '<path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path><path d="M2 21a8 8 0 0 1 16 0"></path>',
   send: '<path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path>',
+  calendar:
+    '<rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path>',
+  tag: '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 3 12V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.8z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle>',
+  target:
+    '<circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle>',
 } as const;
 
 function Glyph({ d, size = 24, sw = 1.7 }: { d: string; size?: number; sw?: number }) {
@@ -94,9 +106,11 @@ const metrics = [
 
 const features = [
   { title: "Storage registry", body: "Track every firearm in your custody - make, model, serial, calibre, and exact storage location - on one searchable registry.", color: BLUE, svg: ic.box },
+  { title: "Range bookings", body: "Take bookings against live lane availability - pick a slot, assign shooters, and confirm on the spot. No double-booked lanes.", color: TEAL, svg: ic.calendar },
+  { title: "Packages & pricing", body: "Build reusable shooting packages with set duration, price, and shooter limits, then bill them automatically on every booking.", color: PURPLE, svg: ic.tag },
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
-  { title: "Invoicing", body: "Monthly storage invoices are generated automatically, so you can track outstanding balances and flag overdue accounts.", color: GREEN, svg: ic.money },
-  { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: PURPLE, svg: ic.list },
+  { title: "Invoicing", body: "Storage fees and range bookings roll into invoices automatically, so you can track outstanding balances and flag overdue accounts.", color: GREEN, svg: ic.money },
+  { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: RED, svg: ic.list },
 ];
 
 const stats: Stat[] = [
@@ -133,6 +147,27 @@ const audit = [
   { who: "System", action: "flagged licence renewal", target: "LIC-90471", time: "1h", color: AMBER },
   { who: "J. Mokoena", action: "updated storage record", target: "Bay C-12", time: "3h", color: PURPLE },
   { who: "A. Naidoo", action: "marked invoice paid", target: "INV-2038 · R2,100", time: "5h", color: GREEN },
+];
+
+const bookingSlots = [
+  { time: "09:00", note: "3 lanes", state: "open" },
+  { time: "10:00", note: "Selected", state: "active" },
+  { time: "11:00", note: "Full", state: "full" },
+  { time: "13:00", note: "4 lanes", state: "open" },
+  { time: "14:00", note: "2 lanes", state: "open" },
+  { time: "15:00", note: "Full", state: "full" },
+] as const;
+
+const bookingUpcoming: (Invoice & { time: string })[] = [
+  { num: "K. Adams", name: "Intro package · 1 shooter", total: "10:00", status: "Confirmed", time: "10:00", ...statusPill(GREEN) },
+  { num: "Sentinel Security", name: "Range day · 4 shooters", total: "13:00", status: "Pending", time: "13:00", ...statusPill(AMBER) },
+  { num: "M. van der Merwe", name: "Practice · 1 shooter", total: "15:00", status: "Confirmed", time: "15:00", ...statusPill(GREEN) },
+];
+
+const bookingPoints = [
+  { title: "Live lane availability", body: "See remaining lanes per slot before you book - never double-book a lane again." },
+  { title: "Reusable packages", body: "Duration, price, and shooter limits set once, then applied to every booking." },
+  { title: "Straight to invoice", body: "Every confirmed booking rolls into the customer's invoice automatically." },
 ];
 
 const steps = [
@@ -258,9 +293,9 @@ export default function Home() {
               Run a compliant firearm storage business - without the paperwork.
             </h1>
             <p style={{ ...lede, maxWidth: 540, fontSize: "clamp(15px,1.7vw,18px)", margin: "22px 0 0" }}>
-              Firearm Studio keeps your registry, storage records, licences, and
-              invoicing in one secure, audit-ready system - purpose-built for
-              South African storage providers.
+              Firearm Studio keeps your registry, range bookings, storage
+              records, licences, and invoicing in one secure, audit-ready system
+              - purpose-built for South African storage providers.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
               {isLoggedIn ? (
@@ -434,6 +469,76 @@ export default function Home() {
               <p style={{ margin: "9px 0 0", fontSize: 14, lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>{f.body}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section id="bookings" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)", display: "flex", flexWrap: "wrap", gap: "clamp(36px,5vw,64px)", alignItems: "center" }}>
+        <div style={{ flex: "1 1 360px", minWidth: 300 }}>
+          <div style={{ ...eyebrow, color: TEAL }}>Range bookings</div>
+          <h2 style={h2}>Fill every lane, book in seconds</h2>
+          <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
+            Take bookings against live lane availability, sell shooting
+            packages, and confirm on the spot - the whole day's schedule, and
+            every open slot, in one view.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
+            {bookingPoints.map((p) => (
+              <div key={p.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: TEAL, background: chip(TEAL, 14) }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </span>
+                <span>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "#e6eaf0" }}>{p.title}</span>
+                  <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>{p.body}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ flex: "1 1 380px", minWidth: 300 }}>
+          <div style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 9, color: TEAL }}>
+                <Glyph d={ic.calendar} size={17} sw={1.7} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>New booking</span>
+              </span>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#5c6573" }}>FRI 27 JUN</span>
+            </div>
+            <div style={{ padding: "clamp(14px,2vw,18px)" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5c6573" }}>Available slots</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 10 }}>
+                {bookingSlots.map((s) => {
+                  const active = s.state === "active";
+                  const full = s.state === "full";
+                  return (
+                    <div key={s.time} style={{ borderRadius: 10, padding: "9px 10px", border: `1px solid ${active ? TEAL : "#262d38"}`, background: active ? chip(TEAL, 16) : "#0e1116", opacity: full ? 0.45 : 1 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: active ? TEAL : "#e6eaf0" }}>{s.time}</div>
+                      <div style={{ marginTop: 3, fontSize: 10, color: active ? TEAL : "#5c6573" }}>{s.note}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ marginTop: 16, border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", overflow: "hidden" }}>
+                <div style={{ padding: "11px 14px", borderBottom: "1px solid #1f252e", fontSize: 11.5, fontWeight: 700, color: "#e6eaf0" }}>Today's bookings</div>
+                {bookingUpcoming.map((b) => (
+                  <div key={b.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid #1f252e" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                      <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 700, color: TEAL, flexShrink: 0 }}>{b.time}</span>
+                      <span style={{ minWidth: 0 }}>
+                        <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#e6eaf0" }}>{b.num}</span>
+                        <span style={{ display: "block", fontSize: 10, color: "#5c6573" }}>{b.name}</span>
+                      </span>
+                    </span>
+                    <StatusPill inv={b} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

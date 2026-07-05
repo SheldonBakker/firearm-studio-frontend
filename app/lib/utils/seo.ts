@@ -62,7 +62,7 @@ export function organizationLd() {
     url: SITE_URL,
     logo: `${SITE_URL}/icon-512.png`,
     description:
-      "Storage and compliance management software for South African firearm storage providers.",
+      "Storage, compliance, and range booking management software for South African firearm storage providers and shooting ranges.",
     areaServed: "ZA",
     contactPoint: {
       "@type": "ContactPoint",
@@ -78,5 +78,27 @@ export function websiteLd() {
     "@type": "WebSite",
     name: SITE_NAME,
     url: SITE_URL,
+  };
+}
+
+export function softwareApplicationLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: SITE_NAME,
+    url: SITE_URL,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description:
+      "Firearm Studio keeps your registry, range bookings, storage records, licences, and invoicing in one secure, audit-ready system - purpose-built for South African firearm storage providers and shooting ranges.",
+    areaServed: "ZA",
+    featureList: [
+      "Firearm storage registry",
+      "Range bookings with live lane availability",
+      "Shooting packages and pricing",
+      "Licence expiry tracking and renewal alerts",
+      "Automated invoicing",
+      "Tamper-evident audit trail",
+    ],
   };
 }
