@@ -61,6 +61,8 @@ export interface FormField {
   placeholder?: string;
   full?: boolean;
   defaultValue?: string;
+
+  onValueChange?: (value: string) => Record<string, string> | undefined;
   searchDebounceMs?: number;
   searchMinChars?: number;
   searchTypes?: { value: string; label: string }[];
@@ -325,12 +327,13 @@ export function FormDialog({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  function set(name: string, v: string) {
-    setValues((prev) => ({ ...prev, [name]: v }));
+  function set(name: string, v: string, patch?: Record<string, string>) {
+    setValues((prev) => ({ ...prev, [name]: v, ...patch }));
     setFieldErrors((prev) => {
-      if (!prev[name]) return prev;
+      const touched = [name, ...Object.keys(patch ?? {})];
+      if (!touched.some((key) => prev[key])) return prev;
       const next = { ...prev };
-      delete next[name];
+      for (const key of touched) delete next[key];
       return next;
     });
   }
@@ -391,7 +394,7 @@ export function FormDialog({
                 {f.type === "select" ? (
                   <Select
                     value={values[f.name]}
-                    onValueChange={(v) => set(f.name, v)}
+                    onValueChange={(v) => set(f.name, v, f.onValueChange?.(v))}
                   >
                     <SelectTrigger id={f.name}>
                       <SelectValue placeholder={f.placeholder ?? "Select…"} />

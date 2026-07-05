@@ -53,7 +53,6 @@ export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus];
 export const BookingSource = { Staff: 0, Online: 1 } as const;
 export type BookingSource = (typeof BookingSource)[keyof typeof BookingSource];
 
-// .NET DayOfWeek: Sunday = 0.
 export const DayOfWeek = {
   Sunday: 0,
   Monday: 1,

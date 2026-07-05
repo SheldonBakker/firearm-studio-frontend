@@ -16,6 +16,7 @@ import { Mono } from "~/components/common/mono";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
 import type { CompanyDetailsResponse } from "~/lib/api/company/types";
+import { SOUTH_AFRICAN_BANKS, BANK_ACCOUNT_TYPES } from "~/lib/constants/banking";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);
@@ -161,11 +162,34 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
             { name: "city", label: "City", defaultValue: c.city ?? "" },
             { name: "province", label: "Province", defaultValue: c.province ?? "" },
             { name: "postalCode", label: "Postal code", defaultValue: c.postalCode ?? "" },
-            { name: "bankName", label: "Bank name", defaultValue: c.bankName ?? "" },
+            {
+              name: "bankName",
+              label: "Bank name",
+              type: "select",
+              placeholder: "Select a bank",
+              options: SOUTH_AFRICAN_BANKS.map((b) => ({
+                value: b.name,
+                label: b.name,
+              })),
+              onValueChange: (v) => {
+                const branchCode = SOUTH_AFRICAN_BANKS.find(
+                  (b) => b.name === v,
+                )?.branchCode;
+                return branchCode ? { bankBranchCode: branchCode } : undefined;
+              },
+              defaultValue: c.bankName ?? "",
+            },
             { name: "bankAccountHolder", label: "Account holder", defaultValue: c.bankAccountHolder ?? "" },
             { name: "bankAccountNumber", label: "Account number", defaultValue: c.bankAccountNumber ?? "" },
             { name: "bankBranchCode", label: "Branch code", defaultValue: c.bankBranchCode ?? "" },
-            { name: "bankAccountType", label: "Account type", placeholder: "e.g. Cheque, Savings", defaultValue: c.bankAccountType ?? "" },
+            {
+              name: "bankAccountType",
+              label: "Account type",
+              type: "select",
+              placeholder: "Select an account type",
+              options: BANK_ACCOUNT_TYPES.map((t) => ({ value: t, label: t })),
+              defaultValue: c.bankAccountType ?? "",
+            },
             { name: "bankSwiftCode", label: "SWIFT code", defaultValue: c.bankSwiftCode ?? "" },
           ]}
           onSubmit={async (v) => {
