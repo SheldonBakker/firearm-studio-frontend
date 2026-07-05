@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Badge } from "~/components/ui/badge";
+import { Separator } from "~/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -35,6 +38,8 @@ const CUSTOMER_SEARCH_TYPES = [
   { value: "phone", label: "Phone" },
 ];
 
+const hhmm = (t: string) => t.slice(0, 5);
+
 async function searchCustomers(query: string, searchType: string) {
   const results = await customersApi.list({ [searchType]: query });
   return (results.items ?? []).map((c) => ({
@@ -42,6 +47,14 @@ async function searchCustomers(query: string, searchType: string) {
     label: customerLabel(c),
     description: [c.email, c.phone].filter(Boolean).join(" · "),
   }));
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      {children}
+    </h3>
+  );
 }
 
 export function BookingFormDialog({
@@ -73,7 +86,15 @@ export function BookingFormDialog({
   const activeRanges = ranges.filter((r) => r.isActive);
   const activePackages = packages.filter((p) => p.isActive);
   const selectedPackage = activePackages.find((p) => p.id === packageId);
+  const selectedSlot = slots.find((s) => s.startTime === startTime);
   const today = new Date().toISOString().slice(0, 10);
+  const shooters = Number(shooterCount);
+
+  const canSubmit =
+    Boolean(rangeId && packageId && date && startTime && customerId) &&
+    Number.isInteger(shooters) &&
+    shooters >= 1 &&
+    (!selectedPackage || shooters <= selectedPackage.maxShooters);
 
   useEffect(() => {
     if (!open) return;
@@ -113,6 +134,25 @@ export function BookingFormDialog({
     };
   }, [rangeId, packageId, date]);
 
+  // Keep the shooter count within the selected package's limit.
+  useEffect(() => {
+    if (!selectedPackage) return;
+    const n = Number(shooterCount);
+    if (Number.isInteger(n) && n > selectedPackage.maxShooters) {
+      setShooterCount(String(selectedPackage.maxShooters));
+    }
+  }, [packageId]);
+
+  function stepShooters(delta: number) {
+    const n = Number(shooterCount) || 0;
+    let next = n + delta;
+    if (next < 1) next = 1;
+    if (selectedPackage && next > selectedPackage.maxShooters) {
+      next = selectedPackage.maxShooters;
+    }
+    setShooterCount(String(next));
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -121,7 +161,6 @@ export function BookingFormDialog({
       setError("Pick a range, package, date, time slot and customer.");
       return;
     }
-    const shooters = Number(shooterCount);
     if (!Number.isInteger(shooters) || shooters < 1) {
       setError("Shooter count must be at least 1.");
       return;
@@ -159,169 +198,254 @@ export function BookingFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-140 overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>New booking</DialogTitle>
-          <DialogDescription>
-            Book a range slot for a customer.
-          </DialogDescription>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full gap-0 sm:max-w-xl"
+      >
+        <SheetHeader className="gap-1 pr-12">
+          <div className="flex items-center justify-between gap-3">
+            <SheetTitle>New booking</SheetTitle>
+            {selectedPackage && (
+              <Badge variant="secondary" className="text-[13px]">
+                {fmtMoney(selectedPackage.price)}
+              </Badge>
+            )}
+          </div>
+          <SheetDescription>Book a range slot for a customer.</SheetDescription>
+        </SheetHeader>
+
         <form
           noValidate
           onSubmit={submit}
-          className="grid grid-cols-1 gap-4 py-1 sm:grid-cols-2"
+          className="flex flex-1 flex-col overflow-hidden"
         >
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-range">
-              Range<span className="text-destructive"> *</span>
-            </Label>
-            <Select value={rangeId} onValueChange={setRangeId}>
-              <SelectTrigger id="booking-range">
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {activeRanges.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.name ?? "Unnamed range"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-package">
-              Package<span className="text-destructive"> *</span>
-            </Label>
-            <Select value={packageId} onValueChange={setPackageId}>
-              <SelectTrigger id="booking-package">
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {activePackages.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name ?? "Unnamed package"} · {fmtMoney(p.price)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="booking-date">
-              Date<span className="text-destructive"> *</span>
-            </Label>
-            <Input
-              id="booking-date"
-              type="date"
-              min={today}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label>
-              Time slot<span className="text-destructive"> *</span>
-            </Label>
-            {!rangeId || !packageId || !date ? (
-              <p className="text-[12.5px] text-muted-foreground">
-                Pick a range, package and date to see available slots.
-              </p>
-            ) : slotsLoading ? (
-              <p className="text-[12.5px] text-muted-foreground">
-                Loading slots…
-              </p>
-            ) : slots.length === 0 ? (
-              <p className="text-[12.5px] text-muted-foreground">
-                No available slots for this date.
-              </p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {slots.map((slot) => (
-                  <button
-                    key={slot.startTime}
-                    type="button"
-                    aria-pressed={startTime === slot.startTime}
-                    onClick={() => setStartTime(slot.startTime)}
-                    className={cn(
-                      "rounded-md border px-2.5 py-1.5 text-[12.5px] font-medium transition-colors",
-                      startTime === slot.startTime
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input hover:bg-accent hover:text-accent-foreground",
-                    )}
-                  >
-                    {slot.startTime.slice(0, 5)}
-                    <span
-                      className={cn(
-                        "ml-1.5 text-[11px]",
-                        startTime === slot.startTime
-                          ? "text-primary-foreground/70"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {slot.remainingLanes}{" "}
-                      {slot.remainingLanes === 1 ? "lane" : "lanes"}
-                    </span>
-                  </button>
-                ))}
+          <div className="flex-1 space-y-6 overflow-y-auto px-4 pb-4">
+            {/* Session */}
+            <section className="space-y-3">
+              <SectionHeading>Session</SectionHeading>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-range">
+                  Range<span className="text-destructive"> *</span>
+                </Label>
+                <Select value={rangeId} onValueChange={setRangeId}>
+                  <SelectTrigger id="booking-range">
+                    <SelectValue placeholder="Select a range…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeRanges.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name ?? "Unnamed range"} · {r.laneCount}{" "}
+                        {r.laneCount === 1 ? "lane" : "lanes"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-package">
+                  Package<span className="text-destructive"> *</span>
+                </Label>
+                <Select value={packageId} onValueChange={setPackageId}>
+                  <SelectTrigger id="booking-package">
+                    <SelectValue placeholder="Select a package…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activePackages.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name ?? "Unnamed package"} · {fmtMoney(p.price)} ·{" "}
+                        {p.durationMinutes} min · up to {p.maxShooters}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-date">
+                  Date<span className="text-destructive"> *</span>
+                </Label>
+                <Input
+                  id="booking-date"
+                  type="date"
+                  min={today}
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </div>
+            </section>
+
+            <Separator />
+
+            {/* Time slot */}
+            <section className="space-y-3">
+              <SectionHeading>Time slot</SectionHeading>
+              {!rangeId || !packageId || !date ? (
+                <p className="text-[12.5px] text-muted-foreground">
+                  Pick a range, package and date to see available slots.
+                </p>
+              ) : slotsLoading ? (
+                <p className="text-[12.5px] text-muted-foreground">
+                  Loading slots…
+                </p>
+              ) : slots.length === 0 ? (
+                <p className="text-[12.5px] text-muted-foreground">
+                  No available slots for this date.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {slots.map((slot) => {
+                    const full = slot.remainingLanes <= 0;
+                    const active = startTime === slot.startTime;
+                    return (
+                      <button
+                        key={slot.startTime}
+                        type="button"
+                        disabled={full}
+                        aria-pressed={active}
+                        onClick={() => setStartTime(slot.startTime)}
+                        className={cn(
+                          "flex flex-col items-start gap-1 rounded-md border px-3 py-2 text-left transition-colors",
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-input hover:bg-accent hover:text-accent-foreground",
+                          full &&
+                            "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-inherit",
+                        )}
+                      >
+                        <span className="text-[13px] font-medium">
+                          {hhmm(slot.startTime)} – {hhmm(slot.endTime)}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[11px]",
+                            active
+                              ? "text-primary-foreground/70"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          {full
+                            ? "Full"
+                            : `${slot.remainingLanes} ${
+                                slot.remainingLanes === 1 ? "lane" : "lanes"
+                              } left`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {selectedSlot && selectedPackage && (
+                <p className="text-[12.5px] text-muted-foreground">
+                  Ends {hhmm(selectedSlot.endTime)} ·{" "}
+                  {selectedPackage.durationMinutes} min
+                </p>
+              )}
+            </section>
+
+            <Separator />
+
+            {/* Customer & shooters */}
+            <section className="space-y-3">
+              <SectionHeading>Customer &amp; shooters</SectionHeading>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-customer">
+                  Customer<span className="text-destructive"> *</span>
+                </Label>
+                <SearchSelectField
+                  id="booking-customer"
+                  value={customerId}
+                  options={[]}
+                  placeholder="Search by name, email, or phone…"
+                  searchTypes={CUSTOMER_SEARCH_TYPES}
+                  defaultSearchType="name"
+                  onSearch={searchCustomers}
+                  invalid={false}
+                  onChange={setCustomerId}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-shooters">Shooters</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="Fewer shooters"
+                    disabled={shooters <= 1}
+                    onClick={() => stepShooters(-1)}
+                  >
+                    <MinusIcon />
+                  </Button>
+                  <Input
+                    id="booking-shooters"
+                    type="number"
+                    min={1}
+                    max={selectedPackage?.maxShooters}
+                    value={shooterCount}
+                    onChange={(e) => setShooterCount(e.target.value)}
+                    className="w-16 text-center"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="More shooters"
+                    disabled={
+                      !!selectedPackage &&
+                      shooters >= selectedPackage.maxShooters
+                    }
+                    onClick={() => stepShooters(1)}
+                  >
+                    <PlusIcon />
+                  </Button>
+                  {selectedPackage && (
+                    <span className="text-[12.5px] text-muted-foreground">
+                      max {selectedPackage.maxShooters}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            <Separator />
+
+            {/* Notes & options */}
+            <section className="space-y-3">
+              <SectionHeading>Notes &amp; options</SectionHeading>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="booking-notes">Notes</Label>
+                <textarea
+                  id="booking-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
+                />
+              </div>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-input p-3 text-sm transition-colors hover:bg-accent/50">
+                <input
+                  type="checkbox"
+                  className="accent-primary"
+                  checked={confirmImmediately}
+                  onChange={(e) => setConfirmImmediately(e.target.checked)}
+                />
+                <span>
+                  Confirm booking immediately
+                  <span className="block text-[12.5px] text-muted-foreground">
+                    Skip the pending state and mark this booking confirmed.
+                  </span>
+                </span>
+              </label>
+            </section>
+
+            {error && (
+              <p className="text-[13px] font-medium text-destructive">
+                {error}
+              </p>
             )}
           </div>
 
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="booking-customer">
-              Customer<span className="text-destructive"> *</span>
-            </Label>
-            <SearchSelectField
-              id="booking-customer"
-              value={customerId}
-              options={[]}
-              placeholder="Search by name, email, or phone…"
-              searchTypes={CUSTOMER_SEARCH_TYPES}
-              defaultSearchType="name"
-              onSearch={searchCustomers}
-              invalid={false}
-              onChange={setCustomerId}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-shooters">Shooters</Label>
-            <Input
-              id="booking-shooters"
-              type="number"
-              min={1}
-              max={selectedPackage?.maxShooters}
-              value={shooterCount}
-              onChange={(e) => setShooterCount(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="booking-notes">Notes</Label>
-            <textarea
-              id="booking-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
-            />
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
-            <input
-              type="checkbox"
-              className="accent-primary"
-              checked={confirmImmediately}
-              onChange={(e) => setConfirmImmediately(e.target.checked)}
-            />
-            Confirm booking immediately
-          </label>
-
-          {error && (
-            <p className="text-[13px] font-medium text-destructive sm:col-span-2">
-              {error}
-            </p>
-          )}
-          <DialogFooter className="mt-1 sm:col-span-2">
+          <SheetFooter className="border-t bg-muted/50 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
@@ -329,12 +453,12 @@ export function BookingFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !canSubmit}>
               {loading ? "Creating…" : "Create booking"}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
