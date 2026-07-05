@@ -10,6 +10,7 @@ import {
   refreshSession,
   requireAuth,
 } from "~/context/auth-context";
+import { useConfirm } from "~/context/confirm-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { BrandMark } from "~/components/common/brand";
 import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
@@ -21,7 +22,10 @@ import {
   getSouthAfricanPhoneError,
   optionalSouthAfricanPhoneSchema,
 } from "~/lib/utils/phone";
-import { optionalEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
+import {
+  optionalEmailSchema,
+  requiredTextSchema,
+} from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -60,6 +64,7 @@ const FIELDS: {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [values, setValues] = useState<CreateCompanyRequest>({});
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -101,6 +106,12 @@ export default function Onboarding() {
       setFieldErrors(errors);
       return;
     }
+    const confirmed = await confirm({
+      title: "Create company?",
+      description: `Set up "${result.data.name}" as your company.`,
+      confirmLabel: "Create company",
+    });
+    if (!confirmed) return;
     setLoading(true);
     try {
       await companyApi.createOnboarding({

@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/select";
 import { SectionHeading } from "~/components/modals/form-dialog";
 import { ApiError } from "~/lib/api/http";
+import { useConfirm } from "~/context/confirm-context";
 import { rangesApi } from "~/lib/api/ranges/ranges";
 import type { ShootingRangeResponse } from "~/lib/api/ranges/types";
 import { DayOfWeek } from "~/lib/types/enums";
@@ -74,6 +75,7 @@ export function RangeFormDialog({
   const [hours, setHours] = useState<HourRow[]>(() => initialHours(range));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (!open) return;
@@ -127,6 +129,15 @@ export function RangeFormDialog({
         openTime: `${h.open}:00`,
         closeTime: `${h.close}:00`,
       }));
+
+    const confirmed = await confirm({
+      title: range ? "Save changes?" : "Add range?",
+      description: range
+        ? `Update "${name.trim()}" with these details.`
+        : `Create the range "${name.trim()}".`,
+      confirmLabel: range ? "Save changes" : "Add range",
+    });
+    if (!confirmed) return;
 
     setLoading(true);
     try {

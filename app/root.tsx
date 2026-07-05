@@ -15,6 +15,7 @@ import { AppShellSkeleton } from "~/components/common/skeletons";
 import { PageWrap, ErrorState } from "~/components/common/misc";
 import { ApiError } from "~/lib/api/http";
 import { AuthProvider } from "~/context/auth-context";
+import { ConfirmProvider } from "~/context/confirm-context";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
 
@@ -44,7 +45,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#0e1116" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icon-192.png"
+        />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <Meta />
@@ -80,9 +86,11 @@ function SiteChrome({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <SiteChrome>
-        <Outlet />
-      </SiteChrome>
+      <ConfirmProvider>
+        <SiteChrome>
+          <Outlet />
+        </SiteChrome>
+      </ConfirmProvider>
     </AuthProvider>
   );
 }

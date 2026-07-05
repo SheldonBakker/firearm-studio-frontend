@@ -20,18 +20,20 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { FormDialog } from "~/components/modals/form-dialog";
+import { useConfirm } from "~/context/confirm-context";
 import { Resolve } from "~/components/common/skeletons";
 import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
-import type { AppUserResponsePaginatedResponse, UserResponse } from "~/lib/api/users/types";
+import type {
+  AppUserResponsePaginatedResponse,
+  UserResponse,
+} from "~/lib/api/users/types";
 
 const PAGE_SIZE = 20;
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);
   if (!canSeeNav(user, "team")) throw redirect("/dashboard");
-  const requestedPage = Number(
-    new URL(request.url).searchParams.get("page"),
-  );
+  const requestedPage = Number(new URL(request.url).searchParams.get("page"));
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   return {
@@ -51,6 +53,7 @@ const ROLES = enumNames(AppRole);
 
 export default function Team({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
+  const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleFor, setRoleFor] = useState<UserResponse | null>(null);
@@ -63,6 +66,13 @@ export default function Team({ loaderData }: Route.ComponentProps) {
   };
 
   async function deactivate(u: UserResponse) {
+    const confirmed = await confirm({
+      title: "Deactivate user?",
+      description: `${u.fullName || u.email} will lose access to this account.`,
+      confirmLabel: "Deactivate",
+      destructive: true,
+    });
+    if (!confirmed) return;
     await usersApi.deactivate(u.id);
     toast.success("User deactivated");
     revalidator.revalidate();

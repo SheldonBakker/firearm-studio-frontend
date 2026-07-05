@@ -2,6 +2,7 @@ import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/booking-detail";
 import { ApiError } from "~/lib/api/http";
+import { useConfirm, type ConfirmOptions } from "~/context/confirm-context";
 import { bookingsApi } from "~/lib/api/bookings/bookings";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
@@ -28,7 +29,10 @@ export default function BookingDetail({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   return (
     <PageWrap>
-      <BackLink label="Back to bookings" onClick={() => navigate("/bookings")} />
+      <BackLink
+        label="Back to bookings"
+        onClick={() => navigate("/bookings")}
+      />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
         {(booking) => <BookingView booking={booking} />}
       </Resolve>
@@ -39,6 +43,7 @@ export default function BookingDetail({ loaderData }: Route.ComponentProps) {
 function BookingView({ booking }: { booking: BookingResponse }) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+  const confirm = useConfirm();
   const user = useSessionUser();
   const writable = can(user, "bookings:write");
   const status = enumKey(BookingStatus, booking.status) ?? "Pending";
@@ -49,7 +54,9 @@ function BookingView({ booking }: { booking: BookingResponse }) {
     action: (id: string) => Promise<void>,
     success: string,
     failure: string,
+    confirmOpts: ConfirmOptions,
   ) {
+    if (!(await confirm(confirmOpts))) return;
     try {
       await action(booking.id);
       toast.success(success);
@@ -84,7 +91,16 @@ function BookingView({ booking }: { booking: BookingResponse }) {
                 <Button
                   variant="ghost"
                   onClick={() =>
-                    run(bookingsApi.confirm, "Booking confirmed", "Could not confirm")
+                    run(
+                      bookingsApi.confirm,
+                      "Booking confirmed",
+                      "Could not confirm",
+                      {
+                        title: "Confirm booking?",
+                        description: "This will confirm the booking.",
+                        confirmLabel: "Confirm booking",
+                      },
+                    )
                   }
                 >
                   <Icon name="check" size={16} />
@@ -100,6 +116,11 @@ function BookingView({ booking }: { booking: BookingResponse }) {
                         bookingsApi.complete,
                         "Booking completed",
                         "Could not complete",
+                        {
+                          title: "Mark booking complete?",
+                          description: "This marks the booking as completed.",
+                          confirmLabel: "Complete",
+                        },
                       )
                     }
                   >
@@ -113,6 +134,12 @@ function BookingView({ booking }: { booking: BookingResponse }) {
                         bookingsApi.noShow,
                         "Booking marked as no-show",
                         "Could not mark as no-show",
+                        {
+                          title: "Mark as no-show?",
+                          description: "This marks the booking as a no-show.",
+                          confirmLabel: "Mark no-show",
+                          destructive: true,
+                        },
                       )
                     }
                   >
@@ -123,7 +150,18 @@ function BookingView({ booking }: { booking: BookingResponse }) {
               <Button
                 variant="ghost"
                 onClick={() =>
-                  run(bookingsApi.cancel, "Booking cancelled", "Could not cancel")
+                  run(
+                    bookingsApi.cancel,
+                    "Booking cancelled",
+                    "Could not cancel",
+                    {
+                      title: "Cancel booking?",
+                      description: "This will cancel the booking.",
+                      confirmLabel: "Cancel booking",
+                      cancelLabel: "Keep booking",
+                      destructive: true,
+                    },
+                  )
                 }
               >
                 Cancel booking
@@ -148,7 +186,8 @@ function BookingView({ booking }: { booking: BookingResponse }) {
                 k: "Time",
                 v: (
                   <Mono>
-                    {booking.startTime.slice(0, 5)}–{booking.endTime.slice(0, 5)}
+                    {booking.startTime.slice(0, 5)}–
+                    {booking.endTime.slice(0, 5)}
                   </Mono>
                 ),
               },

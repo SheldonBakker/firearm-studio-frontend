@@ -22,6 +22,7 @@ import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { Icon } from "~/components/common/icon";
 import { SectionHeading } from "~/components/modals/form-dialog";
 import { ApiError } from "~/lib/api/http";
+import { useConfirm } from "~/context/confirm-context";
 import { packagesApi } from "~/lib/api/packages/packages";
 import type { PackageResponse } from "~/lib/api/packages/types";
 
@@ -62,6 +63,7 @@ export function PackageFormDialog({
   const [items, setItems] = useState<ItemRow[]>(() => initialItems(pkg));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (!open) return;
@@ -134,6 +136,15 @@ export function PackageFormDialog({
         sortOrder: i,
       })),
     };
+
+    const confirmed = await confirm({
+      title: pkg ? "Save changes?" : "Add package?",
+      description: pkg
+        ? `Update "${name.trim()}" with these details.`
+        : `Create the package "${name.trim()}".`,
+      confirmLabel: pkg ? "Save changes" : "Add package",
+    });
+    if (!confirmed) return;
 
     setLoading(true);
     try {

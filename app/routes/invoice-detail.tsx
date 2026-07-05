@@ -7,6 +7,7 @@ import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { customerLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
 import { useSessionUser } from "~/context/auth-context";
+import { useConfirm } from "~/context/confirm-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
@@ -44,7 +45,10 @@ export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   return (
     <PageWrap>
-      <BackLink label="Back to invoices" onClick={() => navigate("/invoices")} />
+      <BackLink
+        label="Back to invoices"
+        onClick={() => navigate("/invoices")}
+      />
       <Resolve resolve={loaderData.data} fallback={<DetailSkeleton />}>
         {(invoice) => <InvoiceView invoice={invoice} />}
       </Resolve>
@@ -55,6 +59,7 @@ export default function InvoiceDetail({ loaderData }: Route.ComponentProps) {
 function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+  const confirm = useConfirm();
   const user = useSessionUser();
   const writable = can(user, "invoices:write");
   const [payOpen, setPayOpen] = useState(false);
@@ -65,6 +70,12 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
   const isPaid = invoice.status === InvoiceStatus.Paid;
 
   async function send() {
+    const confirmed = await confirm({
+      title: "Send invoice?",
+      description: "This will send the invoice to the customer.",
+      confirmLabel: "Send invoice",
+    });
+    if (!confirmed) return;
     try {
       await invoicesApi.send(invoice.id);
       toast.success("Invoice sent");
@@ -74,6 +85,14 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
     }
   }
   async function cancel() {
+    const confirmed = await confirm({
+      title: "Cancel invoice?",
+      description: "This will cancel the invoice.",
+      confirmLabel: "Cancel invoice",
+      cancelLabel: "Keep invoice",
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       await invoicesApi.cancel(invoice.id);
       toast.success("Invoice cancelled");

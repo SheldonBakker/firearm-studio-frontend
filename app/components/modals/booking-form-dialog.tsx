@@ -22,6 +22,7 @@ import {
 } from "~/components/ui/select";
 import { SearchSelectField } from "~/components/modals/form-dialog";
 import { ApiError } from "~/lib/api/http";
+import { useConfirm } from "~/context/confirm-context";
 import { bookingsApi } from "~/lib/api/bookings/bookings";
 import { customersApi } from "~/lib/api/customers/customers";
 import { rangesApi } from "~/lib/api/ranges/ranges";
@@ -82,6 +83,7 @@ export function BookingFormDialog({
   const [confirmImmediately, setConfirmImmediately] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const confirm = useConfirm();
 
   const activeRanges = ranges.filter((r) => r.isActive);
   const activePackages = packages.filter((p) => p.isActive);
@@ -174,6 +176,15 @@ export function BookingFormDialog({
       return;
     }
 
+    const confirmed = await confirm({
+      title: "Create booking?",
+      description: confirmImmediately
+        ? "This will create the booking and confirm it immediately."
+        : "This will create the booking as pending.",
+      confirmLabel: "Create booking",
+    });
+    if (!confirmed) return;
+
     setLoading(true);
     try {
       const created = await bookingsApi.create({
@@ -189,9 +200,7 @@ export function BookingFormDialog({
       onCreated(created?.id ?? null);
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Something went wrong.",
-      );
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -199,10 +208,7 @@ export function BookingFormDialog({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-full gap-0 sm:max-w-xl"
-      >
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
         <SheetHeader className="gap-1 pr-12">
           <div className="flex items-center justify-between gap-3">
             <SheetTitle>New booking</SheetTitle>

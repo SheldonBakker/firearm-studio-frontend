@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { ApiError } from "~/lib/api/http";
+import { useConfirm } from "~/context/confirm-context";
 import {
   optionalSouthAfricanPhoneSchema,
   requiredSouthAfricanPhoneSchema,
@@ -302,6 +303,8 @@ export function FormDialog({
   description,
   fields,
   submitLabel = "Save",
+  confirmTitle,
+  confirmDescription,
   onSubmit,
 }: {
   open: boolean;
@@ -310,8 +313,11 @@ export function FormDialog({
   description?: string;
   fields: FormField[];
   submitLabel?: string;
+  confirmTitle?: string;
+  confirmDescription?: React.ReactNode;
   onSubmit: (values: Record<string, string>) => Promise<void>;
 }) {
+  const confirm = useConfirm();
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map((f) => [f.name, f.defaultValue ?? ""])),
   );
@@ -344,6 +350,13 @@ export function FormDialog({
       setFieldErrors(fieldErrorsFromZod(result.error));
       return;
     }
+
+    const confirmed = await confirm({
+      title: confirmTitle ?? `${title}?`,
+      description: confirmDescription,
+      confirmLabel: submitLabel,
+    });
+    if (!confirmed) return;
 
     setLoading(true);
     try {
