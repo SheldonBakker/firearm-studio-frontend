@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { SectionHeading } from "~/components/modals/form-dialog";
 import { ApiError } from "~/lib/api/http";
 import { rangesApi } from "~/lib/api/ranges/ranges";
 import type { ShootingRangeResponse } from "~/lib/api/ranges/types";
@@ -149,131 +151,148 @@ export function RangeFormDialog({
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Something went wrong.",
-      );
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-140 overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{range ? "Edit range" : "Add range"}</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
+        <SheetHeader className="gap-1 pr-12">
+          <SheetTitle>{range ? "Edit range" : "Add range"}</SheetTitle>
+          <SheetDescription>
             {range
               ? "Update the range details and weekly operating hours."
               : "Set up a shooting range with its weekly operating hours."}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <form
           noValidate
           onSubmit={submit}
-          className="grid grid-cols-1 gap-4 py-1 sm:grid-cols-2"
+          className="flex flex-1 flex-col overflow-hidden"
         >
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="range-name">
-              Name<span className="text-destructive"> *</span>
-            </Label>
-            <Input
-              id="range-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Indoor 25m"
-            />
-          </div>
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="range-description">Description</Label>
-            <textarea
-              id="range-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="range-lanes">Lanes</Label>
-            <Input
-              id="range-lanes"
-              type="number"
-              min={1}
-              value={laneCount}
-              onChange={(e) => setLaneCount(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="range-interval">Slot interval (minutes)</Label>
-            <Input
-              id="range-interval"
-              type="number"
-              min={1}
-              step={5}
-              value={slotInterval}
-              onChange={(e) => setSlotInterval(e.target.value)}
-            />
-          </div>
-          {range && (
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label htmlFor="range-active">Status</Label>
-              <Select value={active} onValueChange={setActive}>
-                <SelectTrigger id="range-active">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Active</SelectItem>
-                  <SelectItem value="false">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="flex-1 space-y-6 overflow-y-auto px-4 pb-4">
+            <section className="space-y-3">
+              <SectionHeading>Details</SectionHeading>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="range-name">
+                  Name<span className="text-destructive"> *</span>
+                </Label>
+                <Input
+                  id="range-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Indoor 25m"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="range-description">Description</Label>
+                <textarea
+                  id="range-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
+                />
+              </div>
+            </section>
 
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label>Operating hours</Label>
-            <div className="flex flex-col gap-1.5">
-              {hours.map((h) => (
-                <div key={h.day} className="flex items-center gap-3">
-                  <label className="flex w-16 shrink-0 cursor-pointer items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      className="accent-primary"
-                      checked={h.enabled}
-                      onChange={(e) =>
-                        setHour(h.day, { enabled: e.target.checked })
-                      }
-                    />
-                    {DAY_LABELS[h.day]}
-                  </label>
+            <Separator />
+
+            <section className="space-y-3">
+              <SectionHeading>Capacity</SectionHeading>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="range-lanes">Lanes</Label>
                   <Input
-                    type="time"
-                    aria-label={`${DAY_LABELS[h.day]} opening time`}
-                    disabled={!h.enabled}
-                    value={h.open}
-                    onChange={(e) => setHour(h.day, { open: e.target.value })}
-                    className="h-9 w-full"
-                  />
-                  <span className="text-muted-foreground">–</span>
-                  <Input
-                    type="time"
-                    aria-label={`${DAY_LABELS[h.day]} closing time`}
-                    disabled={!h.enabled}
-                    value={h.close}
-                    onChange={(e) => setHour(h.day, { close: e.target.value })}
-                    className="h-9 w-full"
+                    id="range-lanes"
+                    type="number"
+                    min={1}
+                    value={laneCount}
+                    onChange={(e) => setLaneCount(e.target.value)}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="range-interval">
+                    Slot interval (minutes)
+                  </Label>
+                  <Input
+                    id="range-interval"
+                    type="number"
+                    min={1}
+                    step={5}
+                    value={slotInterval}
+                    onChange={(e) => setSlotInterval(e.target.value)}
+                  />
+                </div>
+              </div>
+              {range && (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="range-active">Status</Label>
+                  <Select value={active} onValueChange={setActive}>
+                    <SelectTrigger id="range-active">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </section>
 
-          {error && (
-            <p className="text-[13px] font-medium text-destructive sm:col-span-2">
-              {error}
-            </p>
-          )}
-          <DialogFooter className="mt-1 sm:col-span-2">
+            <Separator />
+
+            <section className="space-y-3">
+              <SectionHeading>Operating hours</SectionHeading>
+              <div className="flex flex-col gap-1.5">
+                {hours.map((h) => (
+                  <div key={h.day} className="flex items-center gap-3">
+                    <label className="flex w-16 shrink-0 cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="accent-primary"
+                        checked={h.enabled}
+                        onChange={(e) =>
+                          setHour(h.day, { enabled: e.target.checked })
+                        }
+                      />
+                      {DAY_LABELS[h.day]}
+                    </label>
+                    <Input
+                      type="time"
+                      aria-label={`${DAY_LABELS[h.day]} opening time`}
+                      disabled={!h.enabled}
+                      value={h.open}
+                      onChange={(e) => setHour(h.day, { open: e.target.value })}
+                      className="h-9 w-full"
+                    />
+                    <span className="text-muted-foreground">–</span>
+                    <Input
+                      type="time"
+                      aria-label={`${DAY_LABELS[h.day]} closing time`}
+                      disabled={!h.enabled}
+                      value={h.close}
+                      onChange={(e) =>
+                        setHour(h.day, { close: e.target.value })
+                      }
+                      className="h-9 w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {error && (
+              <p className="text-[13px] font-medium text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
+          <SheetFooter className="border-t bg-muted/50 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
@@ -284,9 +303,9 @@ export function RangeFormDialog({
             <Button type="submit" disabled={loading}>
               {loading ? "Saving…" : range ? "Save changes" : "Add range"}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

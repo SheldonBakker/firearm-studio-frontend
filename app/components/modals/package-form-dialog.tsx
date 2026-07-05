@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
 } from "~/components/ui/select";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { Icon } from "~/components/common/icon";
+import { SectionHeading } from "~/components/modals/form-dialog";
 import { ApiError } from "~/lib/api/http";
 import { packagesApi } from "~/lib/api/packages/packages";
 import type { PackageResponse } from "~/lib/api/packages/types";
@@ -146,187 +148,204 @@ export function PackageFormDialog({
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Something went wrong.",
-      );
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-140 overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{pkg ? "Edit package" : "Add package"}</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
+        <SheetHeader className="gap-1 pr-12">
+          <SheetTitle>{pkg ? "Edit package" : "Add package"}</SheetTitle>
+          <SheetDescription>
             {pkg
               ? "Update the package details and included items."
               : "Create a bookable package with its included items."}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <form
           noValidate
           onSubmit={submit}
-          className="grid grid-cols-1 gap-4 py-1 sm:grid-cols-2"
+          className="flex flex-1 flex-col overflow-hidden"
         >
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="package-name">
-              Name<span className="text-destructive"> *</span>
-            </Label>
-            <Input
-              id="package-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Standard Range Session"
-            />
-          </div>
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="package-description">Description</Label>
-            <textarea
-              id="package-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="package-price">
-              Price (R)<span className="text-destructive"> *</span>
-            </Label>
-            <Input
-              id="package-price"
-              type="number"
-              min={0}
-              step="0.01"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="package-duration">Duration (minutes)</Label>
-            <Input
-              id="package-duration"
-              type="number"
-              min={1}
-              step={5}
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="package-shooters">Max shooters</Label>
-            <Input
-              id="package-shooters"
-              type="number"
-              min={1}
-              value={maxShooters}
-              onChange={(e) => setMaxShooters(e.target.value)}
-            />
-          </div>
-          {pkg && (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="package-active">Status</Label>
-              <Select value={active} onValueChange={setActive}>
-                <SelectTrigger id="package-active">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Active</SelectItem>
-                  <SelectItem value="false">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label>Included items</Label>
-            {items.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                {items.map((it, index) => (
-                  <div key={it.key} className="flex items-center gap-2">
-                    <Input
-                      aria-label={`Item ${index + 1} description`}
-                      placeholder="e.g. 9mm rounds"
-                      value={it.description}
-                      onChange={(e) =>
-                        setItem(it.key, { description: e.target.value })
-                      }
-                      className="flex-1"
-                    />
-                    <Input
-                      aria-label={`Item ${index + 1} quantity`}
-                      type="number"
-                      min={0}
-                      step="any"
-                      placeholder="Qty"
-                      value={it.quantity}
-                      onChange={(e) =>
-                        setItem(it.key, { quantity: e.target.value })
-                      }
-                      className="w-20 shrink-0"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Move item ${index + 1} up`}
-                      disabled={index === 0}
-                      onClick={() => moveItem(index, -1)}
-                    >
-                      <ChevronUpIcon />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Move item ${index + 1} down`}
-                      disabled={index === items.length - 1}
-                      onClick={() => moveItem(index, 1)}
-                    >
-                      <ChevronDownIcon />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Remove item ${index + 1}`}
-                      onClick={() =>
-                        setItems((prev) =>
-                          prev.filter((row) => row.key !== it.key),
-                        )
-                      }
-                    >
-                      <XIcon />
-                    </Button>
-                  </div>
-                ))}
+          <div className="flex-1 space-y-6 overflow-y-auto px-4 pb-4">
+            <section className="space-y-3">
+              <SectionHeading>Details</SectionHeading>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="package-name">
+                  Name<span className="text-destructive"> *</span>
+                </Label>
+                <Input
+                  id="package-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Standard Range Session"
+                />
               </div>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="self-start"
-              onClick={() =>
-                setItems((prev) => [
-                  ...prev,
-                  { key: crypto.randomUUID(), description: "", quantity: "1" },
-                ])
-              }
-            >
-              <Icon name="plus" size={14} />
-              Add item
-            </Button>
-          </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="package-description">Description</Label>
+                <textarea
+                  id="package-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
+                />
+              </div>
+            </section>
 
-          {error && (
-            <p className="text-[13px] font-medium text-destructive sm:col-span-2">
-              {error}
-            </p>
-          )}
-          <DialogFooter className="mt-1 sm:col-span-2">
+            <Separator />
+
+            <section className="space-y-3">
+              <SectionHeading>Pricing &amp; capacity</SectionHeading>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="package-price">
+                    Price (R)<span className="text-destructive"> *</span>
+                  </Label>
+                  <Input
+                    id="package-price"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="package-duration">Duration (minutes)</Label>
+                  <Input
+                    id="package-duration"
+                    type="number"
+                    min={1}
+                    step={5}
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="package-shooters">Max shooters</Label>
+                  <Input
+                    id="package-shooters"
+                    type="number"
+                    min={1}
+                    value={maxShooters}
+                    onChange={(e) => setMaxShooters(e.target.value)}
+                  />
+                </div>
+                {pkg && (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="package-active">Status</Label>
+                    <Select value={active} onValueChange={setActive}>
+                      <SelectTrigger id="package-active">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Active</SelectItem>
+                        <SelectItem value="false">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <Separator />
+
+            <section className="space-y-3">
+              <SectionHeading>Included items</SectionHeading>
+              {items.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  {items.map((it, index) => (
+                    <div key={it.key} className="flex items-center gap-2">
+                      <Input
+                        aria-label={`Item ${index + 1} description`}
+                        placeholder="e.g. 9mm rounds"
+                        value={it.description}
+                        onChange={(e) =>
+                          setItem(it.key, { description: e.target.value })
+                        }
+                        className="flex-1"
+                      />
+                      <Input
+                        aria-label={`Item ${index + 1} quantity`}
+                        type="number"
+                        min={0}
+                        step="any"
+                        placeholder="Qty"
+                        value={it.quantity}
+                        onChange={(e) =>
+                          setItem(it.key, { quantity: e.target.value })
+                        }
+                        className="w-20 shrink-0"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Move item ${index + 1} up`}
+                        disabled={index === 0}
+                        onClick={() => moveItem(index, -1)}
+                      >
+                        <ChevronUpIcon />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Move item ${index + 1} down`}
+                        disabled={index === items.length - 1}
+                        onClick={() => moveItem(index, 1)}
+                      >
+                        <ChevronDownIcon />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Remove item ${index + 1}`}
+                        onClick={() =>
+                          setItems((prev) =>
+                            prev.filter((row) => row.key !== it.key),
+                          )
+                        }
+                      >
+                        <XIcon />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() =>
+                  setItems((prev) => [
+                    ...prev,
+                    {
+                      key: crypto.randomUUID(),
+                      description: "",
+                      quantity: "1",
+                    },
+                  ])
+                }
+              >
+                <Icon name="plus" size={14} />
+                Add item
+              </Button>
+            </section>
+
+            {error && (
+              <p className="text-[13px] font-medium text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
+          <SheetFooter className="border-t bg-muted/50 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
@@ -337,9 +356,9 @@ export function PackageFormDialog({
             <Button type="submit" disabled={loading}>
               {loading ? "Saving…" : pkg ? "Save changes" : "Add package"}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

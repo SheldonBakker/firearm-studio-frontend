@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -29,6 +29,14 @@ import {
   requiredEmailSchema,
   requiredTextSchema,
 } from "~/lib/utils/validation";
+
+export function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      {children}
+    </h3>
+  );
+}
 
 export interface FormField {
   name: string;
@@ -342,150 +350,143 @@ export function FormDialog({
       await onSubmit(result.data as Record<string, string>);
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Something went wrong.",
-      );
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-140 overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
+        <SheetHeader className="gap-1 pr-12">
+          <SheetTitle>{title}</SheetTitle>
+          {description && <SheetDescription>{description}</SheetDescription>}
+        </SheetHeader>
         <form
           noValidate
           onSubmit={submit}
-          className="grid grid-cols-1 gap-4 py-1 sm:grid-cols-2"
+          className="flex flex-1 flex-col overflow-hidden"
         >
-          {fields.map((f) => (
-            <div
-              key={f.name}
-              className={`flex flex-col gap-2 ${
-                f.full || f.type === "email" || f.type === "tel"
-                  ? "sm:col-span-2"
-                  : ""
-              }`}
-            >
-              <Label htmlFor={f.name}>
-                {f.label}
-                {f.required && <span className="text-destructive"> *</span>}
-              </Label>
-              {f.type === "select" ? (
-                <Select
-                  value={values[f.name]}
-                  onValueChange={(v) => set(f.name, v)}
-                >
-                  <SelectTrigger id={f.name}>
-                    <SelectValue placeholder={f.placeholder ?? "Select…"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {f.options?.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : f.type === "search-select" ? (
-                <SearchSelectField
-                  id={f.name}
-                  value={values[f.name]}
-                  options={f.options ?? []}
-                  placeholder={f.placeholder}
-                  debounceMs={f.searchDebounceMs}
-                  minChars={f.searchMinChars}
-                  searchTypes={f.searchTypes}
-                  defaultSearchType={f.defaultSearchType}
-                  onSearch={f.onSearch}
-                  invalid={Boolean(fieldErrors[f.name])}
-                  describedBy={
-                    fieldErrors[f.name] ? `${f.name}-error` : undefined
-                  }
-                  onChange={(value) => set(f.name, value)}
-                />
-              ) : f.type === "textarea" ? (
-                <textarea
-                  id={f.name}
-                  required={f.required}
-                  placeholder={f.placeholder}
-                  value={values[f.name]}
-                  onChange={(e) => set(f.name, e.target.value)}
-                  rows={3}
-                  className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
-                />
-              ) : f.type === "tel" ? (
-                <SouthAfricanPhoneInput
-                  id={f.name}
-                  required={f.required}
-                  placeholder={f.placeholder}
-                  value={values[f.name]}
-                  onValueChange={(value) => set(f.name, value)}
-                  onBlur={() => {
-                    const result = schemaForField(f).safeParse(
-                      values[f.name] ?? "",
-                    );
-                    setFieldErrors((prev) => {
-                      const next = { ...prev };
-                      if (!result.success) {
-                        next[f.name] = result.error.issues[0]?.message;
-                      } else delete next[f.name];
-                      return next;
-                    });
-                  }}
-                  autoComplete="tel-national"
-                  aria-invalid={Boolean(fieldErrors[f.name])}
-                  aria-describedby={
-                    fieldErrors[f.name] ? `${f.name}-error` : undefined
-                  }
-                />
-              ) : (
-                <Input
-                  id={f.name}
-                  type={f.type ?? "text"}
-                  required={f.required}
-                  placeholder={f.placeholder}
-                  value={values[f.name]}
-                  onChange={(e) => set(f.name, e.target.value)}
-                  onBlur={() => {
-                    if (f.type !== "email") return;
-                    const result = schemaForField(f).safeParse(
-                      values[f.name] ?? "",
-                    );
-                    setFieldErrors((prev) => {
-                      const next = { ...prev };
-                      if (!result.success) {
-                        next[f.name] = result.error.issues[0]?.message;
-                      } else delete next[f.name];
-                      return next;
-                    });
-                  }}
-                  aria-invalid={Boolean(fieldErrors[f.name])}
-                  aria-describedby={
-                    fieldErrors[f.name] ? `${f.name}-error` : undefined
-                  }
-                />
-              )}
-              {fieldErrors[f.name] && (
-                <p
-                  id={`${f.name}-error`}
-                  className="text-[12px] font-medium text-destructive"
-                >
-                  {fieldErrors[f.name]}
-                </p>
-              )}
-            </div>
-          ))}
-          {error && (
-            <p className="text-[13px] font-medium text-destructive sm:col-span-2">
-              {error}
-            </p>
-          )}
-          <DialogFooter className="mt-1 sm:col-span-2">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-4">
+            {fields.map((f) => (
+              <div key={f.name} className="flex flex-col gap-2">
+                <Label htmlFor={f.name}>
+                  {f.label}
+                  {f.required && <span className="text-destructive"> *</span>}
+                </Label>
+                {f.type === "select" ? (
+                  <Select
+                    value={values[f.name]}
+                    onValueChange={(v) => set(f.name, v)}
+                  >
+                    <SelectTrigger id={f.name}>
+                      <SelectValue placeholder={f.placeholder ?? "Select…"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {f.options?.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : f.type === "search-select" ? (
+                  <SearchSelectField
+                    id={f.name}
+                    value={values[f.name]}
+                    options={f.options ?? []}
+                    placeholder={f.placeholder}
+                    debounceMs={f.searchDebounceMs}
+                    minChars={f.searchMinChars}
+                    searchTypes={f.searchTypes}
+                    defaultSearchType={f.defaultSearchType}
+                    onSearch={f.onSearch}
+                    invalid={Boolean(fieldErrors[f.name])}
+                    describedBy={
+                      fieldErrors[f.name] ? `${f.name}-error` : undefined
+                    }
+                    onChange={(value) => set(f.name, value)}
+                  />
+                ) : f.type === "textarea" ? (
+                  <textarea
+                    id={f.name}
+                    required={f.required}
+                    placeholder={f.placeholder}
+                    value={values[f.name]}
+                    onChange={(e) => set(f.name, e.target.value)}
+                    rows={3}
+                    className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
+                  />
+                ) : f.type === "tel" ? (
+                  <SouthAfricanPhoneInput
+                    id={f.name}
+                    required={f.required}
+                    placeholder={f.placeholder}
+                    value={values[f.name]}
+                    onValueChange={(value) => set(f.name, value)}
+                    onBlur={() => {
+                      const result = schemaForField(f).safeParse(
+                        values[f.name] ?? "",
+                      );
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        if (!result.success) {
+                          next[f.name] = result.error.issues[0]?.message;
+                        } else delete next[f.name];
+                        return next;
+                      });
+                    }}
+                    autoComplete="tel-national"
+                    aria-invalid={Boolean(fieldErrors[f.name])}
+                    aria-describedby={
+                      fieldErrors[f.name] ? `${f.name}-error` : undefined
+                    }
+                  />
+                ) : (
+                  <Input
+                    id={f.name}
+                    type={f.type ?? "text"}
+                    required={f.required}
+                    placeholder={f.placeholder}
+                    value={values[f.name]}
+                    onChange={(e) => set(f.name, e.target.value)}
+                    onBlur={() => {
+                      if (f.type !== "email") return;
+                      const result = schemaForField(f).safeParse(
+                        values[f.name] ?? "",
+                      );
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        if (!result.success) {
+                          next[f.name] = result.error.issues[0]?.message;
+                        } else delete next[f.name];
+                        return next;
+                      });
+                    }}
+                    aria-invalid={Boolean(fieldErrors[f.name])}
+                    aria-describedby={
+                      fieldErrors[f.name] ? `${f.name}-error` : undefined
+                    }
+                  />
+                )}
+                {fieldErrors[f.name] && (
+                  <p
+                    id={`${f.name}-error`}
+                    className="text-[12px] font-medium text-destructive"
+                  >
+                    {fieldErrors[f.name]}
+                  </p>
+                )}
+              </div>
+            ))}
+            {error && (
+              <p className="text-[13px] font-medium text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
+          <SheetFooter className="border-t bg-muted/50 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
@@ -496,9 +497,9 @@ export function FormDialog({
             <Button type="submit" disabled={loading}>
               {loading ? "Saving…" : submitLabel}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
