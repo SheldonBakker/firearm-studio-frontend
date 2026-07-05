@@ -12,4 +12,18 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+
+  optimizeDeps: {
+    include: [
+      "@supabase/supabase-js",
+      "class-variance-authority",
+      "clsx",
+      "lucide-react",
+      "next-themes",
+      "radix-ui",
+      "sonner",
+      "tailwind-merge",
+      "zod",
+    ],
+  },
 });
