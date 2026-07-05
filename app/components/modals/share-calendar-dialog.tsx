@@ -94,10 +94,7 @@ export function ShareCalendarDialog({
                   Copy embed code
                 </Button>
                 <p className="text-[12px] leading-relaxed text-muted-foreground">
-                  Paste this into your website to embed the calendar. Bot
-                  protection requires adding the embedding domain to your
-                  Turnstile widget&apos;s allowed hostnames, or verification
-                  will fail on that site.
+                  Paste this into your website to embed the calendar.
                 </p>
               </div>
             </div>
