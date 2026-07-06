@@ -1,5 +1,6 @@
 import type {
   PublicBookingOptionsResponse,
+  PublicInvoiceBankingResponse,
   PublicPackageResponse,
   PublicRangeResponse,
 } from "~/lib/api/public/types";
@@ -61,6 +62,8 @@ export type ConfirmationState = {
   refs: string[];
   invoiceNumber: string | null;
   total: number;
+  email: string;
+  banking: PublicInvoiceBankingResponse | null;
 } | null;
 
 function clampShooters(n: number, max: number): number {

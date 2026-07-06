@@ -93,6 +93,15 @@ interface PublicBookingConfirmationResponse {
   packagePrice: number;
 }
 
+export interface PublicInvoiceBankingResponse {
+  bankName: string | null;
+  bankAccountHolder: string | null;
+  bankAccountNumber: string | null;
+  bankBranchCode: string | null;
+  bankAccountType: string | null;
+  bankSwiftCode: string | null;
+}
+
 export interface PublicBookingResponse {
   invoiceId: string;
   invoiceNumber: string | null;
@@ -100,4 +109,5 @@ export interface PublicBookingResponse {
   vatAmount: number;
   total: number;
   bookings: PublicBookingConfirmationResponse[] | null;
+  banking: PublicInvoiceBankingResponse | null;
 }

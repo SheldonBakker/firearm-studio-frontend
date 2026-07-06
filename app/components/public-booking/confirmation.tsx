@@ -2,6 +2,15 @@ import type { ConfirmationState } from "~/lib/booking/cart";
 import { fmtMoney } from "~/lib/utils/format";
 import { Button } from "~/components/ui/button";
 
+function PayRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right font-medium text-foreground">{value}</dd>
+    </div>
+  );
+}
+
 export function Confirmation({
   confirmation,
   onBookAnother,
@@ -9,7 +18,17 @@ export function Confirmation({
   confirmation: NonNullable<ConfirmationState>;
   onBookAnother: () => void;
 }) {
+  const { count, invoiceNumber, total, email, banking } = confirmation;
   const refs = confirmation.refs.filter((r) => r !== "confirmed");
+  const hasBanking =
+    !!banking &&
+    (banking.bankName ||
+      banking.bankAccountHolder ||
+      banking.bankAccountNumber ||
+      banking.bankBranchCode ||
+      banking.bankAccountType ||
+      banking.bankSwiftCode);
+
   return (
     <div className="rounded-xl border border-border bg-card p-6 text-center">
       <div
@@ -34,9 +53,7 @@ export function Confirmation({
         </svg>
       </div>
       <h3 className="mt-3 font-heading text-base font-medium">
-        {confirmation.count === 1
-          ? "Booking requested"
-          : `${confirmation.count} bookings requested`}
+        {count === 1 ? "Booking requested" : `${count} bookings requested`}
       </h3>
       {refs.length > 0 && (
         <div className="mt-2 space-y-0.5">
@@ -53,29 +70,49 @@ export function Confirmation({
           ))}
         </div>
       )}
-      {(confirmation.invoiceNumber || confirmation.total > 0) && (
-        <div className="mx-auto mt-3 max-w-xs space-y-1 border-t border-border pt-3 text-[12.5px]">
-          {confirmation.invoiceNumber && (
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Invoice</span>
-              <span className="font-mono font-medium text-foreground">
-                {confirmation.invoiceNumber}
-              </span>
-            </div>
-          )}
-          {confirmation.total > 0 && (
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Total</span>
-              <span className="font-medium text-foreground">
-                {fmtMoney(confirmation.total)}
-              </span>
+
+      {(hasBanking || invoiceNumber || total > 0) && (
+        <div className="mx-auto mt-4 max-w-sm rounded-lg border border-border bg-panel2 p-4 text-left">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-dim">
+            Payment details
+          </p>
+          <dl className="mt-2 divide-y divide-border text-[12.5px]">
+            {total > 0 && <PayRow label="Amount due" value={fmtMoney(total)} />}
+            {banking?.bankName && (
+              <PayRow label="Bank" value={banking.bankName} />
+            )}
+            {banking?.bankAccountHolder && (
+              <PayRow label="Account holder" value={banking.bankAccountHolder} />
+            )}
+            {banking?.bankAccountNumber && (
+              <PayRow label="Account number" value={banking.bankAccountNumber} />
+            )}
+            {banking?.bankBranchCode && (
+              <PayRow label="Branch code" value={banking.bankBranchCode} />
+            )}
+            {banking?.bankAccountType && (
+              <PayRow label="Account type" value={banking.bankAccountType} />
+            )}
+            {banking?.bankSwiftCode && (
+              <PayRow label="SWIFT" value={banking.bankSwiftCode} />
+            )}
+          </dl>
+          {invoiceNumber && (
+            <div className="mt-3 rounded-md border border-primary/40 bg-primary/10 p-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-dim">
+                Use as your payment reference
+              </p>
+              <p className="font-mono text-sm font-semibold text-foreground">
+                {invoiceNumber}
+              </p>
             </div>
           )}
         </div>
       )}
+
       <p className="mt-3 text-sm text-muted-foreground">
-        We&apos;ll be in touch to confirm your{" "}
-        {confirmation.count === 1 ? "session" : "sessions"}.
+        We&apos;ve emailed your {count === 1 ? "booking" : "bookings"} and
+        payment details{email ? ` to ${email}` : ""}.
       </p>
       <Button
         type="button"

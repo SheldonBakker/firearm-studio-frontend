@@ -327,6 +327,8 @@ function CalendarView({
         refs,
         invoiceNumber: res.invoiceNumber,
         total: res.total,
+        email: result.data.email,
+        banking: res.banking ?? null,
       });
     } catch (err) {
       setSubmitError(

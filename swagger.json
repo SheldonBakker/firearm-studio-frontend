@@ -4586,6 +4586,9 @@
               "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
             },
             "nullable": true
+          },
+          "banking": {
+            "$ref": "#/components/schemas/PublicInvoiceBankingResponse"
           }
         },
         "additionalProperties": false
@@ -4656,6 +4659,36 @@
             "nullable": true
           },
           "postalCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicInvoiceBankingResponse": {
+        "type": "object",
+        "properties": {
+          "bankName": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountHolder": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankBranchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountType": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankSwiftCode": {
             "type": "string",
             "nullable": true
           }
