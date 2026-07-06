@@ -50,7 +50,11 @@ function publish(user: SessionUser | null) {
 
 async function resolveSessionUser(): Promise<SessionUser | null> {
   const { data } = await supabase.auth.getSession();
-  if (!data.session) return null;
+  if (!data.session) {
+    lastAccessToken = null;
+    return null;
+  }
+  lastAccessToken = data.session.access_token;
 
   const u = data.session.user;
   const jwtRoles = u.app_metadata?.roles as string[] | undefined;
@@ -77,10 +81,18 @@ async function resolveSessionUser(): Promise<SessionUser | null> {
 }
 
 let inflight: Promise<SessionUser | null> | null = null;
+let resolved = false;
+let lastAccessToken: string | null = null;
 
-export function getSessionUser(): Promise<SessionUser | null> {
+export function getSessionUser(options?: {
+  refresh?: boolean;
+}): Promise<SessionUser | null> {
+  if (resolved && !options?.refresh && !inflight) {
+    return Promise.resolve(snapshot.user);
+  }
   inflight ??= resolveSessionUser()
     .then((user) => {
+      resolved = true;
       publish(user);
       return user;
     })
@@ -146,6 +158,8 @@ export async function hasCompanyAccess(): Promise<boolean> {
 
 export async function signOutUser(): Promise<void> {
   resetCompanyAccess();
+  resolved = false;
+  lastAccessToken = null;
   publish(null);
   await supabase.auth.signOut();
 }
@@ -178,15 +192,19 @@ if (typeof window !== "undefined") {
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
       resetCompanyAccess();
+      resolved = false;
+      lastAccessToken = null;
       publish(null);
       return;
     }
     if (event === "INITIAL_SESSION" && !session) {
+      resolved = true;
       publish(null);
       return;
     }
+    if (resolved && session?.access_token === lastAccessToken) return;
     setTimeout(() => {
-      void getSessionUser();
+      void getSessionUser({ refresh: true });
     }, 0);
   });
 }
