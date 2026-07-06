@@ -58,7 +58,7 @@ export function Confirmation({
       {refs.length > 0 && (
         <div className="mt-2 space-y-0.5">
           <p className="text-[12.5px] text-muted-foreground">
-            {refs.length === 1 ? "Your reference:" : "Your references:"}
+            {refs.length === 1 ? "Your booking:" : "Your bookings:"}
           </p>
           {refs.map((r) => (
             <p
