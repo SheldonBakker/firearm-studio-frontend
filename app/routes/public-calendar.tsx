@@ -7,10 +7,19 @@ import { publicBookingsApi } from "~/lib/api/public/public";
 import type {
   AvailabilitySlotDto,
   PublicBookingOptionsResponse,
+  PublicCompanyResponse,
+  PublicPackageResponse,
+  PublicRangeResponse,
 } from "~/lib/api/public/types";
 import { ApiError } from "~/lib/api/http";
 import { pageMeta } from "~/lib/utils/seo";
-import { WEEKDAYS, MONTH_LABELS, monthGrid, dateKey } from "~/lib/utils/date";
+import {
+  WEEKDAYS,
+  DAY_NAMES,
+  MONTH_LABELS,
+  monthGrid,
+  dateKey,
+} from "~/lib/utils/date";
 import { fmtMoney } from "~/lib/utils/format";
 import { cn } from "~/lib/utils/cn";
 import { Button } from "~/components/ui/button";
@@ -130,6 +139,7 @@ function CalendarView({
   const [slot, setSlot] = useState<AvailabilitySlotDto | null>(null);
 
   const selectedPackage = packages.find((p) => p.id === packageId);
+  const selectedRange = ranges.find((r) => r.id === rangeId);
   const todayKey = dateKey(
     now.getFullYear(),
     now.getMonth() + 1,
@@ -231,6 +241,14 @@ function CalendarView({
             </SelectContent>
           </Select>
         </div>
+
+        {(selectedPackage || selectedRange) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {selectedPackage && <PackageDetails pkg={selectedPackage} />}
+            {selectedRange && <RangeDetails range={selectedRange} />}
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">
             {MONTH_LABELS[month - 1]} {year}
@@ -320,7 +338,148 @@ function CalendarView({
           onPickSlot={setSlot}
         />
       )}
+
+      {options.company && <CompanyDetails company={options.company} />}
     </div>
+  );
+}
+
+function DetailCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function PackageDetails({ pkg }: { pkg: PublicPackageResponse }) {
+  const items = pkg.items ?? [];
+  return (
+    <DetailCard title={pkg.name ?? "Package"}>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
+        <span className="font-medium">{fmtMoney(pkg.price)}</span>
+        <span className="text-muted-foreground">
+          {pkg.durationMinutes} min
+        </span>
+        <span className="text-muted-foreground">
+          up to {pkg.maxShooters}{" "}
+          {pkg.maxShooters === 1 ? "shooter" : "shooters"}
+        </span>
+      </div>
+      {pkg.description && (
+        <p className="whitespace-pre-line text-[12.5px] text-muted-foreground">
+          {pkg.description}
+        </p>
+      )}
+      {items.length > 0 && (
+        <div className="space-y-1 border-t pt-3">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-dim">
+            Included
+          </p>
+          <ul className="space-y-1">
+            {items.map((item, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between text-[12.5px]"
+              >
+                <span>{item.description ?? "Item"}</span>
+                <span className="font-medium tabular-nums">
+                  {item.quantity}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </DetailCard>
+  );
+}
+
+function RangeDetails({ range }: { range: PublicRangeResponse }) {
+  const hours = (range.operatingHours ?? [])
+    .slice()
+    .sort((a, b) => ((a.day + 6) % 7) - ((b.day + 6) % 7));
+  return (
+    <DetailCard title={range.name ?? "Range"}>
+      {range.description && (
+        <p className="whitespace-pre-line text-[12.5px] text-muted-foreground">
+          {range.description}
+        </p>
+      )}
+      {hours.length > 0 && (
+        <div className="space-y-1 border-t pt-3">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-dim">
+            Operating hours
+          </p>
+          <ul className="space-y-1">
+            {hours.map((h) => (
+              <li
+                key={h.day}
+                className="flex items-center justify-between text-[12.5px]"
+              >
+                <span>{DAY_NAMES[h.day] ?? `Day ${h.day}`}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {hhmm(h.openTime)} – {hhmm(h.closeTime)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </DetailCard>
+  );
+}
+
+function CompanyDetails({ company }: { company: PublicCompanyResponse }) {
+  const addressLines = [
+    company.addressLine1,
+    company.addressLine2,
+    [company.city, company.province].filter(Boolean).join(", ") || null,
+    company.postalCode,
+  ].filter(Boolean);
+  return (
+    <DetailCard title={company.name ?? "Contact"}>
+      <div className="grid gap-3 text-[12.5px] sm:grid-cols-2">
+        <div className="space-y-1">
+          {company.email && (
+            <p>
+              <a
+                href={`mailto:${company.email}`}
+                className="text-foreground hover:underline"
+              >
+                {company.email}
+              </a>
+            </p>
+          )}
+          {company.phone && (
+            <p>
+              <a
+                href={`tel:${company.phone}`}
+                className="text-foreground hover:underline"
+              >
+                {company.phone}
+              </a>
+            </p>
+          )}
+        </div>
+        {addressLines.length > 0 && (
+          <address className="not-italic text-muted-foreground">
+            {addressLines.map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))}
+          </address>
+        )}
+      </div>
+    </DetailCard>
   );
 }
 

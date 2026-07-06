@@ -1,4 +1,4 @@
-interface PublicCompanyResponse {
+export interface PublicCompanyResponse {
   id: string;
   name: string | null;
   email: string | null;
@@ -15,7 +15,7 @@ interface PublicPackageItemDto {
   quantity: number;
 }
 
-interface PublicPackageResponse {
+export interface PublicPackageResponse {
   id: string;
   name: string | null;
   description: string | null;
@@ -31,7 +31,7 @@ interface PublicOperatingHoursDto {
   closeTime: string;
 }
 
-interface PublicRangeResponse {
+export interface PublicRangeResponse {
   id: string;
   name: string | null;
   description: string | null;
