@@ -118,16 +118,53 @@ export async function refreshSession(): Promise<void> {
 
 let companyAccess = false;
 
+const COMPANY_OK_KEY = "fs-company-ok";
+
+function readPersistedCompanyAccess(userId: string): boolean {
+  try {
+    return window.localStorage.getItem(COMPANY_OK_KEY) === userId;
+  } catch {
+    return false;
+  }
+}
+
+function persistCompanyAccess(userId: string | undefined) {
+  if (!userId) return;
+  try {
+    window.localStorage.setItem(COMPANY_OK_KEY, userId);
+  } catch {
+  }
+}
+
+function clearPersistedCompanyAccess() {
+  try {
+    window.localStorage.removeItem(COMPANY_OK_KEY);
+  } catch {
+  }
+}
+
 export function grantCompanyAccess() {
   companyAccess = true;
+  persistCompanyAccess(snapshot.user?.id);
 }
 
 function resetCompanyAccess() {
   companyAccess = false;
+  clearPersistedCompanyAccess();
 }
 
 export async function hasCompanyAccess(): Promise<boolean> {
   if (companyAccess) return true;
+
+  const snapUser = snapshot.user;
+  if (snapUser && readPersistedCompanyAccess(snapUser.id)) {
+    companyAccess = true;
+    return true;
+  }
+  if (!snapUser) {
+    const user = await getSessionUser();
+    if (!user) return true;
+  }
 
   const probe = async (): Promise<"ok" | "forbidden" | "missing" | "error"> => {
     try {
@@ -150,6 +187,7 @@ export async function hasCompanyAccess(): Promise<boolean> {
 
   if (result === "ok") {
     companyAccess = true;
+    persistCompanyAccess(snapshot.user?.id);
     return true;
   }
   if (result === "forbidden" || result === "missing") return false;

@@ -37,9 +37,12 @@ export function meta({ location }: Route.MetaArgs) {
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  await requireAuth(request);
+  const [, companyOk] = await Promise.all([
+    requireAuth(request),
+    hasCompanyAccess(),
+  ]);
   // Already part of a company? Skip onboarding.
-  if (await hasCompanyAccess()) throw redirect("/dashboard");
+  if (companyOk) throw redirect("/dashboard");
   return null;
 }
 

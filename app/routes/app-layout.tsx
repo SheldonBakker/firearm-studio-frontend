@@ -15,9 +15,14 @@ export function meta() {
 }
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  const user = await requireAuth(request);
+  // Run the auth check and company probe concurrently — sequentially they
+  // add two round trips before any app page can render.
+  const [user, companyOk] = await Promise.all([
+    requireAuth(request),
+    hasCompanyAccess(),
+  ]);
 
-  if (!(await hasCompanyAccess())) throw redirect("/onboarding");
+  if (!companyOk) throw redirect("/onboarding");
 
   return { user };
 }
