@@ -411,7 +411,11 @@ function CalendarView({
               phone={phone}
               error={submitError}
               onChange={(field, value) =>
-                dispatch({ type: "SET_CONTACT", field, value })
+                dispatch({
+                  type: "SET_CONTACT",
+                  field,
+                  value: field === "email" ? value.toLowerCase() : value,
+                })
               }
             />
           )}

@@ -466,7 +466,14 @@ export function FormDialog({
                     required={f.required}
                     placeholder={f.placeholder}
                     value={values[f.name]}
-                    onChange={(e) => set(f.name, e.target.value)}
+                    onChange={(e) =>
+                      set(
+                        f.name,
+                        f.type === "email"
+                          ? e.target.value.toLowerCase()
+                          : e.target.value,
+                      )
+                    }
                     onBlur={() => {
                       if (f.type !== "email") return;
                       const result = schemaForField(f).safeParse(

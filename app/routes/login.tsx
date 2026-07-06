@@ -97,7 +97,7 @@ export default function Login() {
             required
             value={email}
             onChange={(e) => {
-              setEmail(e.target.value);
+              setEmail(e.target.value.toLowerCase());
               setFieldErrors((previous) => {
                 if (!previous.email) return previous;
                 const next = { ...previous };
