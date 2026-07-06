@@ -3,8 +3,8 @@ import type {
   CreatePublicBookingRequest,
   DayAvailabilityResponse,
   MonthAvailabilityResponse,
-  PublicBookingConfirmationResponse,
   PublicBookingOptionsResponse,
+  PublicBookingResponse,
 } from "./types";
 
 const base = (companyId: string) => `/api/v1/public/companies/${companyId}`;
@@ -35,8 +35,8 @@ export const publicBookingsApi = {
       { query: params, skipAuthRedirect: true },
     ),
 
-  createBooking: (companyId: string, body: CreatePublicBookingRequest) =>
-    request<PublicBookingConfirmationResponse>(`${base(companyId)}/bookings`, {
+  createBookings: (companyId: string, body: CreatePublicBookingRequest) =>
+    request<PublicBookingResponse>(`${base(companyId)}/bookings`, {
       method: "POST",
       body,
       skipAuthRedirect: true,

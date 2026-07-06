@@ -1740,17 +1740,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
+                  "$ref": "#/components/schemas/PublicBookingResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
+                  "$ref": "#/components/schemas/PublicBookingResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
+                  "$ref": "#/components/schemas/PublicBookingResponse"
                 }
               }
             }
@@ -3333,25 +3333,12 @@
       "CreatePublicBookingRequest": {
         "type": "object",
         "properties": {
-          "shootingRangeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "packageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bookingDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "time"
-          },
-          "shooterCount": {
-            "type": "integer",
-            "format": "int32"
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicBookingSessionRequest"
+            },
+            "nullable": true
           },
           "fullName": {
             "type": "string",
@@ -4565,6 +4552,69 @@
             "items": {
               "$ref": "#/components/schemas/PublicRangeResponse"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicBookingResponse": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "vatAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "bookings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicBookingConfirmationResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicBookingSessionRequest": {
+        "type": "object",
+        "properties": {
+          "shootingRangeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time"
+          },
+          "shooterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string",
             "nullable": true
           }
         },

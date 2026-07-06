@@ -64,19 +64,24 @@ export interface MonthAvailabilityResponse {
   days: MonthAvailabilityDayDto[] | null;
 }
 
-export interface CreatePublicBookingRequest {
+interface PublicBookingSessionRequest {
   shootingRangeId: string;
   packageId: string;
   bookingDate: string;
   startTime: string;
   shooterCount: number;
+  notes?: string | null;
+}
+
+export interface CreatePublicBookingRequest {
+  sessions: PublicBookingSessionRequest[];
   fullName: string | null;
   email: string | null;
   phone: string | null;
   notes: string | null;
 }
 
-export interface PublicBookingConfirmationResponse {
+interface PublicBookingConfirmationResponse {
   id: string;
   bookingNumber: string | null;
   status: number;
@@ -86,4 +91,13 @@ export interface PublicBookingConfirmationResponse {
   rangeName: string | null;
   packageName: string | null;
   packagePrice: number;
+}
+
+export interface PublicBookingResponse {
+  invoiceId: string;
+  invoiceNumber: string | null;
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  bookings: PublicBookingConfirmationResponse[] | null;
 }
