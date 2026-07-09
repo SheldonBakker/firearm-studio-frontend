@@ -99,6 +99,8 @@ export function softwareApplicationLd() {
       "Licence expiry tracking and renewal alerts",
       "Automated invoicing",
       "Tamper-evident audit trail",
+      "Embeddable booking calendar for your website",
+      "Custom invoice and platform integration",
     ],
   };
 }

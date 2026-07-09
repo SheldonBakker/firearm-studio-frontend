@@ -55,6 +55,9 @@ const ic = {
   tag: '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 3 12V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.8z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle>',
   target:
     '<circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle>',
+  code: '<path d="M16 18l6-6-6-6"></path><path d="M8 6l-6 6 6 6"></path>',
+  globe:
+    '<circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18"></path><path d="M12 3a15 15 0 0 0 0 18"></path>',
 } as const;
 
 function Glyph({ d, size = 24, sw = 1.7 }: { d: string; size?: number; sw?: number }) {
@@ -111,6 +114,7 @@ const features = [
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
   { title: "Invoicing", body: "Storage fees and range bookings roll into invoices automatically, so you can track outstanding balances and flag overdue accounts.", color: GREEN, svg: ic.money },
   { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: RED, svg: ic.list },
+  { title: "Website integration", body: "Put your live booking calendar on your own website - share a public link or drop in an embed. Custom invoice and platform integrations available on request.", color: PURPLE, svg: ic.code },
 ];
 
 const stats: Stat[] = [
@@ -168,6 +172,12 @@ const bookingPoints = [
   { title: "Live lane availability", body: "See remaining lanes per slot before you book - never double-book a lane again." },
   { title: "Reusable packages", body: "Duration, price, and shooter limits set once, then applied to every booking." },
   { title: "Straight to invoice", body: "Every confirmed booking rolls into the customer's invoice automatically." },
+];
+
+const integrationPoints = [
+  { title: "Shareable public link", body: "Give customers a direct link to book online - no login, and no customer details are ever shown to visitors." },
+  { title: "Embed on any website", body: "Paste one iframe snippet into your existing site and the booking calendar appears inline." },
+  { title: "Custom invoice integration", body: "Feed confirmed bookings and VAT invoices into your existing platform or workflow - built to fit." },
 ];
 
 const steps = [
@@ -539,6 +549,105 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="integrations" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(36px,5vw,64px)", alignItems: "center" }}>
+          <div style={{ flex: "1 1 360px", minWidth: 300 }}>
+            <div style={{ ...eyebrow, color: PURPLE }}>Website integration</div>
+            <h2 style={h2}>Put bookings on your own website</h2>
+            <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
+              Share a public booking link or embed the calendar straight into
+              your existing site - customers book online while every request
+              flows back to your dashboard.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
+              {integrationPoints.map((p) => (
+                <div key={p.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                  <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: PURPLE, background: chip(PURPLE, 14) }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  </span>
+                  <span>
+                    <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "#e6eaf0" }}>{p.title}</span>
+                    <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>{p.body}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ flex: "1 1 380px", minWidth: 300 }}>
+            <div style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
+                <span style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#e5484d" }} />
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#e8973c" }} />
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#3fb68b" }} />
+                </span>
+                <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, minWidth: 0, height: 26, padding: "0 12px", borderRadius: 7, border: "1px solid #262d38", background: "#0e1116" }}>
+                  <span style={{ color: "#5c6573", display: "flex", flexShrink: 0 }}>
+                    <Glyph d={ic.globe} size={13} sw={1.7} />
+                  </span>
+                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "#8a93a2", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>yourrange.co.za/book-now</span>
+                </span>
+              </div>
+              <div style={{ padding: "clamp(14px,2vw,18px)" }}>
+                <div style={{ border: "1px dashed #333b49", borderRadius: 14, background: "#0e1116", padding: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#e6eaf0" }}>Book a session</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, color: PURPLE, padding: "2px 8px", borderRadius: 999, background: chip(PURPLE, 14) }}>EMBEDDED</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 12 }}>
+                    {bookingSlots.slice(0, 3).map((s) => {
+                      const active = s.state === "active";
+                      const full = s.state === "full";
+                      return (
+                        <div key={s.time} style={{ borderRadius: 10, padding: "8px 9px", border: `1px solid ${active ? PURPLE : "#262d38"}`, background: active ? chip(PURPLE, 16) : "#11151b", opacity: full ? 0.45 : 1 }}>
+                          <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 700, color: active ? PURPLE : "#e6eaf0" }}>{s.time}</div>
+                          <div style={{ marginTop: 2, fontSize: 9.5, color: active ? PURPLE : "#5c6573" }}>{s.note}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5c6573" }}>Embed code</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10.5, fontWeight: 600, color: PURPLE }}>
+                      <Glyph d={ic.code} size={12} sw={2} />
+                      Copy embed code
+                    </span>
+                  </div>
+                  <div style={{ border: "1px solid #262d38", borderRadius: 10, background: "#0b0e12", padding: "11px 13px", overflowX: "auto" }}>
+                    <code style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, lineHeight: 1.6, color: "#8a93a2", whiteSpace: "pre" }}>{'<iframe\n  src="…/book/{id}?embed=1"\n  width="100%" height="760"\n  style="border:0" loading="lazy">\n</iframe>'}</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: "clamp(32px,4vw,48px)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, border: "1px solid #333b49", borderRadius: 18, background: chip(AMBER, 10), padding: "clamp(20px,3vw,28px)" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start", minWidth: 260, flex: "1 1 420px" }}>
+            <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: AMBER, background: chip(AMBER, 18) }}>
+              <Glyph d={ic.tag} size={20} />
+            </span>
+            <span>
+              <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "#e6eaf0" }}>Custom integration is quote-based</span>
+              <span style={{ display: "block", marginTop: 5, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>
+                The public link and embed are included. Bespoke invoice and
+                website integrations are priced per project - the quote varies
+                depending on your website or platform.
+              </span>
+            </span>
+          </div>
+          <Link to="/contact" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 46, padding: "0 26px", borderRadius: 12, fontSize: 14.5, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none", flexShrink: 0 }}>
+            Get a quote {arrow}
+          </Link>
         </div>
       </section>
 

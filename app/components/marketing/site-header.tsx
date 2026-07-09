@@ -27,6 +27,7 @@ export function MarketingLogo({ size = 19 }: { size?: number }) {
 const NAV = [
   { href: "/#features", label: "Features" },
   { href: "/#bookings", label: "Bookings" },
+  { href: "/#integrations", label: "Integrations" },
   { href: "/#compliance", label: "Compliance" },
   { href: "/#how", label: "How it works" },
 ];

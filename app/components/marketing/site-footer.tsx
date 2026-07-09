@@ -8,6 +8,7 @@ const COLUMNS: { heading: string; links: FooterLink[] }[] = [
     heading: "Product",
     links: [
       { label: "Features", to: "/#features", hash: true },
+      { label: "Integrations", to: "/#integrations", hash: true },
       { label: "Compliance", to: "/#compliance", hash: true },
       { label: "Security", to: "/#compliance", hash: true },
     ],
