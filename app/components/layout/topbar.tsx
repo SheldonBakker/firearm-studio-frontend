@@ -356,7 +356,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <header className="relative z-50 flex h-16 shrink-0 items-center gap-2.5 border-b border-border bg-card/70 px-4 backdrop-blur sm:gap-4 sm:px-6">
+    <header className="relative z-50 flex min-h-16 shrink-0 flex-wrap items-center gap-x-2.5 gap-y-2.5 border-b border-border bg-card/70 px-4 py-2.5 backdrop-blur sm:flex-nowrap sm:gap-4 sm:px-6 sm:py-0">
       <button
         type="button"
         onClick={onMenuClick}
@@ -365,12 +365,12 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       >
         <Icon name="list" size={18} />
       </button>
-      <div className="hidden truncate text-[17px] font-bold tracking-tight text-foreground md:block">
+      <div className="min-w-0 flex-1 truncate text-[15px] font-bold tracking-tight text-foreground sm:flex-none sm:text-[17px]">
         {title}
       </div>
 
       {!isDashboard && (
-      <div className="relative ml-auto w-full min-w-0 sm:w-85">
+      <div className="relative order-last w-full min-w-0 sm:order-none sm:ml-auto sm:w-85">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
           <Icon name="search" size={16} />
         </span>
@@ -402,12 +402,12 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
             setOpen(true);
           }}
           onBlur={() => setTimeout(() => setOpen(false), 160)}
-          className="h-9.5 w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[13px] text-foreground outline-none focus:border-primary"
+          className="h-10 w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[16px] text-foreground outline-none focus:border-primary sm:h-9.5 sm:text-[13px]"
         />
         {showDropdown && (
           <div className="absolute left-0 right-0 top-11.5 z-50 max-h-105 animate-fade-in overflow-y-auto rounded-xl border border-border2 bg-card shadow-2xl">
             {isCustomers && (
-              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+              <div className="flex flex-wrap gap-1 border-b border-border2 px-2.5 py-2">
                 {CUSTOMER_SEARCH_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -431,7 +431,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
               </div>
             )}
             {isFirearms && (
-              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+              <div className="flex flex-wrap gap-1 border-b border-border2 px-2.5 py-2">
                 {FIREARM_SEARCH_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -455,7 +455,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
               </div>
             )}
             {isStorage && (
-              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+              <div className="flex flex-wrap gap-1 border-b border-border2 px-2.5 py-2">
                 {STORAGE_SEARCH_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -479,7 +479,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
               </div>
             )}
             {isAudit && (
-              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+              <div className="flex flex-wrap gap-1 border-b border-border2 px-2.5 py-2">
                 {AUDIT_SEARCH_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -502,7 +502,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
               </div>
             )}
             {isInvoices && (
-              <div className="flex gap-1 border-b border-border2 px-2.5 py-2">
+              <div className="flex flex-wrap gap-1 border-b border-border2 px-2.5 py-2">
                 {INVOICE_SEARCH_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -576,8 +576,8 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       )}
 
       <PageActionsSlot
-        className={`flex shrink-0 items-center gap-2.5${
-          isDashboard ? " ml-auto" : ""
+        className={`ml-auto flex shrink-0 items-center gap-2.5${
+          isDashboard ? "" : " sm:ml-0"
         }`}
       />
     </header>

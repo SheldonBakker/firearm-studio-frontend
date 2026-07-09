@@ -35,6 +35,8 @@ const NAV = [
 export function SiteHeader() {
   const { status, isLoggedIn } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
   return (
     <header
       style={{
@@ -99,6 +101,7 @@ export function SiteHeader() {
         </Link>
 
         <nav
+          className="mk-desktop-nav"
           style={{
             display: "flex",
             alignItems: "center",
@@ -119,6 +122,7 @@ export function SiteHeader() {
         </nav>
 
         <div
+          className="mk-desktop-actions"
           style={{
             display: "flex",
             alignItems: "center",
@@ -242,6 +246,187 @@ export function SiteHeader() {
                   color: "#1a1206",
                   background: "#e8973c",
                   boxShadow: "0 4px 14px rgba(232,151,60,.25)",
+                  textDecoration: "none",
+                }}
+              >
+                Get started
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="mk-hamburger mk-logout"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            height: 38,
+            width: 38,
+            borderRadius: 9,
+            color: "#e6eaf0",
+            background: "#1a1f28",
+            border: "1px solid #333b49",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <Icon
+            name={menuOpen ? "plus" : "list"}
+            size={18}
+            style={
+              menuOpen ? { transform: "rotate(45deg)" } : undefined
+            }
+          />
+        </button>
+      </div>
+
+      <div className={`mk-mobile-panel${menuOpen ? " is-open" : ""}`}>
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "6px clamp(18px,3vw,28px) 4px",
+          }}
+        >
+          {NAV.map((n) => (
+            <a
+              key={n.href}
+              href={n.href}
+              className="mk-nav-link"
+              onClick={closeMenu}
+              style={{
+                padding: "12px 0",
+                fontSize: 15,
+                fontWeight: 500,
+                color: "#8a93a2",
+                borderBottom: "1px solid #1f252e",
+              }}
+            >
+              {n.label}
+            </a>
+          ))}
+        </nav>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            padding: "14px clamp(18px,3vw,28px) 20px",
+          }}
+        >
+          {status === "loading" ? null : isLoggedIn ? (
+            <>
+              <Link
+                to="/dashboard"
+                prefetch="viewport"
+                onClick={closeMenu}
+                className="mk-cta"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 42,
+                  borderRadius: 9,
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "#1a1206",
+                  background: "#e8973c",
+                  textDecoration: "none",
+                }}
+              >
+                Go to Dashboard
+              </Link>
+              <Link
+                to="/licences"
+                onClick={closeMenu}
+                className="mk-logout"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  height: 42,
+                  borderRadius: 9,
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "#e6eaf0",
+                  background: "#1a1f28",
+                  border: "1px solid #333b49",
+                  textDecoration: "none",
+                }}
+              >
+                <Icon name="bell" size={16} />
+                Alerts
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  setConfirmOpen(true);
+                }}
+                className="mk-logout"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  height: 42,
+                  borderRadius: 9,
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "#e6eaf0",
+                  background: "#1a1f28",
+                  border: "1px solid #333b49",
+                  cursor: "pointer",
+                }}
+              >
+                <Icon name="logout" size={15} />
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                prefetch="viewport"
+                onClick={closeMenu}
+                className="mk-logout"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 42,
+                  borderRadius: 9,
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "#e6eaf0",
+                  background: "#1a1f28",
+                  border: "1px solid #333b49",
+                  textDecoration: "none",
+                }}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                prefetch="viewport"
+                onClick={closeMenu}
+                className="mk-cta"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 42,
+                  borderRadius: 9,
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "#1a1206",
+                  background: "#e8973c",
                   textDecoration: "none",
                 }}
               >

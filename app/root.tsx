@@ -83,7 +83,7 @@ function SiteChrome({ children }: { children: React.ReactNode }) {
   }
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <SiteHeader />
+      {!inApp && <SiteHeader />}
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>
       {!inApp && <SiteFooter />}
     </div>

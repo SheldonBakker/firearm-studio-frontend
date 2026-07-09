@@ -69,6 +69,31 @@ function SidebarBody({
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
+      <div className="border-b border-border px-3 py-3">
+        <Link
+          to="/"
+          onClick={onNavigate}
+          aria-label="Go to Firearm Studio home"
+          className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-card"
+        >
+          <img
+            src="/icon-192.png"
+            alt="Firearm Studio"
+            width={30}
+            height={30}
+            className="h-7.5 w-7.5 shrink-0 rounded-lg shadow-md"
+          />
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="truncate text-[14px] font-bold text-foreground">
+              Firearm Studio
+            </span>
+            <span className="mt-1 truncate font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+              Storage &amp; Compliance
+            </span>
+          </span>
+        </Link>
+      </div>
+
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-1 pt-4">
         {GROUPS.map((g, gi) => {
           const items = g.items.filter((it) => canSeeNav(user, it.key));

@@ -268,3 +268,25 @@
 .mk-method:hover {
   border-color: #333b49;
 }
+
+/* Marketing header — mobile hamburger menu */
+.mk-hamburger {
+  display: none;
+}
+.mk-mobile-panel {
+  display: none;
+  background: #0e1116;
+  border-top: 1px solid #1f252e;
+}
+@media (max-width: 860px) {
+  .mk-desktop-nav,
+  .mk-desktop-actions {
+    display: none !important;
+  }
+  .mk-hamburger {
+    display: inline-flex !important;
+  }
+  .mk-mobile-panel.is-open {
+    display: block;
+  }
+}
