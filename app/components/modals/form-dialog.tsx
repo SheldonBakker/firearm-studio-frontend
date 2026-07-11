@@ -305,6 +305,7 @@ export function FormDialog({
   title,
   description,
   fields,
+  afterFields,
   submitLabel = "Save",
   confirmTitle,
   confirmDescription,
@@ -315,6 +316,7 @@ export function FormDialog({
   title: string;
   description?: string;
   fields: FormField[];
+  afterFields?: React.ReactNode;
   submitLabel?: string;
   confirmTitle?: string;
   confirmDescription?: React.ReactNode;
@@ -504,6 +506,7 @@ export function FormDialog({
                 )}
               </div>
             ))}
+            {afterFields}
             {error && (
               <p className="text-[13px] font-medium text-destructive">
                 {error}

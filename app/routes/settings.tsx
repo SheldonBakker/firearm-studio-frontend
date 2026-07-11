@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { redirect, useRevalidator } from "react-router";
+import { Link, redirect, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/settings";
 import { companyApi } from "~/lib/api/company/company";
@@ -208,6 +208,19 @@ function SagePanel({
             defaultValue: c?.sageCompanyId ? String(c.sageCompanyId) : "",
           },
         ]}
+        afterFields={
+          <p className="text-[12.5px] text-muted-foreground">
+            Having connection troubles?{" "}
+            <Link
+              to="/contact"
+              prefetch="viewport"
+              className="font-semibold text-foreground underline underline-offset-4 hover:text-primary"
+            >
+              Contact us for help
+            </Link>
+            .
+          </p>
+        }
         onSubmit={async (v) => {
           await sageApi.register({
             apiKey: v.apiKey || null,
