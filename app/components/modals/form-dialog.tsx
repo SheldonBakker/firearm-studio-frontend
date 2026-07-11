@@ -329,6 +329,7 @@ export function FormDialog({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   function set(name: string, v: string, patch?: Record<string, string>) {
     setValues((prev) => ({ ...prev, [name]: v, ...patch }));
@@ -357,11 +358,13 @@ export function FormDialog({
       return;
     }
 
+    setConfirming(true);
     const confirmed = await confirm({
       title: confirmTitle ?? `${title}?`,
       description: confirmDescription,
       confirmLabel: submitLabel,
     });
+    setConfirming(false);
     if (!confirmed) return;
 
     setLoading(true);
@@ -376,7 +379,13 @@ export function FormDialog({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && confirming) return;
+        onOpenChange(nextOpen);
+      }}
+    >
       <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
         <SheetHeader className="gap-1 pr-12">
           <SheetTitle>{title}</SheetTitle>
