@@ -14,7 +14,7 @@ export function meta({ location }: Route.MetaArgs) {
     ...pageMeta({
       title: "Firearm Studio - Storage, compliance & range bookings",
       description:
-        "Firearm Studio keeps your registry, range bookings, storage records, licences, and invoicing in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
+        "Firearm Studio keeps your registry, range bookings, storage records, licences, invoicing, and Sage Accounting support in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
       pathname: location.pathname,
     }),
     { "script:ld+json": organizationLd() },
@@ -112,9 +112,9 @@ const features = [
   { title: "Range bookings", body: "Take bookings against live lane availability - pick a slot, assign shooters, and confirm on the spot. No double-booked lanes.", color: TEAL, svg: ic.calendar },
   { title: "Packages & pricing", body: "Build reusable shooting packages with set duration, price, and shooter limits, then bill them automatically on every booking.", color: PURPLE, svg: ic.tag },
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
-  { title: "Invoicing", body: "Storage fees and range bookings roll into invoices automatically, so you can track outstanding balances and flag overdue accounts.", color: GREEN, svg: ic.money },
+  { title: "Invoicing", body: "Storage fees and range bookings roll into invoices automatically, with Sage Accounting support ready when your books need to line up.", color: GREEN, svg: ic.money },
   { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: RED, svg: ic.list },
-  { title: "Website integration", body: "Put your live booking calendar on your own website - share a public link or drop in an embed. Custom invoice and platform integrations available on request.", color: PURPLE, svg: ic.code },
+  { title: "Website & accounting integrations", body: "Put your live booking calendar on your website, share a public link, and connect Sage Accounting from settings.", color: PURPLE, svg: ic.code },
 ];
 
 const stats: Stat[] = [
@@ -177,7 +177,7 @@ const bookingPoints = [
 const integrationPoints = [
   { title: "Shareable public link", body: "Give customers a direct link to book online - no login, and no customer details are ever shown to visitors." },
   { title: "Embed on any website", body: "Paste one iframe snippet into your existing site and the booking calendar appears inline." },
-  { title: "Custom invoice integration", body: "Feed confirmed bookings and VAT invoices into your existing platform or workflow - built to fit." },
+  { title: "Sage Accounting connection", body: "Register your Sage credentials once, validate the company, and keep invoice exports ready for accounting." },
 ];
 
 const steps = [
@@ -555,12 +555,12 @@ export default function Home() {
       <section id="integrations" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(36px,5vw,64px)", alignItems: "center" }}>
           <div style={{ flex: "1 1 360px", minWidth: 300 }}>
-            <div style={{ ...eyebrow, color: PURPLE }}>Website integration</div>
-            <h2 style={h2}>Put bookings on your own website</h2>
+            <div style={{ ...eyebrow, color: PURPLE }}>Integrations</div>
+            <h2 style={h2}>Connect bookings, websites, and Sage Accounting</h2>
             <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
               Share a public booking link or embed the calendar straight into
-              your existing site - customers book online while every request
-              flows back to your dashboard.
+              your existing site, then keep invoicing aligned with Sage
+              Accounting from the same dashboard.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
               {integrationPoints.map((p) => (
@@ -626,6 +626,19 @@ export default function Home() {
                     <code style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, lineHeight: 1.6, color: "#8a93a2", whiteSpace: "pre" }}>{'<iframe\n  src="…/book/{id}?embed=1"\n  width="100%" height="760"\n  style="border:0" loading="lazy">\n</iframe>'}</code>
                   </div>
                 </div>
+
+                <div style={{ marginTop: 14, border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                    <span style={{ width: 70, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                      <img src="/assets/sage.png" alt="Sage Accounting" style={{ width: 58, height: "auto", display: "block" }} />
+                    </span>
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: "#e6eaf0" }}>Sage Accounting</span>
+                      <span style={{ display: "block", marginTop: 2, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#8a93a2", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Connected - Sentinel Range</span>
+                    </span>
+                  </span>
+                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, color: GREEN, padding: "2px 8px", borderRadius: 999, background: chip(GREEN, 14), flexShrink: 0 }}>READY</span>
+                </div>
               </div>
             </div>
           </div>
@@ -637,10 +650,11 @@ export default function Home() {
               <Glyph d={ic.tag} size={20} />
             </span>
             <span>
-              <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "#e6eaf0" }}>Custom integration is quote-based</span>
+              <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "#e6eaf0" }}>Sage is built in, custom work is quote-based</span>
               <span style={{ display: "block", marginTop: 5, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>
-                The public link and embed are included. Bespoke invoice and
-                website integrations are priced per project - the quote varies
+                The public link, website embed, and Sage Accounting connection
+                are included. Bespoke website or platform integrations are
+                priced per project - the quote varies
                 depending on your website or platform.
               </span>
             </span>

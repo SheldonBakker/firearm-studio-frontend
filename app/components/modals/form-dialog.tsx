@@ -44,6 +44,7 @@ export interface FormField {
   label: string;
   type?:
     | "text"
+    | "password"
     | "number"
     | "date"
     | "email"

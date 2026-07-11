@@ -1896,6 +1896,83 @@
         }
       }
     },
+    "/api/v1/sage/connections": {
+      "get": {
+        "tags": [
+          "Sage"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionDetailsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionDetailsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sage/register": {
+      "post": {
+        "tags": [
+          "Sage"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSageConnectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSageConnectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSageConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SageConnectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ranges": {
       "get": {
         "tags": [
@@ -4793,6 +4870,97 @@
           "notes": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterSageConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "sageCompanyId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SageConnectionDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apiKey": {
+            "type": "boolean"
+          },
+          "username": {
+            "type": "boolean"
+          },
+          "password": {
+            "type": "boolean"
+          },
+          "sageCompanyId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sageCompanyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastValidatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastRegisteredByAuthUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SageConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "sageCompanyId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sageCompanyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastValidatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
