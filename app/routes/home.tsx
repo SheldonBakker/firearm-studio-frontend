@@ -154,18 +154,18 @@ const audit = [
 ];
 
 const bookingSlots = [
-  { time: "09:00", note: "3 lanes", state: "open" },
+  { time: "09:00", note: "3 left", state: "open" },
   { time: "10:00", note: "Selected", state: "active" },
   { time: "11:00", note: "Full", state: "full" },
-  { time: "13:00", note: "4 lanes", state: "open" },
-  { time: "14:00", note: "2 lanes", state: "open" },
+  { time: "13:00", note: "4 left", state: "open" },
+  { time: "14:00", note: "2 left", state: "open" },
   { time: "15:00", note: "Full", state: "full" },
 ] as const;
 
 const bookingUpcoming: (Invoice & { time: string })[] = [
-  { num: "K. Adams", name: "Intro package · 1 shooter", total: "10:00", status: "Confirmed", time: "10:00", ...statusPill(GREEN) },
-  { num: "Sentinel Security", name: "Range day · 4 shooters", total: "13:00", status: "Pending", time: "13:00", ...statusPill(AMBER) },
-  { num: "M. van der Merwe", name: "Practice · 1 shooter", total: "15:00", status: "Confirmed", time: "15:00", ...statusPill(GREEN) },
+  { num: "K. Adams", name: "Intro package · 1 person", total: "10:00", status: "Confirmed", time: "10:00", ...statusPill(GREEN) },
+  { num: "Sentinel Security", name: "Range day · 4 people", total: "13:00", status: "Pending", time: "13:00", ...statusPill(AMBER) },
+  { num: "M. van der Merwe", name: "Practice · 1 person", total: "15:00", status: "Confirmed", time: "15:00", ...statusPill(GREEN) },
 ];
 
 const bookingPoints = [
