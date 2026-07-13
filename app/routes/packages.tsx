@@ -158,7 +158,7 @@ export default function Packages({ loaderData }: Route.ComponentProps) {
     },
     {
       key: "shooters",
-      header: "Max shooters",
+      header: "Max people",
       align: "right",
       cell: (r) => (
         <Mono className="text-[12.5px] text-muted-foreground">

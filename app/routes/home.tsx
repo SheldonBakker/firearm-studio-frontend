@@ -12,9 +12,9 @@ import { useAuth } from "~/context/auth-context";
 export function meta({ location }: Route.MetaArgs) {
   return [
     ...pageMeta({
-      title: "Firearm Studio - Storage, compliance & range bookings",
+      title: "Firearm Studio - Storage, compliance & facility bookings",
       description:
-        "Firearm Studio keeps your registry, range bookings, storage records, licences, invoicing, and Sage Accounting support in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
+        "Firearm Studio keeps your registry, facility bookings, storage records, licences, invoicing, and Sage Accounting support in one secure, audit-ready system - purpose-built for South African firearm storage providers.",
       pathname: location.pathname,
     }),
     { "script:ld+json": organizationLd() },
@@ -109,10 +109,10 @@ const metrics = [
 
 const features = [
   { title: "Storage registry", body: "Track every firearm in your custody - make, model, serial, calibre, and exact storage location - on one searchable registry.", color: BLUE, svg: ic.box },
-  { title: "Range bookings", body: "Take bookings against live lane availability - pick a slot, assign shooters, and confirm on the spot. No double-booked lanes.", color: TEAL, svg: ic.calendar },
-  { title: "Packages & pricing", body: "Build reusable shooting packages with set duration, price, and shooter limits, then bill them automatically on every booking.", color: PURPLE, svg: ic.tag },
+  { title: "Facility bookings", body: "Take bookings against live availability - pick a slot, assign people, and confirm on the spot. No double-bookings.", color: TEAL, svg: ic.calendar },
+  { title: "Packages & pricing", body: "Build reusable packages with set duration, price, and capacity limits, then bill them automatically on every booking.", color: PURPLE, svg: ic.tag },
   { title: "Licence tracking", body: "Automatic expiry alerts and renewal tracking so nothing lapses. Stay ahead of every SAPS deadline.", color: AMBER, svg: ic.shield },
-  { title: "Invoicing", body: "Storage fees and range bookings roll into invoices automatically, with Sage Accounting support ready when your books need to line up.", color: GREEN, svg: ic.money },
+  { title: "Invoicing", body: "Storage fees and facility bookings roll into invoices automatically, with Sage Accounting support ready when your books need to line up.", color: GREEN, svg: ic.money },
   { title: "Audit trail", body: "Every action logged with who, what, and when - a complete, tamper-evident history for inspections.", color: RED, svg: ic.list },
   { title: "Website & accounting integrations", body: "Put your live booking calendar on your website, share a public link, and connect Sage Accounting from settings.", color: PURPLE, svg: ic.code },
 ];
@@ -169,8 +169,8 @@ const bookingUpcoming: (Invoice & { time: string })[] = [
 ];
 
 const bookingPoints = [
-  { title: "Live lane availability", body: "See remaining lanes per slot before you book - never double-book a lane again." },
-  { title: "Reusable packages", body: "Duration, price, and shooter limits set once, then applied to every booking." },
+  { title: "Live availability", body: "See remaining capacity per slot before you book - never double-book again." },
+  { title: "Reusable packages", body: "Duration, price, and capacity limits set once, then applied to every booking." },
   { title: "Straight to invoice", body: "Every confirmed booking rolls into the customer's invoice automatically." },
 ];
 
@@ -303,7 +303,7 @@ export default function Home() {
               Run a compliant firearm storage business - without the paperwork.
             </h1>
             <p style={{ ...lede, maxWidth: 540, fontSize: "clamp(15px,1.7vw,18px)", margin: "22px 0 0" }}>
-              Firearm Studio keeps your registry, range bookings, storage
+              Firearm Studio keeps your registry, facility bookings, storage
               records, licences, and invoicing in one secure, audit-ready system
               - purpose-built for South African storage providers.
             </p>
@@ -484,12 +484,12 @@ export default function Home() {
 
       <section id="bookings" style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)", display: "flex", flexWrap: "wrap", gap: "clamp(36px,5vw,64px)", alignItems: "center" }}>
         <div style={{ flex: "1 1 360px", minWidth: 300 }}>
-          <div style={{ ...eyebrow, color: TEAL }}>Range bookings</div>
-          <h2 style={h2}>Fill every lane, book in seconds</h2>
+          <div style={{ ...eyebrow, color: TEAL }}>Facility bookings</div>
+          <h2 style={h2}>Fill every slot, book in seconds</h2>
           <p style={{ ...lede, fontSize: "clamp(15px,1.6vw,17px)" }}>
-            Take bookings against live lane availability, sell shooting
-            packages, and confirm on the spot - the whole day's schedule, and
-            every open slot, in one view.
+            Take bookings against live availability, sell packages, and confirm
+            on the spot - the whole day's schedule, and every open slot, in one
+            view.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
             {bookingPoints.map((p) => (

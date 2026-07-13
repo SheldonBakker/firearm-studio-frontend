@@ -39,7 +39,7 @@ import { Confirmation } from "~/components/public-booking/confirmation";
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
     title: "Book a session",
-    description: "Check availability and book a shooting range session online.",
+    description: "Check availability and book a facility session online.",
     pathname: location.pathname,
     noIndex: true,
   });

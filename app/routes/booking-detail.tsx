@@ -191,8 +191,8 @@ function BookingView({ booking }: { booking: BookingResponse }) {
                   </Mono>
                 ),
               },
-              { k: "Range", v: booking.rangeName ?? "—" },
-              { k: "Shooters", v: booking.shooterCount },
+              { k: "Facility", v: booking.rangeName ?? "—" },
+              { k: "People", v: booking.shooterCount },
               {
                 k: "Source",
                 v: enumKey(BookingSource, booking.source) ?? "—",
