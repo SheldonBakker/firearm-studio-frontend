@@ -164,13 +164,13 @@ export function BookingFormDialog({
       return;
     }
     if (!Number.isInteger(shooters) || shooters < 1) {
-      setError("Shooter count must be at least 1.");
+      setError("Person count must be at least 1.");
       return;
     }
     if (selectedPackage && shooters > selectedPackage.maxShooters) {
       setError(
-        `This package allows at most ${selectedPackage.maxShooters} shooter${
-          selectedPackage.maxShooters === 1 ? "" : "s"
+        `This package allows at most ${selectedPackage.maxShooters} ${
+          selectedPackage.maxShooters === 1 ? "person" : "people"
         }.`,
       );
       return;
@@ -349,7 +349,7 @@ export function BookingFormDialog({
 
             {/* Customer & shooters */}
             <section className="space-y-3">
-              <SectionHeading>Customer &amp; shooters</SectionHeading>
+              <SectionHeading>Customer &amp; people</SectionHeading>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="booking-customer">
                   Customer<span className="text-destructive"> *</span>
@@ -367,13 +367,13 @@ export function BookingFormDialog({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="booking-shooters">Shooters</Label>
+                <Label htmlFor="booking-shooters">People</Label>
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon-sm"
-                    aria-label="Fewer shooters"
+                    aria-label="Fewer people"
                     disabled={shooters <= 1}
                     onClick={() => stepShooters(-1)}
                   >
@@ -392,7 +392,7 @@ export function BookingFormDialog({
                     type="button"
                     variant="outline"
                     size="icon-sm"
-                    aria-label="More shooters"
+                    aria-label="More people"
                     disabled={
                       !!selectedPackage &&
                       shooters >= selectedPackage.maxShooters

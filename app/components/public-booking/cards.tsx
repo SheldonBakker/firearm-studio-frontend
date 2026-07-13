@@ -115,7 +115,7 @@ export function PackageCard({
         <span className="text-base font-semibold">{fmtMoney(pkg.price)}</span>
         <span className="text-[12.5px] text-muted-foreground">
           {pkg.durationMinutes} min · up to {pkg.maxShooters}{" "}
-          {pkg.maxShooters === 1 ? "shooter" : "shooters"}
+          {pkg.maxShooters === 1 ? "person" : "people"}
         </span>
       </div>
       {pkg.description && (
@@ -157,13 +157,13 @@ export function ShooterStepper({
   const clamp = (n: number) => Math.min(Math.max(1, n), Math.max(1, max));
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor="pb-shooters">Shooters</Label>
+      <Label htmlFor="pb-shooters">People</Label>
       <div className="flex items-center gap-2">
         <Button
           type="button"
           variant="outline"
           size="icon-sm"
-          aria-label="Fewer shooters"
+          aria-label="Fewer people"
           disabled={value <= 1}
           onClick={() => onChange(clamp(value - 1))}
         >
@@ -182,7 +182,7 @@ export function ShooterStepper({
           type="button"
           variant="outline"
           size="icon-sm"
-          aria-label="More shooters"
+          aria-label="More people"
           disabled={value >= max}
           onClick={() => onChange(clamp(value + 1))}
         >

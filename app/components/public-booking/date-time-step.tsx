@@ -56,7 +56,7 @@ function CartList({
                   </p>
                   <p className="text-[12px] text-muted-foreground">
                     {v.dateLabel} · {v.timeLabel} · {v.shooterCount}{" "}
-                    {v.shooterCount === 1 ? "shooter" : "shooters"}
+                    {v.shooterCount === 1 ? "person" : "people"}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -130,7 +130,7 @@ export function DateTimeStep({
         </span>
         <span className="text-muted-foreground">
           · {draft.shooterCount}{" "}
-          {draft.shooterCount === 1 ? "shooter" : "shooters"}
+          {draft.shooterCount === 1 ? "person" : "people"}
         </span>
         {pkg && (
           <span className="ml-auto font-medium">{fmtMoney(pkg.price)}</span>

@@ -113,7 +113,7 @@ export function PackageFormDialog({
     }
     const shootersValue = Number(maxShooters);
     if (!Number.isInteger(shootersValue) || shootersValue < 1) {
-      setError("Max shooters must be at least 1.");
+      setError("Max people must be at least 1.");
       return;
     }
     const rows = items.filter(
@@ -237,7 +237,7 @@ export function PackageFormDialog({
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="package-shooters">Max shooters</Label>
+                  <Label htmlFor="package-shooters">Max people</Label>
                   <Input
                     id="package-shooters"
                     type="number"

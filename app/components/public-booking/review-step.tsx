@@ -54,7 +54,7 @@ export function ReviewStep({
                   </p>
                   <p className="text-[12px] text-muted-foreground">
                     {v.dateLabel} · {v.timeLabel} · {v.shooterCount}{" "}
-                    {v.shooterCount === 1 ? "shooter" : "shooters"}
+                    {v.shooterCount === 1 ? "person" : "people"}
                   </p>
                 </div>
                 <span className="shrink-0 text-[12.5px] font-medium tabular-nums">
