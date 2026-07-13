@@ -11,6 +11,7 @@ import { supabase } from "~/lib/api/supabase";
 import type { SessionUser } from "~/lib/utils/rbac";
 import {
   getServerSnapshot,
+  getSessionUser,
   getSnapshot,
   signOutUser,
   subscribe,
@@ -47,7 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    if (error) return { error: error.message };
+    await getSessionUser({ refresh: true });
+    return { error: null };
   }, []);
 
   const signUp = useCallback(

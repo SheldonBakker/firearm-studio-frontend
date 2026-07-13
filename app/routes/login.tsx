@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
+import { Loader2Icon } from "lucide-react";
 import { Link, redirect, useNavigate, useSearchParams } from "react-router";
 import type { Route } from "./+types/login";
 import { getSessionUser, useAuth } from "~/context/auth-context";
@@ -63,9 +64,9 @@ export default function Login() {
     setFieldErrors({});
     setLoading(true);
     const { error } = await signIn(result.data.email, result.data.password);
-    setLoading(false);
     if (error) {
       setError(error);
+      setLoading(false);
       return;
     }
     navigate(next ? decodeURIComponent(next) : "/dashboard", { replace: true });
@@ -165,7 +166,14 @@ export default function Login() {
           <p className="text-[13px] font-medium text-destructive">{error}</p>
         )}
         <Button type="submit" disabled={loading} className="mt-1 w-full">
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              Signing in…
+            </>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
     </AuthShell>
