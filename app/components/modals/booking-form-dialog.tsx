@@ -160,7 +160,7 @@ export function BookingFormDialog({
     setError(null);
 
     if (!rangeId || !packageId || !date || !startTime || !customerId) {
-      setError("Pick a range, package, date, time slot and customer.");
+      setError("Pick a facility, package, date, time slot and customer.");
       return;
     }
     if (!Number.isInteger(shooters) || shooters < 1) {
@@ -218,7 +218,9 @@ export function BookingFormDialog({
               </Badge>
             )}
           </div>
-          <SheetDescription>Book a range slot for a customer.</SheetDescription>
+          <SheetDescription>
+            Book a facility slot for a customer.
+          </SheetDescription>
         </SheetHeader>
 
         <form
@@ -232,17 +234,16 @@ export function BookingFormDialog({
               <SectionHeading>Session</SectionHeading>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="booking-range">
-                  Range<span className="text-destructive"> *</span>
+                  Facility<span className="text-destructive"> *</span>
                 </Label>
                 <Select value={rangeId} onValueChange={setRangeId}>
                   <SelectTrigger id="booking-range">
-                    <SelectValue placeholder="Select a range…" />
+                    <SelectValue placeholder="Select a facility…" />
                   </SelectTrigger>
                   <SelectContent>
                     {activeRanges.map((r) => (
                       <SelectItem key={r.id} value={r.id}>
-                        {r.name ?? "Unnamed range"} · {r.laneCount}{" "}
-                        {r.laneCount === 1 ? "lane" : "lanes"}
+                        {r.name ?? "Unnamed facility"} · capacity {r.laneCount}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -287,7 +288,7 @@ export function BookingFormDialog({
               <SectionHeading>Time slot</SectionHeading>
               {!rangeId || !packageId || !date ? (
                 <p className="text-[12.5px] text-muted-foreground">
-                  Pick a range, package and date to see available slots.
+                  Pick a facility, package and date to see available slots.
                 </p>
               ) : slotsLoading ? (
                 <p className="text-[12.5px] text-muted-foreground">
@@ -329,11 +330,7 @@ export function BookingFormDialog({
                               : "text-muted-foreground",
                           )}
                         >
-                          {full
-                            ? "Full"
-                            : `${slot.remainingLanes} ${
-                                slot.remainingLanes === 1 ? "lane" : "lanes"
-                              } left`}
+                          {full ? "Full" : `${slot.remainingLanes} left`}
                         </span>
                       </button>
                     );

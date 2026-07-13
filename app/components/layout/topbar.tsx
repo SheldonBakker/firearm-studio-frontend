@@ -19,7 +19,7 @@ const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/invoices", title: "Invoices" },
   { prefix: "/bookings/calendar", title: "Booking Calendar" },
   { prefix: "/bookings", title: "Bookings" },
-  { prefix: "/ranges", title: "Shooting Ranges" },
+  { prefix: "/facilities", title: "Facilities" },
   { prefix: "/packages", title: "Packages" },
   { prefix: "/team", title: "Team" },
   { prefix: "/audit", title: "Audit Log" },

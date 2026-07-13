@@ -30,7 +30,7 @@ export function SelectionStep({
   return (
     <div className="space-y-6">
       <section className="space-y-3">
-        <SectionLabel>Choose a range</SectionLabel>
+        <SectionLabel>Choose a facility</SectionLabel>
         <div className="grid gap-3 sm:grid-cols-2">
           {ranges.map((r) => (
             <RangeCard

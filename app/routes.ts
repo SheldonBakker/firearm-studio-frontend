@@ -39,7 +39,7 @@ export default [
     route("bookings", "routes/bookings.tsx"),
     route("bookings/calendar", "routes/bookings-calendar.tsx"),
     route("bookings/:id", "routes/booking-detail.tsx"),
-    route("ranges", "routes/ranges.tsx"),
+    route("facilities", "routes/ranges.tsx"),
     route("packages", "routes/packages.tsx"),
     route("team", "routes/team.tsx"),
     route("audit", "routes/audit.tsx"),

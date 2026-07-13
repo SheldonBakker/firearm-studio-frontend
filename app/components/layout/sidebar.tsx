@@ -36,7 +36,7 @@ const GROUPS: NavGroup[] = [
     head: "Bookings",
     items: [
       { key: "bookings", label: "Bookings", icon: "cal", to: "/bookings" },
-      { key: "ranges", label: "Ranges", icon: "pin", to: "/ranges" },
+      { key: "ranges", label: "Facilities", icon: "pin", to: "/facilities" },
       { key: "packages", label: "Packages", icon: "box", to: "/packages" },
     ],
   },

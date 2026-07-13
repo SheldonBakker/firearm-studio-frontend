@@ -105,7 +105,7 @@ export function RangeFormDialog({
     const lanes = Number(laneCount);
     const interval = Number(slotInterval);
     if (!Number.isInteger(lanes) || lanes < 1) {
-      setError("Lane count must be at least 1.");
+      setError("Capacity must be at least 1.");
       return;
     }
     if (!Number.isInteger(interval) || interval < 1) {
@@ -216,7 +216,7 @@ export function RangeFormDialog({
               <SectionHeading>Capacity</SectionHeading>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="range-lanes">Lanes</Label>
+                  <Label htmlFor="range-lanes">Capacity</Label>
                   <Input
                     id="range-lanes"
                     type="number"

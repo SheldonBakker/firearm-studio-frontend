@@ -135,7 +135,7 @@ export default function Ranges({ loaderData }: Route.ComponentProps) {
     },
     {
       key: "lanes",
-      header: "Lanes",
+      header: "Capacity",
       align: "right",
       cell: (r) => (
         <Mono className="text-[12.5px] text-muted-foreground">
