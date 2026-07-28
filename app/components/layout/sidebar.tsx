@@ -38,6 +38,7 @@ const GROUPS: NavGroup[] = [
       { key: "bookings", label: "Bookings", icon: "cal", to: "/bookings" },
       { key: "ranges", label: "Facilities", icon: "pin", to: "/facilities" },
       { key: "packages", label: "Packages", icon: "box", to: "/packages" },
+      { key: "register", label: "Register", icon: "list", to: "/register" },
     ],
   },
   {

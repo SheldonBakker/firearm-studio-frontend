@@ -28,7 +28,17 @@ export function fmtDate(d: string | null | undefined): string {
   });
 }
 
-const EMDASH = "—";
+export const EMDASH = "—";
+
+export function fmtDateTime(d: string | null | undefined): string {
+  if (!d) return EMDASH;
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return d;
+  return `${fmtDate(d)}, ${date.toLocaleTimeString("en-ZA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+}
 
 type StatusMeta = { color: string; label: string };
 
@@ -58,6 +68,9 @@ const STATUS: Record<string, StatusMeta> = {
   Completed: { color: "var(--status-green)", label: "Completed" },
   NoShow: { color: "var(--status-red)", label: "No-show" },
   Online: { color: "var(--status-purple)", label: "Online" },
+  DepositDue: { color: "var(--status-amber)", label: "Deposit due" },
+  DepositPaid: { color: "var(--status-green)", label: "Deposit paid" },
+  DepositExpired: { color: "var(--status-red)", label: "Deposit expired" },
   // customer type
   Individual: { color: "var(--status-teal)", label: "Individual" },
   Company: { color: "var(--status-purple)", label: "Company" },

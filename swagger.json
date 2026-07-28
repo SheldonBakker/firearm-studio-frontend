@@ -5,6 +5,69 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/attendees/{id}": {
+      "patch": {
+        "tags": [
+          "Attendees"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAttendeeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAttendeeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAttendeeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Attendees"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/audit-logs": {
       "get": {
         "tags": [
@@ -408,6 +471,248 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/{id}/check-in": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInBookingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInBookingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInBookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/{id}/attendees": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendeeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendeeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendeeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttendeeResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttendeeResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttendeeResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/register": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "rangeId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterRowDtoPaginatedResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterRowDtoPaginatedResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterRowDtoPaginatedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/register/export": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "rangeId",
+            "in": "query",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -1896,6 +2201,28 @@
         }
       }
     },
+    "/api/v1/public/bookings/{token}/calendar.ics": {
+      "get": {
+        "tags": [
+          "PublicCalendar"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/sage/connections": {
       "get": {
         "tags": [
@@ -1918,6 +2245,46 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SageConnectionDetailsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -2395,6 +2762,24 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
           }
         ],
         "responses": {
@@ -2403,26 +2788,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
-                  }
+                  "$ref": "#/components/schemas/CustomerStorageRecordDtoPaginatedResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
-                  }
+                  "$ref": "#/components/schemas/CustomerStorageRecordDtoPaginatedResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CustomerStorageRecordDto"
-                  }
+                  "$ref": "#/components/schemas/CustomerStorageRecordDtoPaginatedResponse"
                 }
               }
             }
@@ -2676,7 +3052,12 @@
         "additionalProperties": false
       },
       "AppRole": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -2734,6 +3115,98 @@
           "totalCount": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AttendeeRequest": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "idNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmMakeModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "calibre": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmOrigin": {
+            "$ref": "#/components/schemas/FirearmOrigin"
+          },
+          "signedIndemnity": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AttendeeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "idNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmMakeModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "calibre": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmOrigin": {
+            "$ref": "#/components/schemas/FirearmOrigin"
+          },
+          "signedIndemnity": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -3049,6 +3522,16 @@
             "format": "date-time",
             "nullable": true
           },
+          "reminderSentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -3057,17 +3540,39 @@
         "additionalProperties": false
       },
       "BookingSource": {
-        "enum": [0, 1],
+        "enum": [
+          0,
+          1
+        ],
         "type": "integer",
         "format": "int32"
       },
       "BookingStatus": {
-        "enum": [0, 1, 2, 3, 4],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "type": "integer",
         "format": "int32"
       },
       "BooleanOptional": {
         "type": "boolean"
+      },
+      "CheckInBookingRequest": {
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendeeRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "CompanyDetailsResponse": {
         "type": "object",
@@ -3142,6 +3647,17 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "depositMode": {
+            "$ref": "#/components/schemas/DepositMode"
+          },
+          "depositValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "depositWindowHours": {
+            "type": "integer",
+            "format": "int32"
           },
           "createdAt": {
             "type": "string",
@@ -3726,8 +4242,42 @@
         },
         "additionalProperties": false
       },
+      "CustomerStorageRecordDtoPaginatedResponse": {
+        "required": [
+          "items",
+          "pageNumber",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerStorageRecordDto"
+            },
+            "nullable": true
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomerType": {
-        "enum": [0, 1],
+        "enum": [
+          0,
+          1
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -3794,13 +4344,33 @@
         "additionalProperties": false
       },
       "DayOfWeek": {
-        "enum": [0, 1, 2, 3, 4, 5, 6],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
         "type": "integer",
         "format": "int32"
       },
       "DecimalOptional": {
         "type": "number",
         "format": "double"
+      },
+      "DepositMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DepositModeOptional": {
+        "$ref": "#/components/schemas/DepositMode"
       },
       "FirearmDetailResponse": {
         "type": "object",
@@ -3879,6 +4449,17 @@
         },
         "additionalProperties": false
       },
+      "FirearmOrigin": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "FirearmOriginOptional": {
+        "$ref": "#/components/schemas/FirearmOrigin"
+      },
       "FirearmResponse": {
         "type": "object",
         "properties": {
@@ -3952,7 +4533,12 @@
         "additionalProperties": false
       },
       "FirearmStatus": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -4022,6 +4608,21 @@
           "dueOn": {
             "type": "string",
             "format": "date",
+            "nullable": true
+          },
+          "depositAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "depositDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "depositPaidAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           },
           "customer": {
@@ -4108,6 +4709,21 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          },
+          "depositAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "depositDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "depositPaidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4169,7 +4785,13 @@
         "additionalProperties": false
       },
       "InvoiceStatus": {
-        "enum": [0, 1, 2, 3, 4],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -4359,7 +4981,12 @@
         "additionalProperties": false
       },
       "LicenceStatus": {
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -4566,9 +5193,42 @@
         "additionalProperties": false
       },
       "PaymentMethod": {
-        "enum": [0, 1, 2, 3, 4],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "type": "integer",
         "format": "int32"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
       },
       "PublicBookingConfirmationResponse": {
         "type": "object",
@@ -4657,6 +5317,16 @@
             "type": "number",
             "format": "double"
           },
+          "depositAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "depositDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "bookings": {
             "type": "array",
             "items": {
@@ -4738,6 +5408,20 @@
           "postalCode": {
             "type": "string",
             "nullable": true
+          },
+          "depositMode": {
+            "$ref": "#/components/schemas/DepositMode"
+          },
+          "depositValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "depositWindowHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isVatRegistered": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -4870,6 +5554,102 @@
           "notes": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterRowDto": {
+        "type": "object",
+        "properties": {
+          "bookingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time"
+          },
+          "rangeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "bookingNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "attendeeFullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "attendeeIdNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmMakeModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "calibre": {
+            "type": "string",
+            "nullable": true
+          },
+          "firearmOrigin": {
+            "$ref": "#/components/schemas/FirearmOrigin"
+          },
+          "signedIndemnity": {
+            "type": "boolean"
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterRowDtoPaginatedResponse": {
+        "required": [
+          "items",
+          "pageNumber",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegisterRowDto"
+            },
+            "nullable": true
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5173,7 +5953,11 @@
         "additionalProperties": false
       },
       "StorageStatus": {
-        "enum": [0, 1, 2],
+        "enum": [
+          0,
+          1,
+          2
+        ],
         "type": "integer",
         "format": "int32"
       },
@@ -5182,6 +5966,39 @@
       },
       "StringOptional": {
         "type": "string"
+      },
+      "UpdateAttendeeRequest": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "idNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "licenceNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "firearmMakeModel": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "firearmSerialNumber": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "calibre": {
+            "$ref": "#/components/schemas/StringOptional"
+          },
+          "firearmOrigin": {
+            "$ref": "#/components/schemas/FirearmOriginOptional"
+          },
+          "signedIndemnity": {
+            "$ref": "#/components/schemas/BooleanOptional"
+          },
+          "notes": {
+            "$ref": "#/components/schemas/StringOptional"
+          }
+        },
+        "additionalProperties": false
       },
       "UpdateCompanyRequest": {
         "type": "object",
@@ -5233,6 +6050,15 @@
           },
           "bankSwiftCode": {
             "$ref": "#/components/schemas/StringOptional"
+          },
+          "depositMode": {
+            "$ref": "#/components/schemas/DepositModeOptional"
+          },
+          "depositValue": {
+            "$ref": "#/components/schemas/DecimalOptional"
+          },
+          "depositWindowHours": {
+            "$ref": "#/components/schemas/Int32Optional"
           }
         },
         "additionalProperties": false
@@ -5411,8 +6237,8 @@
   },
   "security": [
     {
-      "Bearer": [],
-      "ApiKey": []
+      "Bearer": [ ],
+      "ApiKey": [ ]
     }
   ]
 }

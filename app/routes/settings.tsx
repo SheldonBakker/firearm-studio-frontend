@@ -16,11 +16,14 @@ import { Icon } from "~/components/common/icon";
 import { KeyValue } from "~/components/common/key-value";
 import { Mono } from "~/components/common/mono";
 import { FormDialog } from "~/components/modals/form-dialog";
+import { DepositPolicyFormDialog } from "~/components/modals/deposit-policy-form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
 import { Badge } from "~/components/ui/badge";
 import type { CompanyDetailsResponse } from "~/lib/api/company/types";
 import type { SageConnectionDetailsResponse } from "~/lib/api/sage/types";
 import { SOUTH_AFRICAN_BANKS, BANK_ACCOUNT_TYPES } from "~/lib/constants/banking";
+import { DepositMode } from "~/lib/types/enums";
+import { fmtMoney } from "~/lib/utils/format";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);
@@ -40,14 +43,25 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <Resolve
-              resolve={loaderData.company}
-              fallback={<KeyValueSkeleton rows={6} />}
-            >
-              {(company) => <CompanyPanel company={company} />}
-            </Resolve>
-          </div>
+          <Resolve
+            resolve={loaderData.company}
+            fallback={
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <KeyValueSkeleton rows={6} />
+              </div>
+            }
+          >
+            {(company) => (
+              <>
+                <div className="rounded-2xl border border-border bg-card p-6">
+                  <CompanyPanel company={company} />
+                </div>
+                <div className="rounded-2xl border border-border bg-card p-6">
+                  <DepositPolicyPanel company={company} />
+                </div>
+              </>
+            )}
+          </Resolve>
 
           <div className="rounded-2xl border border-border bg-card p-6">
             <Resolve
@@ -388,6 +402,86 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
               bankSwiftCode: v.bankSwiftCode || null,
             });
             toast.success("Company details updated");
+            revalidator.revalidate();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function depositModeLabel(mode: DepositMode): string {
+  if (mode === DepositMode.FixedAmount) return "Fixed amount";
+  if (mode === DepositMode.Percentage) return "Percentage of total";
+  return "No deposit required";
+}
+
+function depositValueDisplay(company: CompanyDetailsResponse): string {
+  if (company.depositMode === DepositMode.Percentage) {
+    return `${company.depositValue}%`;
+  }
+  return fmtMoney(company.depositValue);
+}
+
+function DepositPolicyPanel({
+  company,
+}: {
+  company: CompanyDetailsResponse | null;
+}) {
+  const revalidator = useRevalidator();
+  const [editOpen, setEditOpen] = useState(false);
+  const c = company;
+  const enabled = !!c && c.depositMode !== DepositMode.None;
+
+  return (
+    <>
+      <SectionTitle
+        right={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditOpen(true)}
+            disabled={!c}
+          >
+            <Icon name="edit" size={14} />
+            Edit
+          </Button>
+        }
+      >
+        Deposit policy
+      </SectionTitle>
+
+      {c ? (
+        enabled ? (
+          <KeyValue
+            pairs={[
+              { k: "Mode", v: depositModeLabel(c.depositMode), strong: true },
+              { k: "Deposit value", v: depositValueDisplay(c) },
+              {
+                k: "Payment window",
+                v: `${c.depositWindowHours} hours`,
+                full: true,
+              },
+            ]}
+          />
+        ) : (
+          <div className="rounded-xl border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">
+            No deposit is required for online bookings.
+          </div>
+        )
+      ) : (
+        <div className="py-8 text-center text-sm text-dim">
+          Could not load deposit policy.
+        </div>
+      )}
+
+      {c && (
+        <DepositPolicyFormDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          company={c}
+          onSaved={() => {
+            toast.success("Deposit policy updated");
             revalidator.revalidate();
           }}
         />
