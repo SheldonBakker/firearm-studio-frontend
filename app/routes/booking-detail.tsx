@@ -8,7 +8,7 @@ import { useConfirm, type ConfirmOptions } from "~/context/confirm-context";
 import { bookingsApi } from "~/lib/api/bookings/bookings";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { fmtDate, fmtDateTime, fmtMoney } from "~/lib/utils/format";
-import { useSessionUser } from "~/context/auth-context";
+import { getSessionUser, useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
@@ -43,7 +43,6 @@ const ORIGIN_LABELS: Record<FirearmOrigin, string> = {
   [FirearmOrigin.RangeRental]: "Range rental",
 };
 
-/** South Africa (Africa/Johannesburg) has no DST and is fixed at UTC+2. */
 function todaySouthAfrica(): string {
   const saMs = Date.now() + 2 * 60 * 60 * 1000;
   return new Date(saMs).toISOString().slice(0, 10);
@@ -61,12 +60,18 @@ function depositState(invoice: InvoiceDetailDto): DepositState | null {
 }
 
 async function loadBookingDetail(id: string): Promise<BookingDetailData> {
-  const booking = await bookingsApi.get(id);
+  const [booking, user] = await Promise.all([
+    bookingsApi.get(id),
+    getSessionUser(),
+  ]);
+  const canReadAttendees = Boolean(user && can(user, "bookings:write"));
   const [invoice, attendees] = await Promise.all([
     booking.invoiceId
       ? invoicesApi.get(booking.invoiceId).catch(() => null)
       : Promise.resolve(null),
-    bookingsApi.attendees.list(id).catch(() => [] as AttendeeResponse[]),
+    canReadAttendees
+      ? bookingsApi.attendees.list(id).catch(() => [] as AttendeeResponse[])
+      : Promise.resolve([] as AttendeeResponse[]),
   ]);
   return { booking, invoice, attendees };
 }

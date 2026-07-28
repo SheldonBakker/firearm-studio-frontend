@@ -28,7 +28,6 @@ export function fmtDate(d: string | null | undefined): string {
   });
 }
 
-/** Date + time, e.g. "27 Jul 2026, 14:05" - used where the time of day matters. */
 export function fmtDateTime(d: string | null | undefined): string {
   if (!d) return "—";
   const date = new Date(d);

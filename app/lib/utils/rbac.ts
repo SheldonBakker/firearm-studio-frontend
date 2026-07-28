@@ -58,7 +58,7 @@ export type Action =
   | "registry:write" // create/edit customers, firearms, storage, licences
   | "invoices:write" // generate, record payment, send, cancel
   | "bookings:write" // ranges, packages, bookings + status actions
-  | "bookings:delete-attendee" // remove a check-in attendee record
+  | "bookings:delete-attendee"
   | "team:manage" // invite / role / deactivate users
   | "settings:write"; // company settings
 
