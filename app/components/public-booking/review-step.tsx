@@ -1,9 +1,11 @@
 import type {
+  PublicCompanyResponse,
   PublicPackageResponse,
   PublicRangeResponse,
 } from "~/lib/api/public/types";
 import { itemView, type CartItem } from "~/lib/booking/cart";
 import { fmtMoney } from "~/lib/utils/format";
+import { DepositMode } from "~/lib/types/enums";
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
@@ -14,10 +16,19 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function depositAmountFor(company: PublicCompanyResponse, total: number): number {
+  if (company.depositMode === DepositMode.FixedAmount) return company.depositValue;
+  if (company.depositMode === DepositMode.Percentage) {
+    return (total * company.depositValue) / 100;
+  }
+  return 0;
+}
+
 export function ReviewStep({
   items,
   ranges,
   packages,
+  company,
   total,
   fullName,
   email,
@@ -27,12 +38,16 @@ export function ReviewStep({
   items: CartItem[];
   ranges: PublicRangeResponse[];
   packages: PublicPackageResponse[];
+  company: PublicCompanyResponse;
   total: number;
   fullName: string;
   email: string;
   phone: string;
   error: string | null;
 }) {
+  const hasDeposit = company.depositMode !== DepositMode.None;
+  const depositAmount = hasDeposit ? depositAmountFor(company, total) : 0;
+
   return (
     <div className="space-y-4">
       <div className="space-y-3 rounded-xl border border-border bg-card p-4">
@@ -78,6 +93,21 @@ export function ReviewStep({
           <ReviewRow label="Phone" value={phone || "—"} />
         </dl>
       </div>
+
+      {hasDeposit && (
+        <div className="space-y-1.5 rounded-xl border border-primary/30 bg-primary/5 p-4">
+          <h3 className="text-sm font-semibold">Deposit required</h3>
+          <p className="text-[12.5px] text-muted-foreground">
+            A deposit of {fmtMoney(depositAmount)} is required within{" "}
+            {company.depositWindowHours}{" "}
+            {company.depositWindowHours === 1 ? "hour" : "hours"} of
+            confirmation to secure{" "}
+            {items.length === 1 ? "this booking" : "these bookings"}. Payment
+            details and your reference will be included with your
+            confirmation.
+          </p>
+        </div>
+      )}
 
       {error && (
         <p className="text-[13px] font-medium text-destructive">{error}</p>
