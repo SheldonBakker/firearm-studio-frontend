@@ -1,5 +1,5 @@
 import type { ConfirmationState } from "~/lib/booking/cart";
-import { fmtMoney } from "~/lib/utils/format";
+import { EMDASH, fmtMoney } from "~/lib/utils/format";
 import { Button } from "~/components/ui/button";
 
 function PayRow({ label, value }: { label: string; value: string }) {
@@ -11,6 +11,19 @@ function PayRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function fmtDueAt(d: string | null): string {
+  if (!d) return EMDASH;
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return d;
+  return date.toLocaleString("en-ZA", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function Confirmation({
   confirmation,
   onBookAnother,
@@ -18,8 +31,10 @@ export function Confirmation({
   confirmation: NonNullable<ConfirmationState>;
   onBookAnother: () => void;
 }) {
-  const { count, invoiceNumber, total, email, banking } = confirmation;
+  const { count, invoiceNumber, total, depositAmount, depositDueAt, email, banking } =
+    confirmation;
   const refs = confirmation.refs.filter((r) => r !== "confirmed");
+  const hasDeposit = depositAmount != null;
   const hasBanking =
     !!banking &&
     (banking.bankName ||
@@ -71,13 +86,26 @@ export function Confirmation({
         </div>
       )}
 
-      {(hasBanking || invoiceNumber || total > 0) && (
+      {(hasBanking || invoiceNumber || total > 0 || hasDeposit) && (
         <div className="mx-auto mt-4 max-w-sm rounded-lg border border-border bg-panel2 p-4 text-left">
           <p className="text-[11px] font-medium uppercase tracking-wide text-dim">
             Payment details
           </p>
           <dl className="mt-2 divide-y divide-border text-[12.5px]">
-            {total > 0 && <PayRow label="Amount due" value={fmtMoney(total)} />}
+            {hasDeposit ? (
+              <>
+                <PayRow
+                  label="Deposit due now"
+                  value={fmtMoney(depositAmount)}
+                />
+                <PayRow label="Pay by" value={fmtDueAt(depositDueAt)} />
+                {total > 0 && (
+                  <PayRow label="Booking total" value={fmtMoney(total)} />
+                )}
+              </>
+            ) : (
+              total > 0 && <PayRow label="Amount due" value={fmtMoney(total)} />
+            )}
             {banking?.bankName && (
               <PayRow label="Bank" value={banking.bankName} />
             )}

@@ -1,3 +1,5 @@
+import type { DepositMode } from "~/lib/types/enums";
+
 export interface CreateCompanyRequest {
   name?: string | null;
   registrationNumber?: string | null;
@@ -18,6 +20,9 @@ export interface UpdateCompanyRequest extends CreateCompanyRequest {
   bankBranchCode?: string | null;
   bankAccountType?: string | null;
   bankSwiftCode?: string | null;
+  depositMode?: DepositMode;
+  depositValue?: number;
+  depositWindowHours?: number;
 }
 
 export interface CompanyDetailsResponse {
@@ -39,6 +44,9 @@ export interface CompanyDetailsResponse {
   bankAccountType: string | null;
   bankSwiftCode: string | null;
   isActive: boolean;
+  depositMode: DepositMode;
+  depositValue: number;
+  depositWindowHours: number;
   createdAt: string;
   updatedAt: string | null;
 }

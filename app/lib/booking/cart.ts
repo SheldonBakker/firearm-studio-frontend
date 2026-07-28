@@ -62,6 +62,8 @@ export type ConfirmationState = {
   refs: string[];
   invoiceNumber: string | null;
   total: number;
+  depositAmount: number | null;
+  depositDueAt: string | null;
   email: string;
   banking: PublicInvoiceBankingResponse | null;
 } | null;

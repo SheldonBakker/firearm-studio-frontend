@@ -1,9 +1,11 @@
 import type {
+  PublicCompanyResponse,
   PublicPackageResponse,
   PublicRangeResponse,
 } from "~/lib/api/public/types";
 import { itemView, type CartItem } from "~/lib/booking/cart";
 import { fmtMoney } from "~/lib/utils/format";
+import { DepositMode } from "~/lib/types/enums";
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
@@ -14,10 +16,39 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+const VAT_RATE_PERCENT = 15;
+
+function round2AwayFromZero(n: number): number {
+  return (Math.sign(n) || 1) * (Math.round(Math.abs(n) * 100) / 100);
+}
+
+function invoiceTotalFor(company: PublicCompanyResponse, subtotal: number): number {
+  if (!company.isVatRegistered) return subtotal;
+  const vat = round2AwayFromZero((subtotal * VAT_RATE_PERCENT) / 100);
+  return subtotal + vat;
+}
+
+function depositAmountFor(company: PublicCompanyResponse, invoiceTotal: number): number {
+  if (invoiceTotal <= 0) return 0;
+
+  let amount: number;
+  if (company.depositMode === DepositMode.FixedAmount) {
+    amount = company.depositValue;
+  } else if (company.depositMode === DepositMode.Percentage) {
+    amount = round2AwayFromZero((invoiceTotal * company.depositValue) / 100);
+  } else {
+    amount = 0;
+  }
+
+  if (amount <= 0) return 0;
+  return Math.min(amount, invoiceTotal);
+}
+
 export function ReviewStep({
   items,
   ranges,
   packages,
+  company,
   total,
   fullName,
   email,
@@ -27,12 +58,17 @@ export function ReviewStep({
   items: CartItem[];
   ranges: PublicRangeResponse[];
   packages: PublicPackageResponse[];
+  company: PublicCompanyResponse;
   total: number;
   fullName: string;
   email: string;
   phone: string;
   error: string | null;
 }) {
+  const invoiceTotal = invoiceTotalFor(company, total);
+  const depositAmount = depositAmountFor(company, invoiceTotal);
+  const hasDeposit = depositAmount > 0;
+
   return (
     <div className="space-y-4">
       <div className="space-y-3 rounded-xl border border-border bg-card p-4">
@@ -78,6 +114,21 @@ export function ReviewStep({
           <ReviewRow label="Phone" value={phone || "—"} />
         </dl>
       </div>
+
+      {hasDeposit && (
+        <div className="space-y-1.5 rounded-xl border border-primary/30 bg-primary/5 p-4">
+          <h3 className="text-sm font-semibold">Deposit required</h3>
+          <p className="text-[12.5px] text-muted-foreground">
+            A deposit of {fmtMoney(depositAmount)} is required within{" "}
+            {company.depositWindowHours}{" "}
+            {company.depositWindowHours === 1 ? "hour" : "hours"} of
+            confirmation to secure{" "}
+            {items.length === 1 ? "this booking" : "these bookings"}. Payment
+            details and your reference will be included with your
+            confirmation.
+          </p>
+        </div>
+      )}
 
       {error && (
         <p className="text-[13px] font-medium text-destructive">{error}</p>

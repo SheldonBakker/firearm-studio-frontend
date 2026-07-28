@@ -327,6 +327,8 @@ function CalendarView({
         refs,
         invoiceNumber: res.invoiceNumber,
         total: res.total,
+        depositAmount: res.depositAmount ?? null,
+        depositDueAt: res.depositDueAt ?? null,
         email: result.data.email,
         banking: res.banking ?? null,
       });
@@ -425,6 +427,7 @@ function CalendarView({
               items={items}
               ranges={ranges}
               packages={packages}
+              company={options.company}
               total={total}
               fullName={fullName}
               email={email}

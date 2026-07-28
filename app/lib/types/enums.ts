@@ -53,6 +53,12 @@ export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus];
 export const BookingSource = { Staff: 0, Online: 1 } as const;
 export type BookingSource = (typeof BookingSource)[keyof typeof BookingSource];
 
+export const DepositMode = { None: 0, FixedAmount: 1, Percentage: 2 } as const;
+export type DepositMode = (typeof DepositMode)[keyof typeof DepositMode];
+
+export const FirearmOrigin = { Own: 0, RangeRental: 1 } as const;
+export type FirearmOrigin = (typeof FirearmOrigin)[keyof typeof FirearmOrigin];
+
 export const DayOfWeek = {
   Sunday: 0,
   Monday: 1,

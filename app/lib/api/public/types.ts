@@ -1,3 +1,5 @@
+import type { DepositMode } from "~/lib/types/enums";
+
 export interface PublicCompanyResponse {
   id: string;
   name: string | null;
@@ -8,6 +10,10 @@ export interface PublicCompanyResponse {
   city: string | null;
   province: string | null;
   postalCode: string | null;
+  depositMode: DepositMode;
+  depositValue: number;
+  depositWindowHours: number;
+  isVatRegistered: boolean;
 }
 
 interface PublicPackageItemDto {
@@ -108,6 +114,8 @@ export interface PublicBookingResponse {
   subtotal: number;
   vatAmount: number;
   total: number;
+  depositAmount: number | null;
+  depositDueAt: string | null;
   bookings: PublicBookingConfirmationResponse[] | null;
   banking: PublicInvoiceBankingResponse | null;
 }
