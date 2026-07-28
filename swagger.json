@@ -3522,6 +3522,16 @@
             "format": "date-time",
             "nullable": true
           },
+          "reminderSentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"

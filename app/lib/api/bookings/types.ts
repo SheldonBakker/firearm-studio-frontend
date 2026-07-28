@@ -44,7 +44,6 @@ export interface BookingResponse {
   createdAt: string;
   checkedInAt: string | null;
   reminderSentAt: string | null;
-  calendarToken: string | null;
 }
 
 export interface CreateBookingRequest {
