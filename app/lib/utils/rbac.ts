@@ -49,6 +49,7 @@ export type NavKey =
   | "bookings"
   | "ranges"
   | "packages"
+  | "register"
   | "team"
   | "audit"
   | "settings";
@@ -59,14 +60,17 @@ export type Action =
   | "invoices:write" // generate, record payment, send, cancel
   | "bookings:write" // ranges, packages, bookings + status actions
   | "bookings:delete-attendee"
+  | "bookings:export-register" // CSV export of the range register
   | "team:manage" // invite / role / deactivate users
   | "settings:write"; // company settings
 
 const ADMIN_ONLY_NAV: NavKey[] = ["team", "audit", "settings"];
+const STAFF_ONLY_NAV: NavKey[] = ["register"];
 
 /** Whether a nav section is visible for this user. */
 export function canSeeNav(user: SessionUser, key: NavKey): boolean {
   if (ADMIN_ONLY_NAV.includes(key)) return isAtLeast(user, "Admin");
+  if (STAFF_ONLY_NAV.includes(key)) return isAtLeast(user, "Staff");
   return true;
 }
 
@@ -78,6 +82,7 @@ export function can(user: SessionUser, action: Action): boolean {
     case "bookings:write":
       return isAtLeast(user, "Staff");
     case "bookings:delete-attendee":
+    case "bookings:export-register":
       return isAtLeast(user, "Manager");
     case "team:manage":
     case "settings:write":
