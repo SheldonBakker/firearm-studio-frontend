@@ -1,4 +1,8 @@
-import type { BookingSource, BookingStatus } from "~/lib/types/enums";
+import type {
+  BookingSource,
+  BookingStatus,
+  FirearmOrigin,
+} from "~/lib/types/enums";
 import type { PaginatedResponse } from "../shared/pagination";
 
 export interface BookingListItemDto {
@@ -38,6 +42,9 @@ export interface BookingResponse {
   confirmedAt: string | null;
   cancelledAt: string | null;
   createdAt: string;
+  checkedInAt: string | null;
+  reminderSentAt: string | null;
+  calendarToken: string | null;
 }
 
 export interface CreateBookingRequest {
@@ -64,3 +71,36 @@ export interface BookingCalendarItemDto {
 
 export type BookingListItemDtoPaginatedResponse =
   PaginatedResponse<BookingListItemDto>;
+
+export interface AttendeeRequest {
+  fullName: string;
+  idNumber: string;
+  licenceNumber?: string | null;
+  firearmMakeModel?: string | null;
+  firearmSerialNumber?: string | null;
+  calibre?: string | null;
+  firearmOrigin: FirearmOrigin;
+  signedIndemnity: boolean;
+  notes?: string | null;
+}
+
+export interface AttendeeResponse {
+  id: string;
+  bookingId: string;
+  fullName: string;
+  idNumber: string;
+  licenceNumber: string | null;
+  firearmMakeModel: string | null;
+  firearmSerialNumber: string | null;
+  calibre: string | null;
+  firearmOrigin: FirearmOrigin;
+  signedIndemnity: boolean;
+  notes: string | null;
+  createdAt: string;
+}
+
+export type UpdateAttendeeRequest = Partial<AttendeeRequest>;
+
+export interface CheckInBookingRequest {
+  attendees: AttendeeRequest[];
+}

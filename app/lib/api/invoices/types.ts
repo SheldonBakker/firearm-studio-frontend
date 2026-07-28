@@ -70,6 +70,9 @@ export interface InvoiceDetailDto {
   status: InvoiceStatus;
   sentAt: string | null;
   dueOn: string | null;
+  depositAmount: number | null;
+  depositDueAt: string | null;
+  depositPaidAt: string | null;
   customer: CustomerResponse | null;
   lines: InvoiceLineDto[] | null;
   payments: InvoicePaymentDto[] | null;

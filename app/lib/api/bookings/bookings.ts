@@ -2,10 +2,14 @@ import { request } from "../http";
 import { normalizePage } from "../shared/pagination";
 import type { BookingStatus } from "~/lib/types/enums";
 import type {
+  AttendeeRequest,
+  AttendeeResponse,
   BookingCalendarItemDto,
   BookingListItemDtoPaginatedResponse,
   BookingResponse,
+  CheckInBookingRequest,
   CreateBookingRequest,
+  UpdateAttendeeRequest,
 } from "./types";
 
 interface BookingListParams {
@@ -58,4 +62,25 @@ export const bookingsApi = {
     request<void>(`/api/v1/bookings/${id}/complete`, { method: "POST" }),
   noShow: (id: string) =>
     request<void>(`/api/v1/bookings/${id}/no-show`, { method: "POST" }),
+  checkIn: (id: string, body: CheckInBookingRequest) =>
+    request<void>(`/api/v1/bookings/${id}/check-in`, {
+      method: "POST",
+      body,
+    }),
+  attendees: {
+    list: (bookingId: string) =>
+      request<AttendeeResponse[]>(`/api/v1/bookings/${bookingId}/attendees`),
+    add: (bookingId: string, body: AttendeeRequest) =>
+      request<void>(`/api/v1/bookings/${bookingId}/attendees`, {
+        method: "POST",
+        body,
+      }),
+    update: (attendeeId: string, body: UpdateAttendeeRequest) =>
+      request<void>(`/api/v1/attendees/${attendeeId}`, {
+        method: "PATCH",
+        body,
+      }),
+    remove: (attendeeId: string) =>
+      request<void>(`/api/v1/attendees/${attendeeId}`, { method: "DELETE" }),
+  },
 };

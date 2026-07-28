@@ -58,6 +58,7 @@ export type Action =
   | "registry:write" // create/edit customers, firearms, storage, licences
   | "invoices:write" // generate, record payment, send, cancel
   | "bookings:write" // ranges, packages, bookings + status actions
+  | "bookings:delete-attendee" // remove a check-in attendee record
   | "team:manage" // invite / role / deactivate users
   | "settings:write"; // company settings
 
@@ -76,6 +77,8 @@ export function can(user: SessionUser, action: Action): boolean {
     case "invoices:write":
     case "bookings:write":
       return isAtLeast(user, "Staff");
+    case "bookings:delete-attendee":
+      return isAtLeast(user, "Manager");
     case "team:manage":
     case "settings:write":
       return isAtLeast(user, "Admin");
