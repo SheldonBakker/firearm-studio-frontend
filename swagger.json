@@ -5419,6 +5419,9 @@
           "depositWindowHours": {
             "type": "integer",
             "format": "int32"
+          },
+          "isVatRegistered": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

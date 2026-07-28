@@ -16,12 +16,32 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function depositAmountFor(company: PublicCompanyResponse, total: number): number {
-  if (company.depositMode === DepositMode.FixedAmount) return company.depositValue;
-  if (company.depositMode === DepositMode.Percentage) {
-    return (total * company.depositValue) / 100;
+const VAT_RATE_PERCENT = 15;
+
+function round2AwayFromZero(n: number): number {
+  return (Math.sign(n) || 1) * (Math.round(Math.abs(n) * 100) / 100);
+}
+
+function invoiceTotalFor(company: PublicCompanyResponse, subtotal: number): number {
+  if (!company.isVatRegistered) return subtotal;
+  const vat = round2AwayFromZero((subtotal * VAT_RATE_PERCENT) / 100);
+  return subtotal + vat;
+}
+
+function depositAmountFor(company: PublicCompanyResponse, invoiceTotal: number): number {
+  if (invoiceTotal <= 0) return 0;
+
+  let amount: number;
+  if (company.depositMode === DepositMode.FixedAmount) {
+    amount = company.depositValue;
+  } else if (company.depositMode === DepositMode.Percentage) {
+    amount = round2AwayFromZero((invoiceTotal * company.depositValue) / 100);
+  } else {
+    amount = 0;
   }
-  return 0;
+
+  if (amount <= 0) return 0;
+  return Math.min(amount, invoiceTotal);
 }
 
 export function ReviewStep({
@@ -45,8 +65,9 @@ export function ReviewStep({
   phone: string;
   error: string | null;
 }) {
-  const hasDeposit = company.depositMode !== DepositMode.None;
-  const depositAmount = hasDeposit ? depositAmountFor(company, total) : 0;
+  const invoiceTotal = invoiceTotalFor(company, total);
+  const depositAmount = depositAmountFor(company, invoiceTotal);
+  const hasDeposit = depositAmount > 0;
 
   return (
     <div className="space-y-4">

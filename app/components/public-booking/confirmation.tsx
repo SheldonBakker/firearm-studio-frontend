@@ -1,5 +1,5 @@
 import type { ConfirmationState } from "~/lib/booking/cart";
-import { fmtMoney } from "~/lib/utils/format";
+import { EMDASH, fmtMoney } from "~/lib/utils/format";
 import { Button } from "~/components/ui/button";
 
 function PayRow({ label, value }: { label: string; value: string }) {
@@ -12,7 +12,7 @@ function PayRow({ label, value }: { label: string; value: string }) {
 }
 
 function fmtDueAt(d: string | null): string {
-  if (!d) return "—";
+  if (!d) return EMDASH;
   const date = new Date(d);
   if (Number.isNaN(date.getTime())) return d;
   return date.toLocaleString("en-ZA", {

@@ -170,7 +170,7 @@ export function DepositPolicyFormDialog({
                 ? "Percentage of the booking total, up to 100%."
                 : "A fixed rand amount per invoice."}{" "}
               Customers must pay within the payment window (1-336 hours) of
-              booking confirmation.
+              booking creation.
             </p>
             {error && (
               <p className="text-[13px] font-medium text-destructive">

@@ -6,7 +6,7 @@ import type { Route } from "./+types/register";
 import { registerApi } from "~/lib/api/register/register";
 import { rangesApi } from "~/lib/api/ranges/ranges";
 import { ApiError } from "~/lib/api/http";
-import { fmtDate, fmtDateTime } from "~/lib/utils/format";
+import { EMDASH, fmtDate, fmtDateTime } from "~/lib/utils/format";
 import { requireAuth, useSessionUser } from "~/context/auth-context";
 import { can, canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
@@ -24,10 +24,7 @@ import {
 } from "~/components/ui/select";
 import { Resolve } from "~/components/common/skeletons";
 import { FirearmOrigin, enumKey } from "~/lib/types/enums";
-import type {
-  RegisterRowDto,
-  RegisterRowDtoPaginatedResponse,
-} from "~/lib/api/register/types";
+import type { RegisterRowDto } from "~/lib/api/register/types";
 
 const PAGE_SIZE = 20;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -47,17 +44,13 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedTo = searchParams.get("dateTo") ?? "";
   const dateTo = DATE_PATTERN.test(requestedTo) ? requestedTo : undefined;
 
-  const registerP = registerApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, rangeId, dateFrom, dateTo })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies RegisterRowDtoPaginatedResponse,
-    );
+  const registerP = registerApi.list({
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    rangeId,
+    dateFrom,
+    dateTo,
+  });
   const rangesP = rangesApi.all().catch(() => []);
   return { data: registerP, ranges: rangesP };
 }
@@ -123,7 +116,7 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       header: "Range",
       cell: (r) => (
         <span className="text-[12.5px] text-muted-foreground">
-          {r.rangeName ?? "—"}
+          {r.rangeName ?? EMDASH}
         </span>
       ),
     },
@@ -132,7 +125,7 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       header: "Booking",
       cell: (r) => (
         <Mono className="text-[12.5px] font-semibold text-foreground">
-          {r.bookingNumber ?? "—"}
+          {r.bookingNumber ?? EMDASH}
         </Mono>
       ),
     },
@@ -141,7 +134,7 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       header: "Customer",
       cell: (r) => (
         <span className="text-[12.5px] text-foreground">
-          {r.customerName ?? "—"}
+          {r.customerName ?? EMDASH}
         </span>
       ),
     },
@@ -151,10 +144,10 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       cell: (r) => (
         <span className="flex flex-col">
           <span className="text-[12.5px] text-foreground">
-            {r.attendeeFullName ?? "—"}
+            {r.attendeeFullName ?? EMDASH}
           </span>
           <Mono className="text-[11.5px] text-dim">
-            {r.attendeeIdNumber ?? "—"}
+            {r.attendeeIdNumber ?? EMDASH}
           </Mono>
         </span>
       ),
@@ -165,11 +158,11 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       cell: (r) => (
         <span className="flex flex-col">
           <span className="text-[12.5px] text-foreground">
-            {r.firearmMakeModel ?? "—"}
+            {r.firearmMakeModel ?? EMDASH}
           </span>
           <Mono className="text-[11.5px] text-dim">
             {[r.firearmSerialNumber, r.calibre].filter(Boolean).join(" · ") ||
-              "—"}
+              EMDASH}
           </Mono>
         </span>
       ),
@@ -179,7 +172,7 @@ export default function Register({ loaderData }: Route.ComponentProps) {
       header: "Licence",
       cell: (r) => (
         <Mono className="text-[12.5px] text-muted-foreground">
-          {r.licenceNumber ?? "—"}
+          {r.licenceNumber ?? EMDASH}
         </Mono>
       ),
     },

@@ -7,7 +7,7 @@ import { ApiError } from "~/lib/api/http";
 import { useConfirm, type ConfirmOptions } from "~/context/confirm-context";
 import { bookingsApi } from "~/lib/api/bookings/bookings";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
-import { fmtDate, fmtDateTime, fmtMoney } from "~/lib/utils/format";
+import { EMDASH, fmtDate, fmtDateTime, fmtMoney } from "~/lib/utils/format";
 import { getSessionUser, useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink, SectionTitle } from "~/components/common/misc";
@@ -66,11 +66,9 @@ async function loadBookingDetail(id: string): Promise<BookingDetailData> {
   ]);
   const canReadAttendees = Boolean(user && can(user, "bookings:write"));
   const [invoice, attendees] = await Promise.all([
-    booking.invoiceId
-      ? invoicesApi.get(booking.invoiceId).catch(() => null)
-      : Promise.resolve(null),
+    booking.invoiceId ? invoicesApi.get(booking.invoiceId) : Promise.resolve(null),
     canReadAttendees
-      ? bookingsApi.attendees.list(id).catch(() => [] as AttendeeResponse[])
+      ? bookingsApi.attendees.list(id)
       : Promise.resolve([] as AttendeeResponse[]),
   ]);
   return { booking, invoice, attendees };
@@ -179,7 +177,7 @@ function BookingView({ data }: { data: BookingDetailData }) {
       header: "Licence",
       cell: (a) => (
         <Mono className="text-[12.5px] text-muted-foreground">
-          {a.licenceNumber ?? "—"}
+          {a.licenceNumber ?? EMDASH}
         </Mono>
       ),
     },
@@ -188,7 +186,7 @@ function BookingView({ data }: { data: BookingDetailData }) {
       header: "Firearm",
       cell: (a) => (
         <span className="text-[12.5px] text-muted-foreground">
-          {[a.firearmMakeModel, a.calibre].filter(Boolean).join(" · ") || "—"}
+          {[a.firearmMakeModel, a.calibre].filter(Boolean).join(" · ") || EMDASH}
         </span>
       ),
     },
@@ -237,7 +235,7 @@ function BookingView({ data }: { data: BookingDetailData }) {
   }
 
   const billingPairs: KVPair[] = [
-    { k: "Package", v: booking.packageName ?? "—", strong: true },
+    { k: "Package", v: booking.packageName ?? EMDASH, strong: true },
     { k: "Price", v: fmtMoney(booking.packagePrice) },
     { k: "Invoice", v: booking.invoiceId ? "Linked" : "Not linked" },
   ];

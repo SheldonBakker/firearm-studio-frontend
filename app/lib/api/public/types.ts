@@ -13,6 +13,7 @@ export interface PublicCompanyResponse {
   depositMode: DepositMode;
   depositValue: number;
   depositWindowHours: number;
+  isVatRegistered: boolean;
 }
 
 interface PublicPackageItemDto {

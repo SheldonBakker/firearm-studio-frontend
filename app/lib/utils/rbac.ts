@@ -60,7 +60,7 @@ export type Action =
   | "invoices:write" // generate, record payment, send, cancel
   | "bookings:write" // ranges, packages, bookings + status actions
   | "bookings:delete-attendee"
-  | "bookings:export-register" // CSV export of the range register
+  | "bookings:export-register"
   | "team:manage" // invite / role / deactivate users
   | "settings:write"; // company settings
 

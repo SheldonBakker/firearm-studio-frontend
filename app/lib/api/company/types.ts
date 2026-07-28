@@ -20,9 +20,9 @@ export interface UpdateCompanyRequest extends CreateCompanyRequest {
   bankBranchCode?: string | null;
   bankAccountType?: string | null;
   bankSwiftCode?: string | null;
-  depositMode?: DepositMode | null;
-  depositValue?: number | null;
-  depositWindowHours?: number | null;
+  depositMode?: DepositMode;
+  depositValue?: number;
+  depositWindowHours?: number;
 }
 
 export interface CompanyDetailsResponse {

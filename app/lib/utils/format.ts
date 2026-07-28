@@ -28,8 +28,10 @@ export function fmtDate(d: string | null | undefined): string {
   });
 }
 
+export const EMDASH = "—";
+
 export function fmtDateTime(d: string | null | undefined): string {
-  if (!d) return "—";
+  if (!d) return EMDASH;
   const date = new Date(d);
   if (Number.isNaN(date.getTime())) return d;
   return `${fmtDate(d)}, ${date.toLocaleTimeString("en-ZA", {
@@ -37,8 +39,6 @@ export function fmtDateTime(d: string | null | undefined): string {
     minute: "2-digit",
   })}`;
 }
-
-const EMDASH = "—";
 
 type StatusMeta = { color: string; label: string };
 
