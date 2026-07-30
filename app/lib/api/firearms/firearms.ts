@@ -1,5 +1,7 @@
-import { request } from "../http";
+import { request, requestBlob } from "../http";
 import { normalizePage } from "../shared/pagination";
+import { downloadBlob } from "../shared/download";
+import { RegisterExportFormat } from "~/lib/types/enums";
 import type {
   CreateFirearmRequest,
   FirearmDetailResponse,
@@ -48,6 +50,28 @@ async function all(): Promise<FirearmResponse[]> {
   return firearms;
 }
 
+async function exportRegister(params: {
+  from: string;
+  to: string;
+  format: number;
+}): Promise<void> {
+  const { blob, filename } = await requestBlob(
+    "/api/v1/registers/firearms/export",
+    {
+      query: {
+        from: params.from,
+        to: params.to,
+        format: params.format,
+      },
+    },
+  );
+  const fallback =
+    params.format === RegisterExportFormat.Csv
+      ? "firearms-register.csv"
+      : "firearms-register.pdf";
+  downloadBlob(blob, filename ?? fallback);
+}
+
 export const firearmsApi = {
   list,
   all,
@@ -57,4 +81,5 @@ export const firearmsApi = {
     request<FirearmResponse>("/api/v1/firearms", { method: "POST", body }),
   update: (id: string, body: UpdateFirearmRequest) =>
     request<void>(`/api/v1/firearms/${id}`, { method: "PATCH", body }),
+  exportRegister,
 };

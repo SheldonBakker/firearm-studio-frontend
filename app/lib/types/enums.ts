@@ -59,6 +59,9 @@ export type DepositMode = (typeof DepositMode)[keyof typeof DepositMode];
 export const FirearmOrigin = { Own: 0, RangeRental: 1 } as const;
 export type FirearmOrigin = (typeof FirearmOrigin)[keyof typeof FirearmOrigin];
 
+export const RegisterExportFormat = { Pdf: 0, Csv: 1 } as const;
+export type RegisterExportFormat = (typeof RegisterExportFormat)[keyof typeof RegisterExportFormat];
+
 export const DayOfWeek = {
   Sunday: 0,
   Monday: 1,
