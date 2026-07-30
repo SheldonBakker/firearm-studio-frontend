@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { DownloadIcon } from "lucide-react";
 import type { Route } from "./+types/firearms";
 import { firearmsApi } from "~/lib/api/firearms/firearms";
 import { customersApi } from "~/lib/api/customers/customers";
@@ -66,6 +67,10 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
   const user = useSessionUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const [addOpen, setAddOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+
+  const canWrite = can(user, "registry:write");
+  const canExport = can(user, "registry:export-register");
 
   const activeStatus = FIREARM_STATUSES.has(searchParams.get("status") ?? "")
     ? searchParams.get("status")!
@@ -130,12 +135,20 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
 
   return (
     <PageWrap>
-      {can(user, "registry:write") && (
+      {(canWrite || canExport) && (
         <PageActions>
-          <Button onClick={() => setAddOpen(true)}>
-            <Icon name="plus" size={16} />
-            Add firearm
-          </Button>
+          {canExport && (
+            <Button variant="outline" onClick={() => setExportOpen(true)}>
+              <DownloadIcon />
+              Export register
+            </Button>
+          )}
+          {canWrite && (
+            <Button onClick={() => setAddOpen(true)}>
+              <Icon name="plus" size={16} />
+              Add firearm
+            </Button>
+          )}
         </PageActions>
       )}
       <FilterBar
@@ -194,6 +207,34 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                   </div>
                 </div>
               )}
+
+              <FormDialog
+                open={exportOpen}
+                onOpenChange={setExportOpen}
+                title="Export firearms register"
+                submitLabel="Export"
+                fields={[
+                  { name: "from", label: "From", type: "date", required: true },
+                  { name: "to", label: "To", type: "date", required: true },
+                  {
+                    name: "format",
+                    label: "Format",
+                    type: "select",
+                    required: true,
+                    options: [
+                      { value: "0", label: "PDF" },
+                      { value: "1", label: "CSV" },
+                    ],
+                  },
+                ]}
+                onSubmit={async (v) => {
+                  await firearmsApi.exportRegister({
+                    from: v.from,
+                    to: v.to,
+                    format: Number(v.format),
+                  });
+                }}
+              />
 
               <FormDialog
                 open={addOpen}

@@ -1,5 +1,6 @@
 import { request, requestBlob } from "../http";
 import { normalizePage } from "../shared/pagination";
+import { downloadBlob } from "../shared/download";
 import type {
   RegisterRowDtoPaginatedResponse,
 } from "./types";
@@ -47,14 +48,7 @@ async function exportCsv(params: RegisterExportParams = {}): Promise<void> {
     },
   );
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename ?? "range-register.csv";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  downloadBlob(blob, filename ?? "range-register.csv");
 }
 
 export const registerApi = {
