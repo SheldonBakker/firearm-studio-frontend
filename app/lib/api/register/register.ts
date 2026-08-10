@@ -5,7 +5,7 @@ import type {
   RegisterRowDtoPaginatedResponse,
 } from "./types";
 
-export interface RegisterListParams {
+interface RegisterListParams {
   pageNumber?: number;
   pageSize?: number;
   dateFrom?: string;
@@ -13,7 +13,7 @@ export interface RegisterListParams {
   rangeId?: string;
 }
 
-export type RegisterExportParams = Omit<
+type RegisterExportParams = Omit<
   RegisterListParams,
   "pageNumber" | "pageSize"
 >;
