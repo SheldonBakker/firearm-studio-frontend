@@ -5,7 +5,6 @@ import { hasCompanyAccess, requireAuth } from "~/context/auth-context";
 import { Sidebar, MobileSidebar } from "~/components/layout/sidebar";
 import { Topbar } from "~/components/layout/topbar";
 import { PageActionsProvider } from "~/context/page-actions";
-import { AppShellSkeleton } from "~/components/common/skeletons";
 
 export function meta() {
   return [
@@ -25,10 +24,6 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   if (!companyOk) throw redirect("/onboarding");
 
   return { user };
-}
-
-export function HydrateFallback() {
-  return <AppShellSkeleton />;
 }
 
 export default function AppLayout({ loaderData }: Route.ComponentProps) {
