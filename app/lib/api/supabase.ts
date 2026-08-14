@@ -14,6 +14,18 @@ if (!url || !anonKey) {
 const projectRef = new URL(url ?? "http://localhost").hostname.split(".")[0];
 export const SUPABASE_STORAGE_KEY = `sb-${projectRef}-auth-token`;
 
+function readLandingAuthParams(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const params: Record<string, string> = {};
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  for (const [key, value] of [...hash, ...new URLSearchParams(window.location.search)]) {
+    params[key] ??= value;
+  }
+  return params;
+}
+
+export const landingAuthParams = readLandingAuthParams();
+
 export const supabase = createClient(url ?? "http://localhost", anonKey ?? "public-anon-key", {
   auth: {
     persistSession: true,
