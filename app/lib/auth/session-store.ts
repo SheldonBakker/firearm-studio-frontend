@@ -116,7 +116,8 @@ export async function refreshSession(): Promise<void> {
   await supabase.auth.refreshSession();
 }
 
-let companyAccess = false;
+let companyAccess: boolean | null = null;
+let companyProbe: Promise<boolean> | null = null;
 
 const COMPANY_OK_KEY = "fs-company-ok";
 
@@ -149,22 +150,13 @@ export function grantCompanyAccess() {
 }
 
 function resetCompanyAccess() {
-  companyAccess = false;
+  companyAccess = null;
+  companyProbe = null;
   clearPersistedCompanyAccess();
 }
 
-export async function hasCompanyAccess(): Promise<boolean> {
-  if (companyAccess) return true;
-
-  const snapUser = snapshot.user;
-  if (snapUser && readPersistedCompanyAccess(snapUser.id)) {
-    companyAccess = true;
-    return true;
-  }
-  if (!snapUser) {
-    const user = await getSessionUser();
-    if (!user) return true;
-  }
+async function probeCompanyAccess(): Promise<boolean | null> {
+  if (!snapshot.user && !(await getSessionUser())) return null;
 
   const probe = async (): Promise<"ok" | "forbidden" | "missing" | "error"> => {
     try {
@@ -185,13 +177,32 @@ export async function hasCompanyAccess(): Promise<boolean> {
     result = await probe();
   }
 
-  if (result === "ok") {
-    companyAccess = true;
-    persistCompanyAccess(snapshot.user?.id);
-    return true;
-  }
+  if (result === "ok") return true;
   if (result === "forbidden" || result === "missing") return false;
-  return true;
+  return null;
+}
+
+export function hasCompanyAccess(): Promise<boolean> {
+  if (companyAccess !== null) return Promise.resolve(companyAccess);
+
+  const userId = snapshot.user?.id;
+  if (userId && readPersistedCompanyAccess(userId)) {
+    companyAccess = true;
+    return Promise.resolve(true);
+  }
+
+  companyProbe ??= probeCompanyAccess()
+    .then((ok) => {
+      if (ok === null) return true;
+      companyAccess = ok;
+      if (ok) persistCompanyAccess(snapshot.user?.id);
+      return ok;
+    })
+    .finally(() => {
+      companyProbe = null;
+    });
+
+  return companyProbe;
 }
 
 export async function signOutUser(): Promise<void> {
