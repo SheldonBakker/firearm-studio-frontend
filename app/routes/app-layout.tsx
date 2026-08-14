@@ -13,17 +13,18 @@ export function meta() {
   ];
 }
 
+export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
+  async ({ request }) => {
+    const [, companyOk] = await Promise.all([
+      requireAuth(request),
+      hasCompanyAccess(),
+    ]);
+    if (!companyOk) throw redirect("/onboarding");
+  },
+];
+
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  // Run the auth check and company probe concurrently — sequentially they
-  // add two round trips before any app page can render.
-  const [user, companyOk] = await Promise.all([
-    requireAuth(request),
-    hasCompanyAccess(),
-  ]);
-
-  if (!companyOk) throw redirect("/onboarding");
-
-  return { user };
+  return { user: await requireAuth(request) };
 }
 
 export default function AppLayout({ loaderData }: Route.ComponentProps) {
