@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -6,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useMatches,
+  useNavigate,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -18,6 +20,7 @@ import { AuthProvider } from "~/context/auth-context";
 import { ConfirmProvider } from "~/context/confirm-context";
 import { SiteHeader } from "~/components/marketing/site-header";
 import { SiteFooter } from "~/components/marketing/site-footer";
+import { landingAuthParams } from "~/lib/api/supabase";
 
 export const meta: Route.MetaFunction = () => [{ title: "Firearm Studio" }];
 
@@ -90,9 +93,22 @@ function SiteChrome({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SignupCallbackRedirect() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (landingAuthParams.type !== "signup") return;
+    if (window.location.pathname === "/verified") return;
+    void navigate("/verified", { replace: true });
+  }, [navigate]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
+      <SignupCallbackRedirect />
       <ConfirmProvider>
         <SiteChrome>
           <Outlet />
