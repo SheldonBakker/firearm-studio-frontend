@@ -11,7 +11,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
+import { PhoneInput } from "~/components/common/phone-input";
 import {
   Select,
   SelectContent,
@@ -22,8 +22,8 @@ import {
 import { ApiError } from "~/lib/api/http";
 import { useConfirm } from "~/context/confirm-context";
 import {
-  optionalSouthAfricanPhoneSchema,
-  requiredSouthAfricanPhoneSchema,
+  optionalPhoneSchema,
+  requiredPhoneSchema,
 } from "~/lib/utils/phone";
 import {
   optionalEmailSchema,
@@ -280,9 +280,7 @@ function schemaForField(field: FormField): z.ZodType {
     return field.required ? requiredEmailSchema : optionalEmailSchema;
   }
   if (field.type === "tel") {
-    return field.required
-      ? requiredSouthAfricanPhoneSchema
-      : optionalSouthAfricanPhoneSchema;
+    return field.required ? requiredPhoneSchema : optionalPhoneSchema;
   }
   if (field.required) return requiredTextSchema(field.label);
   return z.string();
@@ -447,7 +445,7 @@ export function FormDialog({
                     className="rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring"
                   />
                 ) : f.type === "tel" ? (
-                  <SouthAfricanPhoneInput
+                  <PhoneInput
                     id={f.name}
                     required={f.required}
                     placeholder={f.placeholder}
@@ -465,7 +463,7 @@ export function FormDialog({
                         return next;
                       });
                     }}
-                    autoComplete="tel-national"
+                    autoComplete="tel"
                     aria-invalid={Boolean(fieldErrors[f.name])}
                     aria-describedby={
                       fieldErrors[f.name] ? `${f.name}-error` : undefined
