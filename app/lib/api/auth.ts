@@ -7,6 +7,24 @@ export interface AuthTokens {
   accessExpiresAt: string;
 }
 
+export interface TwoFactorChallenge {
+  requiresTwoFactor: true;
+  preAuthToken: string;
+}
+
+export type LoginResult =
+  | { kind: "tokens"; tokens: AuthTokens }
+  | { kind: "challenge"; preAuthToken: string };
+
+function isTwoFactorChallenge(body: unknown): body is TwoFactorChallenge {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    (body as Record<string, unknown>).requiresTwoFactor === true &&
+    typeof (body as Record<string, unknown>).preAuthToken === "string"
+  );
+}
+
 export const AUTH_STORAGE_KEY = "fs-auth";
 
 const REFRESH_SKEW_MS = 30_000;
@@ -94,8 +112,8 @@ async function authRequest<T>(path: string, body?: unknown): Promise<T> {
   });
 
   if (!res.ok) {
-    const { message, body: errBody } = await extractErrorMessage(res);
-    throw new ApiError(res.status, message, errBody);
+    const { message, code, body: errBody } = await extractErrorMessage(res);
+    throw new ApiError(res.status, message, errBody, code);
   }
 
   if (res.status === 204) return undefined as T;
@@ -146,8 +164,12 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 export const authApi = {
-  register: (email: string, password: string) =>
-    authRequest<void>("/api/v1/auth/register", { email, password }),
+  register: (email: string, password: string, phoneNumber?: string | null) =>
+    authRequest<void>("/api/v1/auth/register", {
+      email,
+      password,
+      phoneNumber: phoneNumber ? phoneNumber : null,
+    }),
 
   verifyEmail: async (email: string, code: string) => {
     const tokens = await authRequest<AuthTokens>("/api/v1/auth/verify-email", {
@@ -161,10 +183,22 @@ export const authApi = {
   resendCode: (email: string, purpose: "EmailConfirmation" | "PasswordReset" | "Invite") =>
     authRequest<void>("/api/v1/auth/resend-code", { email, purpose }),
 
-  login: async (email: string, password: string) => {
-    const tokens = await authRequest<AuthTokens>("/api/v1/auth/login", {
-      email,
-      password,
+  login: async (email: string, password: string): Promise<LoginResult> => {
+    const body = await authRequest<AuthTokens | TwoFactorChallenge>(
+      "/api/v1/auth/login",
+      { email, password },
+    );
+    if (isTwoFactorChallenge(body)) {
+      return { kind: "challenge", preAuthToken: body.preAuthToken };
+    }
+    storeTokens(body);
+    return { kind: "tokens", tokens: body };
+  },
+
+  loginVerify: async (preAuthToken: string, code: string): Promise<AuthTokens> => {
+    const tokens = await authRequest<AuthTokens>("/api/v1/auth/login/verify", {
+      preAuthToken,
+      code,
     });
     storeTokens(tokens);
     return tokens;
@@ -188,11 +222,17 @@ export const authApi = {
   resetPassword: (email: string, code: string, newPassword: string) =>
     authRequest<void>("/api/v1/auth/reset-password", { email, code, newPassword }),
 
-  acceptInvite: async (email: string, code: string, password: string) => {
+  acceptInvite: async (
+    email: string,
+    code: string,
+    password: string,
+    phoneNumber?: string | null,
+  ) => {
     const tokens = await authRequest<AuthTokens>("/api/v1/auth/accept-invite", {
       email,
       code,
       password,
+      phoneNumber: phoneNumber ? phoneNumber : null,
     });
     storeTokens(tokens);
     return tokens;
