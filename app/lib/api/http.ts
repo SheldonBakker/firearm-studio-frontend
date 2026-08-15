@@ -1,37 +1,19 @@
-import { getAccessToken, supabase } from "./supabase";
+import { clearTokens, getAccessToken, refreshTokens } from "./auth";
+import { API_KEY, apiUrl } from "./config";
+import { ApiError, extractErrorMessage } from "./error";
 
-const BASE_URL = (
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
-).replace(/\/$/, "");
-
-const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
-
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-    public body?: unknown,
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
+export { ApiError };
 
 export interface RequestOptions {
   method?: string;
   body?: unknown;
   query?: Record<string, string | number | undefined>;
   skipAuthRedirect?: boolean;
+  retried?: boolean;
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): URL {
-  const url = new URL(BASE_URL + path, BASE_URL || window.location.origin);
-  if (query) {
-    for (const [k, v] of Object.entries(query)) {
-      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-    }
-  }
-  return url;
+  return apiUrl(path, query);
 }
 
 async function authHeaders(): Promise<Record<string, string>> {
@@ -40,26 +22,6 @@ async function authHeaders(): Promise<Record<string, string>> {
   if (API_KEY) headers["X-Api-Key"] = API_KEY;
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
-}
-
-async function extractErrorMessage(res: Response): Promise<{
-  message: string;
-  body?: unknown;
-}> {
-  let body: unknown;
-  let message = `${res.status} ${res.statusText}`;
-  try {
-    body = await res.json();
-    if (body && typeof body === "object") {
-      const m =
-        (body as Record<string, unknown>).detail ??
-        (body as Record<string, unknown>).message ??
-        (body as Record<string, unknown>).title;
-      if (typeof m === "string") message = m;
-    }
-  } catch {
-  }
-  return { message, body };
 }
 
 export async function request<T>(
@@ -73,14 +35,24 @@ export async function request<T>(
   };
   if (opts.body !== undefined) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(url.toString(), {
-    method: opts.method ?? "GET",
-    headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  const send = (h: Record<string, string>) =>
+    fetch(url.toString(), {
+      method: opts.method ?? "GET",
+      headers: h,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+
+  let res = await send(headers);
+
+  if (res.status === 401 && !opts.retried) {
+    const refreshed = await refreshTokens();
+    if (refreshed) {
+      res = await send({ ...headers, Authorization: `Bearer ${refreshed.accessToken}` });
+    }
+  }
 
   if (res.status === 401 && !opts.skipAuthRedirect) {
-    await supabase.auth.signOut();
+    clearTokens();
     if (typeof window !== "undefined") window.location.assign("/login");
     throw new ApiError(401, "Unauthorized");
   }
@@ -118,13 +90,20 @@ export async function requestBlob(
   const url = buildUrl(path, opts.query);
   const headers = await authHeaders();
 
-  const res = await fetch(url.toString(), {
-    method: opts.method ?? "GET",
-    headers,
-  });
+  let res = await fetch(url.toString(), { method: opts.method ?? "GET", headers });
+
+  if (res.status === 401 && !opts.retried) {
+    const refreshed = await refreshTokens();
+    if (refreshed) {
+      res = await fetch(url.toString(), {
+        method: opts.method ?? "GET",
+        headers: { ...headers, Authorization: `Bearer ${refreshed.accessToken}` },
+      });
+    }
+  }
 
   if (res.status === 401 && !opts.skipAuthRedirect) {
-    await supabase.auth.signOut();
+    clearTokens();
     if (typeof window !== "undefined") window.location.assign("/login");
     throw new ApiError(401, "Unauthorized");
   }
