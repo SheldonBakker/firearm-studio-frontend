@@ -9,7 +9,8 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { PasswordInput } from "~/components/common/password-input";
-import { requiredEmailSchema, requiredTextSchema } from "~/lib/utils/validation";
+import { requiredEmailSchema } from "~/lib/utils/validation";
+import { VerifyCodeForm } from "~/components/common/verify-code-form";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -28,25 +29,23 @@ export async function clientLoader() {
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-  const [fullName, setFullName] = useState("");
+  const { signUp, verifyEmail, resendCode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checkEmail, setCheckEmail] = useState(false);
+  const [awaitingCode, setAwaitingCode] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     const result = z
       .object({
-        fullName: requiredTextSchema("Full name"),
         email: requiredEmailSchema,
-        password: z.string().min(6, "Password must be at least 6 characters."),
+        password: z.string().min(12, "Password must be at least 12 characters."),
       })
-      .safeParse({ fullName, email, password });
+      .safeParse({ email, password });
 
     if (!result.success) {
       const errors: Record<string, string> = {};
@@ -62,42 +61,36 @@ export default function Signup() {
 
     setFieldErrors({});
     setLoading(true);
-    const { error, hasSession } = await signUp(
-      result.data.email,
-      result.data.password,
-      result.data.fullName,
-    );
+    const { error } = await signUp(result.data.email, result.data.password);
     setLoading(false);
     if (error) {
       setError(error);
       return;
     }
-    // If email confirmation is required, no session is returned yet.
-    if (hasSession) {
-      navigate("/onboarding", { replace: true });
-    } else {
-      setCheckEmail(true);
-    }
+    setAwaitingCode(true);
   }
 
-  if (checkEmail) {
+  if (awaitingCode) {
     return (
       <AuthShell
-        title="Check your inbox"
-        subtitle="We sent a confirmation link to your email"
+        title="Confirm your email"
+        subtitle="Enter the code we just sent you"
         footer={
-          <Link
-            to="/login"
-            className="font-semibold text-primary hover:underline"
-          >
+          <Link to="/login" className="font-semibold text-primary hover:underline">
             Back to sign in
           </Link>
         }
       >
-        <p className="text-center text-[13px] leading-relaxed text-muted-foreground">
-          Confirm your address at <span className="text-foreground">{email}</span>,
-          then sign in to finish setting up your company.
-        </p>
+        <VerifyCodeForm
+          email={email}
+          submitLabel="Confirm email"
+          onSubmit={async (code) => {
+            const result = await verifyEmail(email, code);
+            if (!result.error) navigate("/onboarding", { replace: true });
+            return result;
+          }}
+          onResend={() => resendCode(email, "EmailConfirmation")}
+        />
       </AuthShell>
     );
   }
@@ -119,33 +112,6 @@ export default function Signup() {
       }
     >
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="fullName">Full name</Label>
-          <Input
-            id="fullName"
-            required
-            value={fullName}
-            onChange={(e) => {
-              setFullName(e.target.value);
-              setFieldErrors((previous) => {
-                if (!previous.fullName) return previous;
-                const next = { ...previous };
-                delete next.fullName;
-                return next;
-              });
-            }}
-            placeholder="Marius Steyn"
-            aria-invalid={Boolean(fieldErrors.fullName)}
-            aria-describedby={
-              fieldErrors.fullName ? "signup-name-error" : undefined
-            }
-          />
-          {fieldErrors.fullName && (
-            <p id="signup-name-error" className="text-[12px] font-medium text-destructive">
-              {fieldErrors.fullName}
-            </p>
-          )}
-        </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -191,7 +157,7 @@ export default function Signup() {
             id="password"
             autoComplete="new-password"
             required
-            minLength={6}
+            minLength={12}
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -202,7 +168,7 @@ export default function Signup() {
                 return next;
               });
             }}
-            placeholder="At least 6 characters"
+            placeholder="At least 12 characters"
             aria-invalid={Boolean(fieldErrors.password)}
             aria-describedby={
               fieldErrors.password ? "signup-password-error" : undefined

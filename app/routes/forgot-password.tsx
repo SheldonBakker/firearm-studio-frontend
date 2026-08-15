@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, redirect } from "react-router";
+import { Link, redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/forgot-password";
 import { getSessionUser, useAuth } from "~/context/auth-context";
 import { pageMeta } from "~/lib/utils/seo";
@@ -25,7 +25,8 @@ export async function clientLoader() {
 }
 
 export default function ForgotPassword() {
-  const { resetPassword } = useAuth();
+  const navigate = useNavigate();
+  const { requestPasswordReset } = useAuth();
   const [email, setEmail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +45,12 @@ export default function ForgotPassword() {
 
     setFieldErrors({});
     setLoading(true);
-    const { error } = await resetPassword(result.data);
+    const { error } = await requestPasswordReset(result.data);
     setLoading(false);
     if (error) {
       setError(error);
       return;
     }
-    // Always confirm on success — don't reveal whether the address has an account.
     setSent(true);
   }
 
@@ -58,7 +58,7 @@ export default function ForgotPassword() {
     return (
       <AuthShell
         title="Check your inbox"
-        subtitle="We sent a password reset link to your email"
+        subtitle="We sent a password reset code to your email"
         footer={
           <Link
             to="/login"
@@ -70,9 +70,17 @@ export default function ForgotPassword() {
       >
         <p className="text-center text-[13px] leading-relaxed text-muted-foreground">
           If an account exists for{" "}
-          <span className="text-foreground">{email}</span>, you'll receive a link
-          to set a new password. It may take a few minutes to arrive.
+          <span className="text-foreground">{email}</span>, you'll receive a
+          six-digit code. It may take a few minutes to arrive.
         </p>
+        <Button
+          className="mt-4 w-full"
+          onClick={() =>
+            navigate(`/reset-password?email=${encodeURIComponent(email)}`)
+          }
+        >
+          Enter code
+        </Button>
       </AuthShell>
     );
   }
@@ -80,7 +88,7 @@ export default function ForgotPassword() {
   return (
     <AuthShell
       title="Reset your password"
-      subtitle="Enter your email and we'll send you a reset link"
+      subtitle="Enter your email and we'll send you a reset code"
       footer={
         <Link
           to="/login"
