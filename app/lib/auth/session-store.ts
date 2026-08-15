@@ -1,5 +1,13 @@
 import { redirect } from "react-router";
-import { supabase, SUPABASE_STORAGE_KEY } from "~/lib/api/supabase";
+import {
+  AUTH_STORAGE_KEY,
+  authApi,
+  decodeAccessToken,
+  readTokens,
+  refreshTokens,
+  rolesFromClaims,
+  subscribeToTokens,
+} from "~/lib/api/auth";
 import { ApiError } from "~/lib/api/http";
 import { meApi } from "~/lib/api/me/me";
 import { companyApi } from "~/lib/api/company/company";
@@ -48,41 +56,36 @@ function publish(user: SessionUser | null) {
   listeners.forEach((l) => l());
 }
 
+function userFromToken(accessToken: string): SessionUser | null {
+  const claims = decodeAccessToken(accessToken);
+  if (!claims?.sub) return null;
+  return {
+    id: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : null,
+    roles: normalizeRoles(rolesFromClaims(claims)),
+  };
+}
+
 async function resolveSessionUser(): Promise<SessionUser | null> {
-  const { data } = await supabase.auth.getSession();
-  if (!data.session) {
-    lastAccessToken = null;
-    return null;
-  }
-  lastAccessToken = data.session.access_token;
+  const tokens = readTokens();
+  if (!tokens) return null;
 
-  const u = data.session.user;
-  const jwtRoles = u.app_metadata?.roles as string[] | undefined;
+  const fromToken = userFromToken(tokens.accessToken);
+  if (!fromToken) return null;
 
-  if (jwtRoles?.length) {
-    return {
-      id: u.id,
-      email: u.email ?? null,
-      roles: normalizeRoles(jwtRoles),
-    };
-  }
+  if (fromToken.roles.length) return fromToken;
 
   try {
     const me = await meApi.me();
-    return {
-      id: me.id,
-      email: me.email,
-      roles: normalizeRoles(me.roles),
-    };
+    return { id: me.id, email: me.email, roles: normalizeRoles(me.roles) };
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) return null;
-    return { id: u.id, email: u.email ?? null, roles: ["Viewer"] };
+    return fromToken;
   }
 }
 
 let inflight: Promise<SessionUser | null> | null = null;
 let resolved = false;
-let lastAccessToken: string | null = null;
 
 export function getSessionUser(options?: {
   refresh?: boolean;
@@ -113,7 +116,8 @@ export async function requireAuth(request: Request): Promise<SessionUser> {
 }
 
 export async function refreshSession(): Promise<void> {
-  await supabase.auth.refreshSession();
+  await refreshTokens();
+  await getSessionUser({ refresh: true });
 }
 
 let companyAccess: boolean | null = null;
@@ -208,52 +212,38 @@ export function hasCompanyAccess(): Promise<boolean> {
 export async function signOutUser(): Promise<void> {
   resetCompanyAccess();
   resolved = false;
-  lastAccessToken = null;
   publish(null);
-  await supabase.auth.signOut();
+  await authApi.logout();
 }
-function readStoredUser(): SessionUser | null {
-  try {
-    const raw = window.localStorage.getItem(SUPABASE_STORAGE_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw) as {
-      refresh_token?: string;
-      user?: { id?: string; email?: string; app_metadata?: { roles?: string[] } };
-    };
-    const u = session?.user;
-    if (!u?.id || !session?.refresh_token) return null;
-    return {
-      id: u.id,
-      email: u.email ?? null,
-      roles: normalizeRoles(u.app_metadata?.roles),
-    };
-  } catch {
-    return null;
-  }
+
+export async function adoptSession(): Promise<SessionUser | null> {
+  resetCompanyAccess();
+  resolved = false;
+  return getSessionUser({ refresh: true });
 }
 
 if (typeof window !== "undefined") {
-  const seeded = readStoredUser();
+  const tokens = readTokens();
+  const seeded = tokens ? userFromToken(tokens.accessToken) : null;
   snapshot = seeded
     ? { status: "authenticated", user: seeded }
     : { status: "unauthenticated", user: null };
 
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
+  subscribeToTokens(() => {
+    const current = readTokens();
+    if (!current) {
       resetCompanyAccess();
       resolved = false;
-      lastAccessToken = null;
       publish(null);
       return;
     }
-    if (event === "INITIAL_SESSION" && !session) {
-      resolved = true;
-      publish(null);
-      return;
-    }
-    if (resolved && session?.access_token === lastAccessToken) return;
-    setTimeout(() => {
-      void getSessionUser({ refresh: true });
-    }, 0);
+    const user = userFromToken(current.accessToken);
+    if (user && !sameUser(user, snapshot.user)) publish(user);
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== AUTH_STORAGE_KEY) return;
+    resolved = false;
+    void getSessionUser({ refresh: true });
   });
 }
