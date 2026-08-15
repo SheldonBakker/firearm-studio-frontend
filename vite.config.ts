@@ -15,7 +15,6 @@ export default defineConfig({
 
   optimizeDeps: {
     include: [
-      "@supabase/supabase-js",
       "class-variance-authority",
       "clsx",
       "lucide-react",

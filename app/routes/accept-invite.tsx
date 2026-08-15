@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
-import type { Route } from "./+types/reset-password";
+import type { Route } from "./+types/accept-invite";
 import { useAuth } from "~/context/auth-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { AuthShell } from "~/components/common/auth-shell";
@@ -14,17 +14,17 @@ import { requiredEmailSchema } from "~/lib/utils/validation";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
-    title: "Set a new password - Firearm Studio",
-    description: "Choose a new password for your Firearm Studio account.",
+    title: "Accept your invite - Firearm Studio",
+    description: "Set a password and join your team on Firearm Studio.",
     pathname: location.pathname,
     noIndex: true,
   });
 }
 
-export default function ResetPassword() {
+export default function AcceptInvite() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { resetPassword, requestPasswordReset } = useAuth();
+  const { acceptInvite, resendCode } = useAuth();
 
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
@@ -36,7 +36,7 @@ export default function ResetPassword() {
       .object({
         email: requiredEmailSchema,
         password: z.string().min(12, "Password must be at least 12 characters."),
-        confirm: z.string().min(1, "Confirm your new password."),
+        confirm: z.string().min(1, "Confirm your password."),
       })
       .refine((data) => data.password === data.confirm, {
         message: "Passwords do not match.",
@@ -62,8 +62,8 @@ export default function ResetPassword() {
 
   return (
     <AuthShell
-      title="Set a new password"
-      subtitle="Enter the code we emailed you and choose a new password"
+      title="Accept your invite"
+      subtitle="Enter your code and choose a password"
       footer={
         <Link to="/login" className="font-semibold text-primary hover:underline">
           Back to sign in
@@ -72,24 +72,24 @@ export default function ResetPassword() {
     >
       <VerifyCodeForm
         email={email}
-        submitLabel="Update password"
+        submitLabel="Join the team"
         onSubmit={async (code) => {
           if (!validate()) {
             return { error: "Check the highlighted fields and try again." };
           }
-          const result = await resetPassword(email, code, password);
+          const result = await acceptInvite(email, code, password);
           if (!result.error) {
-            toast.success("Password updated. Sign in with your new password.");
-            navigate("/login", { replace: true });
+            toast.success("Welcome aboard.");
+            navigate("/dashboard", { replace: true });
           }
           return result;
         }}
-        onResend={() => requestPasswordReset(email)}
+        onResend={() => resendCode(email, "Invite")}
       >
         <div className="flex flex-col gap-2">
-          <Label htmlFor="reset-email">Email</Label>
+          <Label htmlFor="invite-email">Email</Label>
           <Input
-            id="reset-email"
+            id="invite-email"
             type="email"
             autoComplete="email"
             required
@@ -106,9 +106,9 @@ export default function ResetPassword() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">New password</Label>
+          <Label htmlFor="invite-password">Choose a password</Label>
           <PasswordInput
-            id="password"
+            id="invite-password"
             autoComplete="new-password"
             required
             minLength={12}
@@ -124,9 +124,9 @@ export default function ResetPassword() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="confirm">Confirm new password</Label>
+          <Label htmlFor="invite-confirm">Confirm password</Label>
           <PasswordInput
-            id="confirm"
+            id="invite-confirm"
             autoComplete="new-password"
             required
             value={confirm}
