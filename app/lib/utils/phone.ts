@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   isValidPhoneNumber,
   parsePhoneNumber,
+  type CountryCode,
 } from "libphonenumber-js";
 
 function e164Error(value: string): string {
@@ -50,4 +51,20 @@ export const requiredPhoneSchema = z
 export function getPhoneError(value: string): string | null {
   if (!value) return null;
   return isValidPhoneNumber(value) ? null : e164Error(value);
+}
+
+export function formatPhoneForDisplay(
+  value: string | null | undefined,
+  viewerCountry?: CountryCode,
+): string {
+  if (!value) return "—";
+  try {
+    const parsed = parsePhoneNumber(value);
+    if (!parsed) return value;
+    return viewerCountry && parsed.country === viewerCountry
+      ? parsed.formatNational()
+      : parsed.formatInternational();
+  } catch {
+    return value;
+  }
 }

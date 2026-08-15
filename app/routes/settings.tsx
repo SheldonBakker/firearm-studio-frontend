@@ -9,6 +9,7 @@ import { requireAuth } from "~/context/auth-context";
 import { canSeeNav, primaryRole } from "~/lib/utils/rbac";
 import { useSessionUser } from "~/context/auth-context";
 import { fmtDate } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { PageWrap, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { Button } from "~/components/ui/button";
@@ -284,7 +285,7 @@ function CompanyPanel({ company }: { company: CompanyDetailsResponse | null }) {
               },
               { k: "VAT number", v: <Mono>{c.vatNumber || "—"}</Mono> },
               { k: "Email", v: c.email || "—" },
-              { k: "Phone", v: <Mono>{c.phone || "—"}</Mono> },
+              { k: "Phone", v: <Mono>{formatPhoneForDisplay(c.phone, "ZA")}</Mono> },
               {
                 k: "Address",
                 full: true,

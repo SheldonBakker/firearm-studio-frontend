@@ -30,6 +30,7 @@ import type { ShootingRangeListItemDto } from "~/lib/api/ranges/types";
 import type { AvailabilitySlotDto } from "~/lib/api/ranges/types";
 import type { PackageListItemDto } from "~/lib/api/packages/types";
 import { customerLabel } from "~/lib/utils/entities";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { fmtMoney } from "~/lib/utils/format";
 import { cn } from "~/lib/utils/cn";
 
@@ -46,7 +47,12 @@ async function searchCustomers(query: string, searchType: string) {
   return (results.items ?? []).map((c) => ({
     value: c.id,
     label: customerLabel(c),
-    description: [c.email, c.phone].filter(Boolean).join(" · "),
+    description: [
+      c.email,
+      c.phone ? formatPhoneForDisplay(c.phone, "ZA") : null,
+    ]
+      .filter(Boolean)
+      .join(" · "),
   }));
 }
 

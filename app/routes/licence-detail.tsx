@@ -5,6 +5,7 @@ import type { Route } from "./+types/licence-detail";
 import { licencesApi } from "~/lib/api/licences/licences";
 import { customerLabel } from "~/lib/utils/entities";
 import { fmtDate } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink } from "~/components/common/misc";
@@ -145,7 +146,7 @@ function LicenceView({ licence }: { licence: LicenceDetailDto }) {
                 { k: "Full name", v: customer.fullName || "—" },
                 { k: "Company", v: customer.companyName || "—" },
                 { k: "Email", v: customer.email || "—" },
-                { k: "Phone", v: customer.phone || "—" },
+                { k: "Phone", v: formatPhoneForDisplay(customer.phone, "ZA") },
               ]}
             />
           ) : (

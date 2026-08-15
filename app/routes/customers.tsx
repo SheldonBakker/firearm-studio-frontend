@@ -5,6 +5,7 @@ import type { Route } from "./+types/customers";
 import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel } from "~/lib/utils/entities";
 import { initials } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
@@ -93,7 +94,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
       header: "Contact",
       cell: (r) => (
         <Mono className="text-[12px] text-muted-foreground">
-          {r.phone ?? "—"}
+          {formatPhoneForDisplay(r.phone, "ZA")}
         </Mono>
       ),
     },

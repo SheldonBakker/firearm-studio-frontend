@@ -5,6 +5,7 @@ import { customersApi } from "~/lib/api/customers/customers";
 import { firearmsApi } from "~/lib/api/firearms/firearms";
 import { storageApi } from "~/lib/api/storage/storage";
 import { CustomerType } from "~/lib/types/enums";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { PageActionsSlot } from "~/context/page-actions";
 import type { CustomerListItemDto } from "~/lib/api/customers/types";
 import type { FirearmResponse } from "~/lib/api/firearms/types";
@@ -542,7 +543,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
                       icon: "users" as const,
                       color: "var(--status-teal)",
                       title: customerName(c),
-                      sub: c.email || c.phone || "",
+                      sub: c.email || (c.phone ? formatPhoneForDisplay(c.phone, "ZA") : ""),
                       onClick: () => goto(`/customers/${c.id}`),
                     }))}
                   />

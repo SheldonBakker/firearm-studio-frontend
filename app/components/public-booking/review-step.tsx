@@ -5,6 +5,7 @@ import type {
 } from "~/lib/api/public/types";
 import { itemView, type CartItem } from "~/lib/booking/cart";
 import { fmtMoney } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { DepositMode } from "~/lib/types/enums";
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
@@ -111,7 +112,7 @@ export function ReviewStep({
         <dl className="divide-y divide-border text-[13px]">
           <ReviewRow label="Name" value={fullName || "—"} />
           <ReviewRow label="Email" value={email || "—"} />
-          <ReviewRow label="Phone" value={phone || "—"} />
+          <ReviewRow label="Phone" value={formatPhoneForDisplay(phone, "ZA")} />
         </dl>
       </div>
 

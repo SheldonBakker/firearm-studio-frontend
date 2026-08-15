@@ -5,6 +5,7 @@ import type { Route } from "./+types/customer-detail";
 import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel, firearmLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap, BackLink } from "~/components/common/misc";
@@ -242,7 +243,7 @@ function CustomerView({ customer }: { customer: CustomerDetailResponse }) {
                   : []),
                 { k: "Type", v: enumKey(CustomerType, customer.customerType) },
                 { k: "Email", v: customer.email ?? "—" },
-                { k: "Phone", v: customer.phone ?? "—" },
+                { k: "Phone", v: formatPhoneForDisplay(customer.phone, "ZA") },
                 {
                   k: "Status",
                   v: customer.isActive ? "Active" : "Inactive",
