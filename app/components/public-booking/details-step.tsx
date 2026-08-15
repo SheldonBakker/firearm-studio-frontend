@@ -1,6 +1,6 @@
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
+import { PhoneInput } from "~/components/common/phone-input";
 
 export function DetailsStep({
   fullName,
@@ -50,7 +50,7 @@ export function DetailsStep({
         <Label htmlFor="pb-phone">
           Phone<span className="text-destructive"> *</span>
         </Label>
-        <SouthAfricanPhoneInput
+        <PhoneInput
           id="pb-phone"
           value={phone}
           onValueChange={(v) => onChange("phone", v)}

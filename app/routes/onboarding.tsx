@@ -13,14 +13,14 @@ import {
 import { useConfirm } from "~/context/confirm-context";
 import { pageMeta } from "~/lib/utils/seo";
 import { BrandMark } from "~/components/common/brand";
-import { SouthAfricanPhoneInput } from "~/components/common/south-african-phone-input";
+import { PhoneInput } from "~/components/common/phone-input";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { CreateCompanyRequest } from "~/lib/api/company/types";
 import {
-  getSouthAfricanPhoneError,
-  optionalSouthAfricanPhoneSchema,
+  getPhoneError,
+  optionalPhoneSchema,
 } from "~/lib/utils/phone";
 import {
   optionalEmailSchema,
@@ -90,7 +90,7 @@ export default function Onboarding() {
       .object({
         name: requiredTextSchema("Company name"),
         email: optionalEmailSchema,
-        phone: optionalSouthAfricanPhoneSchema,
+        phone: optionalPhoneSchema,
       })
       .safeParse({
         name: values.name ?? "",
@@ -172,14 +172,12 @@ export default function Onboarding() {
                   {f.required && <span className="text-destructive"> *</span>}
                 </Label>
                 {f.key === "phone" ? (
-                  <SouthAfricanPhoneInput
+                  <PhoneInput
                     id={f.key}
                     value={values.phone ?? ""}
                     onValueChange={(value) => set("phone", value)}
                     onBlur={() => {
-                      const phoneError = getSouthAfricanPhoneError(
-                        values.phone ?? "",
-                      );
+                      const phoneError = getPhoneError(values.phone ?? "");
                       setFieldErrors((prev) => {
                         const next = { ...prev };
                         if (phoneError) next.phone = phoneError;
@@ -187,7 +185,7 @@ export default function Onboarding() {
                         return next;
                       });
                     }}
-                    autoComplete="tel-national"
+                    autoComplete="tel"
                     placeholder="68 150 1196"
                     aria-invalid={Boolean(fieldErrors.phone)}
                     aria-describedby={
