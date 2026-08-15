@@ -44,3 +44,6 @@ Thumbs.db
 .cache/
 coverage/
 *.tsbuildinfo
+
+# SDD scratch workspace
+.superpowers/
