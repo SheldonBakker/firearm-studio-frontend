@@ -7,6 +7,7 @@ export interface InviteUserRequest {
   email?: string | null;
   fullName?: string | null;
   role?: AppRole | null;
+  phoneNumber?: string | null;
 }
 
 export interface UpdateUserRoleRequest {
@@ -20,6 +21,7 @@ export interface UserResponse {
   role: AppRole | string;
   isActive: boolean;
   isLinked: boolean;
+  phoneNumber: string | null;
   [k: string]: unknown;
 }
 
