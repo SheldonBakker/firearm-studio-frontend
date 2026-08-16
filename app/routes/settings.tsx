@@ -77,7 +77,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
               resolve={loaderData.accounting}
               fallback={<KeyValueSkeleton rows={5} />}
             >
-              {(connection) => <SagePanel connection={connection} />}
+              {(connection) => <AccountingPanel connection={connection} />}
             </Resolve>
           </div>
         </div>
@@ -404,15 +404,15 @@ function CredentialBadge({ stored }: { stored: boolean }) {
   );
 }
 
-function parseSageCompanyId(value: string): number {
-  const sageCompanyId = Number(value);
-  if (!Number.isInteger(sageCompanyId) || sageCompanyId <= 0) {
+function parseExternalCompanyId(value: string): number {
+  const externalCompanyId = Number(value);
+  if (!Number.isInteger(externalCompanyId) || externalCompanyId <= 0) {
     throw new ApiError(400, "Enter a valid Sage company ID.");
   }
-  return sageCompanyId;
+  return externalCompanyId;
 }
 
-function SagePanel({
+function AccountingPanel({
   connection,
 }: {
   connection: AccountingConnectionDetailsResponse | null;
@@ -444,7 +444,7 @@ function SagePanel({
         </div>
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground">
-            {c?.sageCompanyName || "No Sage company connected"}
+            {c?.externalCompanyName || "No Sage company connected"}
           </div>
           <div className="mt-1 text-[12px] text-muted-foreground">
             {c
@@ -461,9 +461,9 @@ function SagePanel({
               { k: "Status", v: <Badge>Connected</Badge> },
               {
                 k: "Sage company ID",
-                v: <Mono>{String(c.sageCompanyId)}</Mono>,
+                v: <Mono>{String(c.externalCompanyId)}</Mono>,
               },
-              { k: "Sage company", v: c.sageCompanyName || "—" },
+              { k: "Sage company", v: c.externalCompanyName || "—" },
               { k: "API key", v: <CredentialBadge stored={c.apiKey} /> },
               { k: "Username", v: <CredentialBadge stored={c.username} /> },
               { k: "Password", v: <CredentialBadge stored={c.password} /> },
@@ -519,11 +519,11 @@ function SagePanel({
             placeholder: c?.password ? "Stored password" : undefined,
           },
           {
-            name: "sageCompanyId",
+            name: "externalCompanyId",
             label: "Sage company ID",
             type: "number",
             required: true,
-            defaultValue: c?.sageCompanyId ? String(c.sageCompanyId) : "",
+            defaultValue: c?.externalCompanyId ? String(c.externalCompanyId) : "",
           },
         ]}
         afterFields={
@@ -544,7 +544,7 @@ function SagePanel({
             apiKey: v.apiKey || null,
             username: v.username || null,
             password: v.password || null,
-            sageCompanyId: parseSageCompanyId(v.sageCompanyId),
+            externalCompanyId: parseExternalCompanyId(v.externalCompanyId),
           });
           toast.success(c ? "Sage connection updated" : "Sage connected");
           revalidator.revalidate();
