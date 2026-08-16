@@ -316,7 +316,7 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
         {phoneStep === "verify" && (
           <div className="mt-2 flex flex-col gap-2">
             <VerifyCodeForm
-              email={pendingNumber}
+              destination={pendingNumber}
               submitLabel="Confirm number"
               onSubmit={async (code) => {
                 try {
