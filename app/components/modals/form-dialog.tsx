@@ -463,7 +463,7 @@ export function FormDialog({
                         return next;
                       });
                     }}
-                    autoComplete="tel"
+                    autoComplete="tel-national"
                     aria-invalid={Boolean(fieldErrors[f.name])}
                     aria-describedby={
                       fieldErrors[f.name] ? `${f.name}-error` : undefined
