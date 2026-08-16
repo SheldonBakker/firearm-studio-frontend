@@ -75,7 +75,7 @@ export default function AcceptInvite() {
       }
     >
       <VerifyCodeForm
-        email={email}
+        destination={email}
         submitLabel="Join the team"
         onSubmit={async (code) => {
           if (!validate()) {

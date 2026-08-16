@@ -90,7 +90,7 @@ export default function Signup() {
         }
       >
         <VerifyCodeForm
-          email={email}
+          destination={email}
           submitLabel="Confirm email"
           onSubmit={async (code) => {
             const result = await verifyEmail(email, code);

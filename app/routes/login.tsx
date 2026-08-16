@@ -94,7 +94,7 @@ export default function Login() {
         }
       >
         <VerifyCodeForm
-          email={email}
+          destination={email}
           submitLabel="Verify and sign in"
           allowResend={false}
           onSubmit={async (code) => {

@@ -6,7 +6,7 @@ import { Label } from "~/components/ui/label";
 const RESEND_COOLDOWN_SECONDS = 60;
 
 interface VerifyCodeFormProps {
-  email: string;
+  destination: string;
   submitLabel?: string;
   onSubmit: (code: string) => Promise<{ error: string | null }>;
   onResend?: () => Promise<{ error: string | null }>;
@@ -15,7 +15,7 @@ interface VerifyCodeFormProps {
 }
 
 export function VerifyCodeForm({
-  email,
+  destination,
   submitLabel = "Verify",
   onSubmit,
   onResend,
@@ -41,7 +41,7 @@ export function VerifyCodeForm({
     setNotice(null);
 
     if (!/^\d{6}$/.test(code)) {
-      setError("Enter the six-digit code from your email.");
+      setError("Enter the six-digit code we sent you.");
       return;
     }
 
@@ -60,7 +60,7 @@ export function VerifyCodeForm({
     setNotice(
       result.error
         ? null
-        : "If that address can receive a code, a new one is on its way.",
+        : "If that destination can receive a code, a new one is on its way.",
     );
     if (result.error) setError(result.error);
   }
@@ -69,7 +69,7 @@ export function VerifyCodeForm({
     <form noValidate onSubmit={submit} className="flex flex-col gap-4">
       <p className="text-center text-[13px] leading-relaxed text-muted-foreground">
         We sent a six-digit code to{" "}
-        <span className="text-foreground">{email}</span>. It expires in 15 minutes.
+        <span className="text-foreground">{destination}</span>. It expires in 15 minutes.
       </p>
 
       <div className="flex flex-col gap-2">
