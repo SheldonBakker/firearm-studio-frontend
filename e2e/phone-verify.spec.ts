@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { parsePhoneNumber } from "libphonenumber-js";
 import { waitForOtp } from "./fixtures/waha";
 
 test("add and verify a phone number end to end", async ({ page }) => {
   const email = process.env.E2E_TEST_EMAIL ?? "";
   const password = process.env.E2E_TEST_PASSWORD ?? "";
   const phone = process.env.E2E_TEST_PHONE_E164 ?? "";
-  const national = phone.replace(/^\+27/, "");
+  const national = phone ? parsePhoneNumber(phone).nationalNumber : "";
 
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
