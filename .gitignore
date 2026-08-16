@@ -47,3 +47,6 @@ coverage/
 
 # SDD scratch workspace
 .superpowers/
+
+# Local planning notes - never committed
+docs/
