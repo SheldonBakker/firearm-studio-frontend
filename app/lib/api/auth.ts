@@ -1,4 +1,4 @@
-import { API_KEY, apiUrl } from "./config";
+import { apiUrl } from "./config";
 import { ApiError, extractErrorMessage } from "./error";
 
 export interface AuthTokens {
@@ -102,7 +102,6 @@ export function rolesFromClaims(claims: JwtClaims | null): string[] {
 
 async function authRequest<T>(path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (API_KEY) headers["X-Api-Key"] = API_KEY;
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const res = await fetch(apiUrl(path).toString(), {

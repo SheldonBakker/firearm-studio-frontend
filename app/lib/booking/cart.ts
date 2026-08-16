@@ -4,8 +4,8 @@ import type {
   PublicPackageResponse,
   PublicRangeResponse,
 } from "~/lib/api/public/types";
-import { dateKey } from "~/lib/utils/date";
 import { fmtDate } from "~/lib/utils/format";
+import { todayInSast } from "~/lib/utils/sast";
 
 export const hhmm = (t: string) => t.slice(0, 5);
 
@@ -156,7 +156,7 @@ export function makeInitialCart(
 ): CartState {
   const ranges = options.ranges ?? [];
   const packages = options.packages ?? [];
-  const now = new Date();
+  const today = todayInSast();
   return {
     step: 1,
     items: [],
@@ -164,8 +164,8 @@ export function makeInitialCart(
       rangeId: ranges[0]?.id ?? "",
       packageId: packages[0]?.id ?? "",
       shooterCount: 1,
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
+      year: Number(today.slice(0, 4)),
+      month: Number(today.slice(5, 7)),
       selectedDate: null,
       slot: null,
     },
@@ -206,12 +206,7 @@ export function readCart(
     const base = makeInitialCart(options);
     const ranges = options.ranges ?? [];
     const packages = options.packages ?? [];
-    const now = new Date();
-    const todayKey = dateKey(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      now.getDate(),
-    );
+    const todayKey = todayInSast();
 
     const pd = (parsed.draft ?? {}) as Partial<Draft>;
     const dRangeId = ranges.some((r) => r.id === pd.rangeId)
@@ -291,6 +286,18 @@ export function clearCart(companyId: string) {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.removeItem(cartKey(companyId));
+  } catch {}
+}
+
+export function clearAllCarts() {
+  if (typeof window === "undefined") return;
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (k?.startsWith("fs:booking-cart:")) keys.push(k);
+    }
+    keys.forEach((k) => window.localStorage.removeItem(k));
   } catch {}
 }
 

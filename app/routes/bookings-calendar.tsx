@@ -84,8 +84,7 @@ export default function BookingsCalendar({ loaderData }: Route.ComponentProps) {
     month === 12 ? setMonth(year + 1, 1) : setMonth(year, month + 1);
 
   const daysInMonth = new Date(year, month, 0).getDate();
-  // getDay() is Sunday-first; shift so Monday leads the grid.
-  const leadingBlanks = (new Date(year, month - 1, 1).getDay() + 6) % 7;
+  const mondayLeadingBlanks = (new Date(year, month - 1, 1).getDay() + 6) % 7;
 
   return (
     <PageWrap>
@@ -140,7 +139,7 @@ export default function BookingsCalendar({ loaderData }: Route.ComponentProps) {
         ))}
         <Resolve
           resolve={loaderData.data}
-          fallback={Array.from({ length: leadingBlanks + daysInMonth }).map(
+          fallback={Array.from({ length: mondayLeadingBlanks + daysInMonth }).map(
             (_, i) => (
               <div
                 key={i}
@@ -163,7 +162,7 @@ export default function BookingsCalendar({ loaderData }: Route.ComponentProps) {
 
             return (
               <>
-                {Array.from({ length: leadingBlanks }).map((_, i) => (
+                {Array.from({ length: mondayLeadingBlanks }).map((_, i) => (
                   <div key={`blank-${i}`} />
                 ))}
                 {Array.from({ length: daysInMonth }).map((_, i) => {

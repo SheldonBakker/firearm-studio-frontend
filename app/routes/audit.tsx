@@ -1,4 +1,4 @@
-import { redirect, useLocation, useNavigate } from "react-router";
+import { redirect } from "react-router";
 import type { Route } from "./+types/audit";
 import { auditApi } from "~/lib/api/audit/audit";
 import { requireAuth } from "~/context/auth-context";
@@ -6,7 +6,6 @@ import { canSeeNav } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
 import { DataTable, type Column } from "~/components/common/data-table";
 import { Mono } from "~/components/common/mono";
-import { Button } from "~/components/ui/button";
 import { Resolve } from "~/components/common/skeletons";
 import {
   AppRole,
@@ -16,12 +15,10 @@ import {
   StorageStatus,
   enumKey,
 } from "~/lib/types/enums";
-import type {
-  AuditLogListItemDtoPaginatedResponse,
-  AuditLogResponse,
-} from "~/lib/api/audit/types";
-
-const PAGE_SIZE = 20;
+import type { AuditLogResponse } from "~/lib/api/audit/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 const MAX_DETAIL_FIELDS = 4;
 const HIDDEN_FIELDS = new Set([
   "Id",
@@ -47,46 +44,26 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   if (!canSeeNav(user, "audit")) throw redirect("/dashboard");
 
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageNumber = parsePage(searchParams);
   const fullName = searchParams.get("fullName")?.trim() || undefined;
   const action = searchParams.get("action")?.trim() || undefined;
   const entityType = searchParams.get("entityType")?.trim() || undefined;
   const createdOn = searchParams.get("createdOn")?.trim() || undefined;
 
   return {
-    logs: auditApi
-      .list({
-        pageNumber,
-        pageSize: PAGE_SIZE,
-        fullName,
-        action,
-        entityType,
-        createdOn,
-      })
-      .catch(
-        () =>
-          ({
-            items: [],
-            pageNumber,
-            pageSize: PAGE_SIZE,
-            totalCount: 0,
-          }) satisfies AuditLogListItemDtoPaginatedResponse,
-      ),
+    logs: auditApi.list({
+      pageNumber,
+      pageSize: PAGE_SIZE,
+      fullName,
+      action,
+      entityType,
+      createdOn,
+    }),
   };
 }
 
 export default function Audit({ loaderData }: Route.ComponentProps) {
-  const navigate = useNavigate();
-  const { search } = useLocation();
-
-  const navigatePage = (pageNumber: number) => {
-    const next = new URLSearchParams(search);
-    if (pageNumber <= 1) next.delete("page");
-    else next.set("page", String(pageNumber));
-    navigate(`/audit${next.toString() ? `?${next.toString()}` : ""}`);
-  };
+  const { navigatePage } = usePagedSearchParams();
 
   const columns: Column<AuditLogResponse>[] = [
     {
@@ -156,33 +133,7 @@ export default function Audit({ loaderData }: Route.ComponentProps) {
               empty="No audit entries."
             />
 
-            {page.totalCount > page.pageSize && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <span className="text-[12.5px] text-muted-foreground">
-                  Showing {(page.pageNumber - 1) * page.pageSize + 1}-
-                  {Math.min(page.pageNumber * page.pageSize, page.totalCount)}{" "}
-                  of {page.totalCount}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={page.pageNumber <= 1}
-                    onClick={() => navigatePage(page.pageNumber - 1)}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={page.pageNumber * page.pageSize >= page.totalCount}
-                    onClick={() => navigatePage(page.pageNumber + 1)}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            )}
+            <Pagination page={page} onPage={navigatePage} separator="-" />
           </>
         )}
       </Resolve>

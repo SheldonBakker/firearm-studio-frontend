@@ -7,7 +7,7 @@ export type LegalSection = {
   bullets?: string[];
 };
 
-export type LegalDocProps = {
+type LegalDocProps = {
   kicker: string;
   title: string;
   intro: string;
@@ -17,8 +17,8 @@ export type LegalDocProps = {
 
 export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocProps) {
   return (
-    <div style={{ background: "#0e1116", overflow: "hidden" }}>
-      <section style={{ borderBottom: "1px solid #1f252e", background: "#0b0e12" }}>
+    <div style={{ background: "var(--background)", overflow: "hidden" }}>
+      <section style={{ borderBottom: "1px solid var(--line)", background: "var(--deep)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "clamp(40px,6vw,72px) clamp(18px,5vw,40px)" }}>
           <div
             style={{
@@ -27,7 +27,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               fontWeight: 600,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "#e8973c",
+              color: "var(--primary)",
             }}
           >
             {kicker}
@@ -39,7 +39,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               lineHeight: 1.08,
               fontWeight: 700,
               letterSpacing: "-0.025em",
-              color: "#e6eaf0",
+              color: "var(--foreground)",
               textWrap: "balance",
             }}
           >
@@ -51,7 +51,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               maxWidth: 620,
               fontSize: "clamp(14.5px,1.6vw,16.5px)",
               lineHeight: 1.6,
-              color: "#8a93a2",
+              color: "var(--muted-foreground)",
               textWrap: "pretty",
             }}
           >
@@ -65,12 +65,12 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               marginTop: 20,
               padding: "6px 12px",
               borderRadius: 999,
-              border: "1px solid #262d38",
-              background: "#14181f",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
             }}
           >
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: "#3fb68b" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, color: "#8a93a2" }}>
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--status-green)" }} />
+            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, color: "var(--muted-foreground)" }}>
               Last updated {updated}
             </span>
           </div>
@@ -89,7 +89,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
         }}
       >
         <aside style={{ flex: "1 1 200px", minWidth: 200, position: "sticky", top: 88 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#5c6573" }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--dim)" }}>
             On this page
           </div>
           <nav
@@ -98,16 +98,16 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               flexDirection: "column",
               gap: 9,
               marginTop: 14,
-              borderLeft: "1px solid #262d38",
+              borderLeft: "1px solid var(--border)",
               paddingLeft: 14,
             }}
           >
             {sections.map((s) => (
               <a
                 key={s.id}
-                className="mk-toc-link"
                 href={`#${s.id}`}
-                style={{ fontSize: 13, lineHeight: 1.4, color: "#8a93a2", textDecoration: "none" }}
+                className="transition-colors duration-150 hover:text-primary"
+                style={{ fontSize: 13, lineHeight: 1.4, color: "var(--muted-foreground)", textDecoration: "none" }}
               >
                 {s.h}
               </a>
@@ -124,7 +124,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
                   fontSize: "clamp(18px,2.2vw,22px)",
                   fontWeight: 700,
                   letterSpacing: "-0.01em",
-                  color: "#e6eaf0",
+                  color: "var(--foreground)",
                 }}
               >
                 {s.h}
@@ -132,7 +132,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               {s.body.map((p, i) => (
                 <p
                   key={i}
-                  style={{ margin: "0 0 12px", fontSize: 15, lineHeight: 1.72, color: "#8a93a2", textWrap: "pretty" }}
+                  style={{ margin: "0 0 12px", fontSize: 15, lineHeight: 1.72, color: "var(--muted-foreground)", textWrap: "pretty" }}
                 >
                   {p}
                 </p>
@@ -140,7 +140,7 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
               {s.bullets && (
                 <ul style={{ margin: "4px 0 12px", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
                   {s.bullets.map((b, i) => (
-                    <li key={i} style={{ fontSize: 15, lineHeight: 1.6, color: "#8a93a2" }}>
+                    <li key={i} style={{ fontSize: 15, lineHeight: 1.6, color: "var(--muted-foreground)" }}>
                       {b}
                     </li>
                   ))}
@@ -149,9 +149,9 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
             </div>
           ))}
 
-          <div style={{ marginTop: 8, border: "1px solid #262d38", borderRadius: 16, background: "#14181f", padding: 20 }}>
-            <div style={{ fontSize: 14.5, fontWeight: 700, color: "#e6eaf0" }}>Questions about this policy?</div>
-            <p style={{ margin: "7px 0 0", fontSize: 13.5, lineHeight: 1.6, color: "#8a93a2" }}>
+          <div style={{ marginTop: 8, border: "1px solid var(--border)", borderRadius: 16, background: "var(--card)", padding: 20 }}>
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: "var(--foreground)" }}>Questions about this policy?</div>
+            <p style={{ margin: "7px 0 0", fontSize: 13.5, lineHeight: 1.6, color: "var(--muted-foreground)" }}>
               Reach our team and we'll point you in the right direction.
             </p>
             <Link
@@ -166,13 +166,13 @@ export function LegalDoc({ kicker, title, intro, updated, sections }: LegalDocPr
                 borderRadius: 10,
                 fontSize: 14,
                 fontWeight: 600,
-                color: "#1a1206",
-                background: "#e8973c",
+                color: "var(--primary-foreground)",
+                background: "var(--primary)",
                 textDecoration: "none",
               }}
             >
               Contact us
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a1206" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary-foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="M13 6l6 6-6 6" />
               </svg>

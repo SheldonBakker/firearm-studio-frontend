@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { MarketingLogo } from "./site-header";
+import { BrandMark } from "~/components/common/brand";
 
 type FooterLink = { label: string; to: string; hash?: boolean };
 
@@ -33,7 +33,7 @@ const COLUMNS: { heading: string; links: FooterLink[] }[] = [
 
 const linkStyle: React.CSSProperties = {
   fontSize: 13.5,
-  color: "#5c6573",
+  color: "var(--dim)",
   width: "fit-content",
   textDecoration: "none",
 };
@@ -41,25 +41,24 @@ const linkStyle: React.CSSProperties = {
 function FootLink({ link }: { link: FooterLink }) {
   if (link.hash) {
     return (
-      <a className="mk-foot-link" href={link.to} style={linkStyle}>
+      <a className="transition-colors duration-150 hover:text-foreground" href={link.to} style={linkStyle}>
         {link.label}
       </a>
     );
   }
   return (
-    <Link className="mk-foot-link" to={link.to} style={linkStyle}>
+    <Link className="transition-colors duration-150 hover:text-foreground" to={link.to} style={linkStyle}>
       {link.label}
     </Link>
   );
 }
 
 export function SiteFooter() {
-  const year = new Date().getFullYear();
   return (
     <footer
       style={{
-        borderTop: "1px solid #1f252e",
-        background: "#0b0e12",
+        borderTop: "1px solid var(--line)",
+        background: "var(--deep)",
         fontFamily: "'IBM Plex Sans',system-ui,sans-serif",
       }}
     >
@@ -87,8 +86,8 @@ export function SiteFooter() {
                 textDecoration: "none",
               }}
             >
-              <MarketingLogo size={18} />
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#e6eaf0" }}>
+              <BrandMark size={32} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--foreground)" }}>
                 Firearm Studio
               </span>
             </Link>
@@ -97,7 +96,7 @@ export function SiteFooter() {
                 margin: "14px 0 0",
                 fontSize: 13,
                 lineHeight: 1.6,
-                color: "#5c6573",
+                color: "var(--dim)",
               }}
             >
               Storage &amp; compliance management for South African firearm
@@ -113,7 +112,7 @@ export function SiteFooter() {
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#8a93a2",
+                  color: "var(--muted-foreground)",
                 }}
               >
                 {col.heading}
@@ -143,17 +142,17 @@ export function SiteFooter() {
             justifyContent: "space-between",
             marginTop: 40,
             paddingTop: 24,
-            borderTop: "1px solid #1f252e",
+            borderTop: "1px solid var(--line)",
           }}
         >
-          <span style={{ fontSize: 12.5, color: "#5c6573" }}>
-            © {year} Firearm Studio. All rights reserved.
+          <span suppressHydrationWarning style={{ fontSize: 12.5, color: "var(--dim)" }}>
+            © {new Date().getFullYear()} Firearm Studio. All rights reserved.
           </span>
           <span
             style={{
               fontFamily: "'IBM Plex Mono',monospace",
               fontSize: 11,
-              color: "#5c6573",
+              color: "var(--dim)",
             }}
           >
             Made for SA storage providers · POPIA compliant

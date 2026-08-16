@@ -3,26 +3,8 @@ import { Link } from "react-router";
 import { useAuth } from "~/context/auth-context";
 import { Icon } from "~/components/common/icon";
 import { LogoutDialog } from "~/components/modals/logout-dialog";
-
-export function MarketingLogo({ size = 19 }: { size?: number }) {
-  const box = Math.round((size / 19) * 34);
-  return (
-    <img
-      src="/icon-192.png"
-      alt="Firearm Studio"
-      width={box}
-      height={box}
-      style={{
-        width: box,
-        height: box,
-        borderRadius: Math.round(box * 0.26),
-        boxShadow: "0 4px 14px rgba(0,0,0,.3)",
-        flexShrink: 0,
-        display: "block",
-      }}
-    />
-  );
-}
+import { Button } from "~/components/ui/button";
+import { BrandMark } from "~/components/common/brand";
 
 const NAV = [
   { href: "/#features", label: "Features" },
@@ -32,8 +14,120 @@ const NAV = [
   { href: "/#how", label: "How it works" },
 ];
 
-export function SiteHeader() {
+function AuthActions({
+  compact,
+  onClose,
+  onLogout,
+}: {
+  compact: boolean;
+  onClose?: () => void;
+  onLogout: () => void;
+}) {
   const { status, isLoggedIn } = useAuth();
+
+  if (status === "loading") {
+    return compact ? null : <div aria-hidden style={{ width: 220, height: 34 }} />;
+  }
+
+  if (isLoggedIn) {
+    if (compact) {
+      return (
+        <>
+          <Button asChild className="h-[42px] w-full rounded-[9px] text-[14.5px]" onClick={onClose}>
+            <Link to="/dashboard" prefetch="viewport">Go to Dashboard</Link>
+          </Button>
+          <Button asChild variant="outline" className="h-[42px] w-full rounded-[9px] text-[14.5px]" onClick={onClose}>
+            <Link to="/licences">
+              <Icon name="bell" size={16} />
+              Alerts
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-[42px] w-full rounded-[9px] text-[14.5px]"
+            onClick={() => { onClose?.(); onLogout(); }}
+          >
+            <Icon name="logout" size={15} />
+            Log out
+          </Button>
+        </>
+      );
+    }
+    return (
+      <>
+        <Link
+          to="/licences"
+          aria-label="Alerts"
+          title="Alerts"
+          style={{
+            position: "relative",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 34,
+            width: 34,
+            borderRadius: 9,
+            color: "var(--foreground)",
+            background: "var(--secondary)",
+            border: "1px solid var(--border2)",
+            textDecoration: "none",
+            flexShrink: 0,
+          }}
+        >
+          <Icon name="bell" size={16} />
+          <span
+            style={{
+              position: "absolute",
+              right: 8,
+              top: 7,
+              height: 7,
+              width: 7,
+              borderRadius: 9999,
+              background: "var(--status-red)",
+              border: "2px solid var(--secondary)",
+            }}
+          />
+        </Link>
+        <Button asChild className="h-[34px] rounded-[9px] px-4 text-[13.5px]" style={{ boxShadow: "0 4px 14px color-mix(in srgb, var(--primary) 25%, transparent)" }}>
+          <Link to="/dashboard" prefetch="viewport">Go to Dashboard</Link>
+        </Button>
+        <Button
+          variant="outline"
+          className="h-[34px] rounded-[9px] px-3.5 text-[13.5px] gap-[7px]"
+          onClick={onLogout}
+        >
+          <Icon name="logout" size={15} />
+          Log out
+        </Button>
+      </>
+    );
+  }
+
+  if (compact) {
+    return (
+      <>
+        <Button asChild variant="outline" className="h-[42px] w-full rounded-[9px] text-[14.5px]" onClick={onClose}>
+          <Link to="/login" prefetch="viewport">Sign in</Link>
+        </Button>
+        <Button asChild className="h-[42px] w-full rounded-[9px] text-[14.5px]" onClick={onClose}>
+          <Link to="/signup" prefetch="viewport">Get started</Link>
+        </Button>
+      </>
+    );
+  }
+  return (
+    <>
+      <Button asChild variant="ghost" className="h-[34px] rounded-[9px] px-3.5 text-[13.5px]">
+        <Link to="/login" prefetch="viewport">Sign in</Link>
+      </Button>
+      <Button asChild className="h-[34px] rounded-[9px] px-4 text-[13.5px]" style={{ boxShadow: "0 4px 14px color-mix(in srgb, var(--primary) 25%, transparent)" }}>
+        <Link to="/signup" prefetch="viewport">Get started</Link>
+      </Button>
+    </>
+  );
+}
+
+export function SiteHeader() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
@@ -43,10 +137,10 @@ export function SiteHeader() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: "rgba(14,17,22,0.82)",
+        background: "color-mix(in srgb, var(--background) 82%, transparent)",
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
-        borderBottom: "1px solid #1f252e",
+        borderBottom: "1px solid var(--line)",
       }}
     >
       <div
@@ -69,7 +163,7 @@ export function SiteHeader() {
             textDecoration: "none",
           }}
         >
-          <MarketingLogo />
+          <BrandMark size={34} />
           <span>
             <span
               style={{
@@ -78,7 +172,7 @@ export function SiteHeader() {
                 fontWeight: 700,
                 letterSpacing: "-0.01em",
                 lineHeight: 1,
-                color: "#e6eaf0",
+                color: "var(--foreground)",
               }}
             >
               Firearm Studio
@@ -92,7 +186,7 @@ export function SiteHeader() {
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
-                color: "#5c6573",
+                color: "var(--dim)",
               }}
             >
               Storage &amp; Compliance
@@ -101,175 +195,41 @@ export function SiteHeader() {
         </Link>
 
         <nav
-          className="mk-desktop-nav"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "clamp(14px,2.2vw,28px)",
-            flexWrap: "wrap",
-          }}
+          className="flex items-center flex-wrap max-[860px]:hidden"
+          style={{ gap: "clamp(14px,2.2vw,28px)" }}
         >
           {NAV.map((n) => (
-            <a
+            <Link
               key={n.href}
-              href={n.href}
-              className="mk-nav-link"
-              style={{ fontSize: 13.5, fontWeight: 500, color: "#8a93a2" }}
+              to={n.href}
+              className="transition-colors duration-150 hover:text-foreground"
+              style={{ fontSize: 13.5, fontWeight: 500, color: "var(--muted-foreground)", textDecoration: "none" }}
             >
               {n.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div
-          className="mk-desktop-actions"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            flexShrink: 0,
-          }}
+          className="flex items-center flex-shrink-0 max-[860px]:hidden"
+          style={{ gap: 10 }}
         >
-          {status === "loading" ? (
-            <div aria-hidden style={{ width: 220, height: 34 }} />
-          ) : isLoggedIn ? (
-            <>
-              <Link
-                to="/licences"
-                aria-label="Alerts"
-                title="Alerts"
-                className="mk-logout"
-                style={{
-                  position: "relative",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 34,
-                  width: 34,
-                  borderRadius: 9,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  textDecoration: "none",
-                  flexShrink: 0,
-                }}
-              >
-                <Icon name="bell" size={16} />
-                <span
-                  style={{
-                    position: "absolute",
-                    right: 8,
-                    top: 7,
-                    height: 7,
-                    width: 7,
-                    borderRadius: 9999,
-                    background: "var(--status-red)",
-                    border: "2px solid #1a1f28",
-                  }}
-                />
-              </Link>
-              <Link
-                to="/dashboard"
-                prefetch="viewport"
-                className="mk-cta"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  height: 34,
-                  padding: "0 16px",
-                  borderRadius: 9,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: "#1a1206",
-                  background: "#e8973c",
-                  boxShadow: "0 4px 14px rgba(232,151,60,.25)",
-                  textDecoration: "none",
-                }}
-              >
-                Go to Dashboard
-              </Link>
-              <button
-                type="button"
-                onClick={() => setConfirmOpen(true)}
-                className="mk-logout"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  height: 34,
-                  padding: "0 14px",
-                  borderRadius: 9,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  cursor: "pointer",
-                }}
-              >
-                <Icon name="logout" size={15} />
-                Log out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                prefetch="viewport"
-                className="mk-ghost"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  height: 34,
-                  padding: "0 14px",
-                  borderRadius: 9,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  textDecoration: "none",
-                }}
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/signup"
-                prefetch="viewport"
-                className="mk-cta"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  height: 34,
-                  padding: "0 16px",
-                  borderRadius: 9,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: "#1a1206",
-                  background: "#e8973c",
-                  boxShadow: "0 4px 14px rgba(232,151,60,.25)",
-                  textDecoration: "none",
-                }}
-              >
-                Get started
-              </Link>
-            </>
-          )}
+          <AuthActions compact={false} onLogout={() => setConfirmOpen(true)} />
         </div>
 
         <button
           type="button"
-          className="mk-hamburger mk-logout"
+          className="hidden max-[860px]:inline-flex items-center justify-center transition-[background,border-color] duration-150 hover:bg-raised"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
           style={{
-            alignItems: "center",
-            justifyContent: "center",
             height: 38,
             width: 38,
             borderRadius: 9,
-            color: "#e6eaf0",
-            background: "#1a1f28",
-            border: "1px solid #333b49",
+            color: "var(--foreground)",
+            background: "var(--secondary)",
+            border: "1px solid var(--border2)",
             cursor: "pointer",
             flexShrink: 0,
           }}
@@ -277,14 +237,18 @@ export function SiteHeader() {
           <Icon
             name={menuOpen ? "plus" : "list"}
             size={18}
-            style={
-              menuOpen ? { transform: "rotate(45deg)" } : undefined
-            }
+            style={menuOpen ? { transform: "rotate(45deg)" } : undefined}
           />
         </button>
       </div>
 
-      <div className={`mk-mobile-panel${menuOpen ? " is-open" : ""}`}>
+      <div
+        className={menuOpen ? "block" : "hidden"}
+        style={{
+          background: "var(--background)",
+          borderTop: "1px solid var(--line)",
+        }}
+      >
         <nav
           style={{
             display: "flex",
@@ -293,21 +257,22 @@ export function SiteHeader() {
           }}
         >
           {NAV.map((n) => (
-            <a
+            <Link
               key={n.href}
-              href={n.href}
-              className="mk-nav-link"
+              to={n.href}
+              className="transition-colors duration-150 hover:text-foreground"
               onClick={closeMenu}
               style={{
                 padding: "12px 0",
                 fontSize: 15,
                 fontWeight: 500,
-                color: "#8a93a2",
-                borderBottom: "1px solid #1f252e",
+                color: "var(--muted-foreground)",
+                borderBottom: "1px solid var(--line)",
+                textDecoration: "none",
               }}
             >
               {n.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -319,121 +284,7 @@ export function SiteHeader() {
             padding: "14px clamp(18px,3vw,28px) 20px",
           }}
         >
-          {status === "loading" ? null : isLoggedIn ? (
-            <>
-              <Link
-                to="/dashboard"
-                prefetch="viewport"
-                onClick={closeMenu}
-                className="mk-cta"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 42,
-                  borderRadius: 9,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: "#1a1206",
-                  background: "#e8973c",
-                  textDecoration: "none",
-                }}
-              >
-                Go to Dashboard
-              </Link>
-              <Link
-                to="/licences"
-                onClick={closeMenu}
-                className="mk-logout"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  height: 42,
-                  borderRadius: 9,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  textDecoration: "none",
-                }}
-              >
-                <Icon name="bell" size={16} />
-                Alerts
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  closeMenu();
-                  setConfirmOpen(true);
-                }}
-                className="mk-logout"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  height: 42,
-                  borderRadius: 9,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  cursor: "pointer",
-                }}
-              >
-                <Icon name="logout" size={15} />
-                Log out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                prefetch="viewport"
-                onClick={closeMenu}
-                className="mk-logout"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 42,
-                  borderRadius: 9,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: "#e6eaf0",
-                  background: "#1a1f28",
-                  border: "1px solid #333b49",
-                  textDecoration: "none",
-                }}
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/signup"
-                prefetch="viewport"
-                onClick={closeMenu}
-                className="mk-cta"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 42,
-                  borderRadius: 9,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: "#1a1206",
-                  background: "#e8973c",
-                  textDecoration: "none",
-                }}
-              >
-                Get started
-              </Link>
-            </>
-          )}
+          <AuthActions compact={true} onClose={closeMenu} onLogout={() => setConfirmOpen(true)} />
         </div>
       </div>
 

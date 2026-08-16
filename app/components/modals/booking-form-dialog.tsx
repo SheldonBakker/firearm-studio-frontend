@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { todayInSast } from "~/lib/utils/sast";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import {
   Sheet,
@@ -95,7 +96,7 @@ export function BookingFormDialog({
   const activePackages = packages.filter((p) => p.isActive);
   const selectedPackage = activePackages.find((p) => p.id === packageId);
   const selectedSlot = slots.find((s) => s.startTime === startTime);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInSast();
   const shooters = Number(shooterCount);
 
   const canSubmit =

@@ -1,27 +1,27 @@
-export interface RegisterSageConnectionRequest {
+export interface RegisterAccountingConnectionRequest {
   apiKey?: string | null;
   username?: string | null;
   password?: string | null;
-  sageCompanyId: number;
+  externalCompanyId: number;
 }
 
-export interface SageConnectionDetailsResponse {
+export interface AccountingConnectionDetailsResponse {
   id: string;
   companyId: string;
   apiKey: boolean;
   username: boolean;
   password: boolean;
-  sageCompanyId: number;
-  sageCompanyName: string | null;
+  externalCompanyId: number;
+  externalCompanyName: string | null;
   lastValidatedAt: string;
   lastRegisteredByAuthUserId: string;
   createdAt: string;
   updatedAt: string | null;
 }
 
-export interface SageConnectionResponse {
+export interface AccountingConnectionResponse {
   connected: boolean;
-  sageCompanyId: number;
-  sageCompanyName: string | null;
+  externalCompanyId: number;
+  externalCompanyName: string | null;
   lastValidatedAt: string;
 }

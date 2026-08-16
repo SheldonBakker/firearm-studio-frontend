@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator, useSearchParams } from "react-router";
+import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/bookings";
 import { Share2Icon } from "lucide-react";
@@ -30,12 +30,10 @@ import { BookingFormDialog } from "~/components/modals/booking-form-dialog";
 import { ShareCalendarDialog } from "~/components/modals/share-calendar-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { BookingSource, BookingStatus, enumKey } from "~/lib/types/enums";
-import type {
-  BookingListItemDto,
-  BookingListItemDtoPaginatedResponse,
-} from "~/lib/api/bookings/types";
-
-const PAGE_SIZE = 20;
+import type { BookingListItemDto } from "~/lib/api/bookings/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -52,10 +50,7 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
+  const pageNumber = parsePage(searchParams);
   const requestedStatus = searchParams.get("status");
   const status =
     requestedStatus && BOOKING_STATUSES.has(requestedStatus)
@@ -68,25 +63,15 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedTo = searchParams.get("dateTo") ?? "";
   const dateTo = DATE_PATTERN.test(requestedTo) ? requestedTo : undefined;
 
-  const bookingsP = bookingsApi
-    .list({
-      pageNumber,
-      pageSize: PAGE_SIZE,
-      sortOrder: "desc",
-      status,
-      rangeId,
-      dateFrom,
-      dateTo,
-    })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies BookingListItemDtoPaginatedResponse,
-    );
+  const bookingsP = bookingsApi.list({
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    sortOrder: "desc",
+    status,
+    rangeId,
+    dateFrom,
+    dateTo,
+  });
   const rangesP = rangesApi.all().catch(() => []);
   const packagesP = packagesApi.all().catch(() => []);
   const companyP = companyApi.get().catch(() => null);
@@ -100,7 +85,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 
 export default function Bookings({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const revalidator = useRevalidator();
   const user = useSessionUser();
   const writable = can(user, "bookings:write");
@@ -122,13 +107,6 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (value) next.set(key, value);
     else next.delete(key);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -310,66 +288,53 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {bookingsPage.totalCount > bookingsPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(bookingsPage.pageNumber - 1) * bookingsPage.pageSize + 1}–
-                    {Math.min(
-                      bookingsPage.pageNumber * bookingsPage.pageSize,
-                      bookingsPage.totalCount,
-                    )}{" "}
-                    of {bookingsPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={bookingsPage.pageNumber <= 1}
-                      onClick={() => navigatePage(bookingsPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        bookingsPage.pageNumber * bookingsPage.pageSize >=
-                        bookingsPage.totalCount
-                      }
-                      onClick={() => navigatePage(bookingsPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={bookingsPage} onPage={navigatePage} />
             </>
           );
         }}
       </Resolve>
 
-      <Resolve resolve={loaderData.ranges} fallback={null}>
-        {(ranges) => (
-          <Resolve resolve={loaderData.packages} fallback={null}>
-            {(packages) => (
-              <BookingFormDialog
-                open={addOpen}
-                onOpenChange={setAddOpen}
-                ranges={ranges}
-                packages={packages}
-                onCreated={(id) => {
-                  toast.success("Booking created");
-                  if (id) navigate(`/bookings/${id}`);
-                  else revalidator.revalidate();
-                }}
-              />
-            )}
-          </Resolve>
+      <Resolve
+        resolve={Promise.all([loaderData.ranges, loaderData.packages])}
+        fallback={
+          <BookingFormDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            ranges={[]}
+            packages={[]}
+            onCreated={(id) => {
+              toast.success("Booking created");
+              if (id) navigate(`/bookings/${id}`);
+              else revalidator.revalidate();
+            }}
+          />
+        }
+      >
+        {([ranges, packages]) => (
+          <BookingFormDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            ranges={ranges}
+            packages={packages}
+            onCreated={(id) => {
+              toast.success("Booking created");
+              if (id) navigate(`/bookings/${id}`);
+              else revalidator.revalidate();
+            }}
+          />
         )}
       </Resolve>
 
-      <Resolve resolve={loaderData.company} fallback={null}>
+      <Resolve
+        resolve={loaderData.company}
+        fallback={
+          <ShareCalendarDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            companyId={null}
+          />
+        }
+      >
         {(company) => (
           <ShareCalendarDialog
             open={shareOpen}

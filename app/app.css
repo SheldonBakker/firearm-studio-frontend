@@ -54,6 +54,8 @@
   --color-status-purple: var(--status-purple);
   --color-status-teal: var(--status-teal);
   --color-status-orange: var(--status-orange);
+  --color-deep: var(--deep);
+  --color-error-text: var(--error-text);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -100,6 +102,8 @@
   --status-purple: #9a7cf0;
   --status-teal: #34b6c9;
   --status-orange: #f2711c;
+  --deep: #0b0e12;
+  --error-text: #ef6b73;
 
   --sidebar: #14181f;
   --sidebar-foreground: #e6eaf0;
@@ -169,7 +173,7 @@
   animation: fadeIn 0.12s ease-out;
 }
 
-@keyframes mkFadeUp {
+@keyframes fadeUpSlow {
   from {
     opacity: 0;
     transform: translateY(14px);
@@ -179,114 +183,9 @@
     transform: none;
   }
 }
-.mk-fade-up {
-  animation: mkFadeUp 0.5s ease-out both;
+.animate-fade-up-slow {
+  animation: fadeUpSlow 0.5s ease-out both;
 }
-.mk-fade-up-delayed {
-  animation: mkFadeUp 0.6s ease-out 0.08s both;
-}
-
-.mk-nav-link {
-  transition: color 0.15s;
-}
-.mk-nav-link:hover {
-  color: #e6eaf0;
-}
-.mk-ghost {
-  transition: background 0.15s;
-}
-.mk-ghost:hover {
-  background: #1a1f28;
-}
-.mk-logout {
-  transition:
-    background 0.15s,
-    border-color 0.15s;
-}
-.mk-logout:hover {
-  background: #222834;
-  border-color: #3d4655;
-}
-.mk-cta {
-  transition: background 0.15s;
-}
-.mk-cta:hover {
-  background: #f0a64a;
-}
-.mk-cta-lg {
-  transition:
-    transform 0.15s,
-    background 0.15s;
-}
-.mk-cta-lg:hover {
-  transform: translateY(-2px);
-  background: #f0a64a;
-}
-.mk-ghost-lg {
-  transition: background 0.15s;
-}
-.mk-ghost-lg:hover {
-  background: #222834;
-}
-.mk-card {
-  transition:
-    transform 0.18s,
-    border-color 0.18s;
-}
-.mk-card:hover {
-  transform: translateY(-3px);
-  border-color: #333b49;
-}
-.mk-foot-link {
-  transition: color 0.15s;
-}
-.mk-foot-link:hover {
-  color: #e6eaf0;
-}
-.mk-toc-link {
-  transition: color 0.15s;
-}
-.mk-toc-link:hover {
-  color: #e8973c;
-}
-.mk-input {
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-}
-.mk-input:focus {
-  outline: none;
-  border-color: #e8973c;
-  background: #0e1116;
-}
-.mk-input::placeholder {
-  color: #5c6573;
-}
-.mk-method {
-  transition: border-color 0.18s;
-}
-.mk-method:hover {
-  border-color: #333b49;
-}
-
-/* Marketing header — mobile hamburger menu */
-.mk-hamburger {
-  display: none;
-}
-.mk-mobile-panel {
-  display: none;
-  background: #0e1116;
-  border-top: 1px solid #1f252e;
-}
-@media (max-width: 860px) {
-  .mk-desktop-nav,
-  .mk-desktop-actions {
-    display: none !important;
-  }
-  .mk-hamburger {
-    display: inline-flex !important;
-  }
-  .mk-mobile-panel.is-open {
-    display: block;
-  }
+.animate-fade-up-slow-delayed {
+  animation: fadeUpSlow 0.6s ease-out 0.08s both;
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRevalidator, useSearchParams } from "react-router";
+import { useRevalidator } from "react-router";
 import { toast } from "sonner";
 import { Trash2Icon } from "lucide-react";
 import type { Route } from "./+types/ranges";
@@ -20,11 +20,11 @@ import { RangeFormDialog } from "~/components/modals/range-form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import type {
   ShootingRangeListItemDto,
-  ShootingRangeListItemDtoPaginatedResponse,
   ShootingRangeResponse,
 } from "~/lib/api/ranges/types";
-
-const PAGE_SIZE = 20;
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const ACTIVE_FILTERS = [
   { id: "all", label: "All" },
@@ -36,32 +36,19 @@ const ACTIVE_VALUES = new Set(ACTIVE_FILTERS.slice(1).map(({ id }) => id));
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
+  const pageNumber = parsePage(searchParams);
   const requestedActive = searchParams.get("active");
   const isActive =
     requestedActive && ACTIVE_VALUES.has(requestedActive)
       ? requestedActive === "true"
       : undefined;
 
-  const rangesP = rangesApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", isActive })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies ShootingRangeListItemDtoPaginatedResponse,
-    );
+  const rangesP = rangesApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", isActive });
   return { data: rangesP };
 }
 
 export default function Ranges({ loaderData }: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const revalidator = useRevalidator();
   const confirm = useConfirm();
   const user = useSessionUser();
@@ -81,13 +68,6 @@ export default function Ranges({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (value === "all") next.delete("active");
     else next.set("active", value);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -225,40 +205,7 @@ export default function Ranges({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {rangesPage.totalCount > rangesPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(rangesPage.pageNumber - 1) * rangesPage.pageSize + 1}–
-                    {Math.min(
-                      rangesPage.pageNumber * rangesPage.pageSize,
-                      rangesPage.totalCount,
-                    )}{" "}
-                    of {rangesPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={rangesPage.pageNumber <= 1}
-                      onClick={() => navigatePage(rangesPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        rangesPage.pageNumber * rangesPage.pageSize >=
-                        rangesPage.totalCount
-                      }
-                      onClick={() => navigatePage(rangesPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={rangesPage} onPage={navigatePage} />
             </>
           );
         }}

@@ -18,34 +18,21 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { CustomerType, enumKey } from "~/lib/types/enums";
-import type {
-  CustomerListItemDto,
-  CustomerListItemDtoPaginatedResponse,
-} from "~/lib/api/customers/types";
-
-const PAGE_SIZE = 20;
+import type { CustomerListItemDto } from "~/lib/api/customers/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
-  const requestedPage = Number(new URL(request.url).searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const customersP = customersApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies CustomerListItemDtoPaginatedResponse,
-    );
+  const pageNumber = parsePage(new URL(request.url).searchParams);
+  const customersP = customersApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" });
   return { data: customersP };
 }
 
 export default function Customers({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+  const { navigatePage } = usePagedSearchParams();
   const user = useSessionUser();
   const [addOpen, setAddOpen] = useState(false);
 
@@ -148,45 +135,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                 onRowClick={(r) => navigate(`/customers/${r.id}`)}
                 empty="No customers yet."
               />
-              {customerPage.totalCount > customerPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(customerPage.pageNumber - 1) * customerPage.pageSize + 1}
-                    –
-                    {Math.min(
-                      customerPage.pageNumber * customerPage.pageSize,
-                      customerPage.totalCount,
-                    )}{" "}
-                    of {customerPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={customerPage.pageNumber <= 1}
-                      onClick={() =>
-                        navigate(`/customers?page=${customerPage.pageNumber - 1}`)
-                      }
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        customerPage.pageNumber * customerPage.pageSize >=
-                        customerPage.totalCount
-                      }
-                      onClick={() =>
-                        navigate(`/customers?page=${customerPage.pageNumber + 1}`)
-                      }
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={customerPage} onPage={navigatePage} />
             </>
           );
         }}

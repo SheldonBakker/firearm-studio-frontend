@@ -24,6 +24,7 @@ export function DataTable<T>({
   empty = "No records.",
   loading = false,
   loadingRows = 6,
+  rowKey,
 }: {
   columns: Column<T>[];
   rows: T[];
@@ -31,6 +32,7 @@ export function DataTable<T>({
   empty?: React.ReactNode;
   loading?: boolean;
   loadingRows?: number;
+  rowKey?: (row: T) => string | number;
 }) {
   const alignCls = (a?: string) =>
     a === "right" ? "text-right" : a === "center" ? "text-center" : "text-left";
@@ -81,8 +83,19 @@ export function DataTable<T>({
           ) : rows.length ? (
             rows.map((row, ri) => (
               <TableRow
-                key={ri}
+                key={rowKey ? rowKey(row) : ri}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                onKeyDown={
+                  onRowClick
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onRowClick(row);
+                        }
+                      }
+                    : undefined
+                }
                 className={cn(
                   "border-b border-line last:border-0",
                   onRowClick && "cursor-pointer hover:bg-secondary",

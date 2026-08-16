@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator, useSearchParams } from "react-router";
+import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/licences";
 import { licencesApi } from "~/lib/api/licences/licences";
@@ -16,12 +16,10 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/types/enums";
-import type {
-  LicenceListItemDtoPaginatedResponse,
-  LicenceResponse,
-} from "~/lib/api/licences/types";
-
-const PAGE_SIZE = 20;
+import type { LicenceResponse } from "~/lib/api/licences/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -40,9 +38,7 @@ function dateInputValue(value: string | null | undefined) {
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageNumber = parsePage(searchParams);
   const requestedStatus = searchParams.get("status");
   const status =
     requestedStatus && LICENCE_STATUSES.has(requestedStatus)
@@ -51,24 +47,14 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const licenceNumber =
     searchParams.get("licenceNumber")?.trim() || undefined;
 
-  const licencesP = licencesApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies LicenceListItemDtoPaginatedResponse,
-    );
+  const licencesP = licencesApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status });
   return { data: licencesP };
 }
 
 export default function Licences({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const user = useSessionUser();
   const writable = can(user, "registry:write");
   const [editing, setEditing] = useState<LicenceResponse | null>(null);
@@ -83,13 +69,6 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (status === "all") next.delete("status");
     else next.set("status", status);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -190,104 +169,68 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {licencesPage.totalCount > licencesPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(licencesPage.pageNumber - 1) * licencesPage.pageSize + 1}–
-                    {Math.min(
-                      licencesPage.pageNumber * licencesPage.pageSize,
-                      licencesPage.totalCount,
-                    )}{" "}
-                    of {licencesPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={licencesPage.pageNumber <= 1}
-                      onClick={() =>
-                        navigatePage(licencesPage.pageNumber - 1)
-                      }
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        licencesPage.pageNumber * licencesPage.pageSize >=
-                        licencesPage.totalCount
-                      }
-                      onClick={() =>
-                        navigatePage(licencesPage.pageNumber + 1)
-                      }
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={licencesPage} onPage={navigatePage} />
 
-              {editing && (
-                <FormDialog
-                  open={!!editing}
-                  onOpenChange={(open) => !open && setEditing(null)}
-                  title="Edit licence"
-                  submitLabel="Save changes"
-                  fields={[
-                    {
-                      name: "licenceNumber",
-                      label: "Licence number",
-                      full: true,
-                      defaultValue: editing.licenceNumber ?? "",
-                    },
-                    {
-                      name: "issuedOn",
-                      label: "Issued on",
-                      type: "date",
-                      defaultValue: dateInputValue(editing.issuedOn),
-                    },
-                    {
-                      name: "expiresOn",
-                      label: "Expires on",
-                      type: "date",
-                      required: true,
-                      defaultValue: dateInputValue(editing.expiresOn),
-                    },
-                    {
-                      name: "status",
-                      label: "Status",
-                      type: "select",
-                      required: true,
-                      defaultValue:
-                        enumKey(LicenceStatus, editing.status) ?? "Unknown",
-                      options: LICENCE_STATUS_NAMES.map((status) => ({
-                        value: status,
-                        label: status.replace(/([A-Z])/g, " $1").trim(),
-                      })),
-                    },
-                  ]}
-                  onSubmit={async (values) => {
-                    await licencesApi.update(editing.id, {
-                      licenceNumber: values.licenceNumber || null,
-                      issuedOn: values.issuedOn || null,
-                      expiresOn: values.expiresOn,
-                      status:
-                        LicenceStatus[
-                          values.status as keyof typeof LicenceStatus
-                        ],
-                    });
-                    toast.success("Licence updated");
-                    setEditing(null);
-                    revalidator.revalidate();
-                  }}
-                />
-              )}
             </>
           );
         }}
       </Resolve>
+
+      {editing && (
+        <FormDialog
+          open={!!editing}
+          onOpenChange={(open) => !open && setEditing(null)}
+          title="Edit licence"
+          submitLabel="Save changes"
+          fields={[
+            {
+              name: "licenceNumber",
+              label: "Licence number",
+              full: true,
+              defaultValue: editing.licenceNumber ?? "",
+            },
+            {
+              name: "issuedOn",
+              label: "Issued on",
+              type: "date",
+              defaultValue: dateInputValue(editing.issuedOn),
+            },
+            {
+              name: "expiresOn",
+              label: "Expires on",
+              type: "date",
+              required: true,
+              defaultValue: dateInputValue(editing.expiresOn),
+            },
+            {
+              name: "status",
+              label: "Status",
+              type: "select",
+              required: true,
+              defaultValue:
+                enumKey(LicenceStatus, editing.status) ?? "Unknown",
+              options: LICENCE_STATUS_NAMES.map((status) => ({
+                value: status,
+                label: status.replace(/([A-Z])/g, " $1").trim(),
+              })),
+            },
+          ]}
+          onSubmit={async (values) => {
+            await licencesApi.update(editing.id, {
+              licenceNumber: values.licenceNumber || null,
+              issuedOn: values.issuedOn || null,
+              expiresOn: values.expiresOn,
+              status:
+                LicenceStatus[
+                  values.status as keyof typeof LicenceStatus
+                ],
+            });
+            toast.success("Licence updated");
+            setEditing(null);
+            revalidator.revalidate();
+          }}
+        />
+      )}
     </PageWrap>
   );
 }

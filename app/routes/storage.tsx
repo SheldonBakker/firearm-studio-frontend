@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator, useSearchParams } from "react-router";
+import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/storage";
 import { storageApi } from "~/lib/api/storage/storage";
@@ -15,12 +15,10 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/types/enums";
-import type {
-  StorageRecordDtoPaginatedResponse,
-  StorageRecordResponse,
-} from "~/lib/api/storage/types";
-
-const PAGE_SIZE = 20;
+import type { StorageRecordResponse } from "~/lib/api/storage/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -33,9 +31,7 @@ const STORAGE_STATUSES = new Set(STATUS_FILTERS.slice(1).map(({ id }) => id));
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageNumber = parsePage(searchParams);
   const requestedStatus = searchParams.get("storageStatus");
   const storageStatus =
     requestedStatus && STORAGE_STATUSES.has(requestedStatus)
@@ -44,24 +40,14 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const serialNumber = searchParams.get("serialNumber")?.trim() || undefined;
   const customerName = searchParams.get("customerName")?.trim() || undefined;
 
-  const storageP = storageApi
-    .listActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies StorageRecordDtoPaginatedResponse,
-    );
+  const storageP = storageApi.listActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName });
   return { data: storageP };
 }
 
 export default function Storage({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const user = useSessionUser();
   const [releasing, setReleasing] = useState<StorageRecordResponse | null>(
     null,
@@ -81,13 +67,6 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (status === "all") next.delete("storageStatus");
     else next.set("storageStatus", status);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -213,71 +192,39 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {storagePage.totalCount > storagePage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(storagePage.pageNumber - 1) * storagePage.pageSize + 1}–
-                    {Math.min(
-                      storagePage.pageNumber * storagePage.pageSize,
-                      storagePage.totalCount,
-                    )}{" "}
-                    of {storagePage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={storagePage.pageNumber <= 1}
-                      onClick={() => navigatePage(storagePage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        storagePage.pageNumber * storagePage.pageSize >=
-                        storagePage.totalCount
-                      }
-                      onClick={() => navigatePage(storagePage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={storagePage} onPage={navigatePage} />
 
-              {releasing && (
-                <FormDialog
-                  open={!!releasing}
-                  onOpenChange={(v) => !v && setReleasing(null)}
-                  title="Release from storage"
-                  description={`${releasing.serialNumber ?? "Firearm"} - confirm release date.`}
-                  submitLabel="Release"
-                  fields={[
-                    {
-                      name: "storedUntil",
-                      label: "Released on",
-                      type: "date",
-                      full: true,
-                    },
-                  ]}
-                  onSubmit={async (v) => {
-                    await storageApi.update(releasing.id, {
-                      storageStatus: StorageStatus.Released,
-                      storedUntil: v.storedUntil || null,
-                    });
-                    toast.success("Storage released");
-                    setReleasing(null);
-                    revalidator.revalidate();
-                  }}
-                />
-              )}
             </>
           );
         }}
       </Resolve>
+
+      {releasing && (
+        <FormDialog
+          open={!!releasing}
+          onOpenChange={(v) => !v && setReleasing(null)}
+          title="Release from storage"
+          description={`${releasing.serialNumber ?? "Firearm"} - confirm release date.`}
+          submitLabel="Release"
+          fields={[
+            {
+              name: "storedUntil",
+              label: "Released on",
+              type: "date",
+              full: true,
+            },
+          ]}
+          onSubmit={async (v) => {
+            await storageApi.update(releasing.id, {
+              storageStatus: StorageStatus.Released,
+              storedUntil: v.storedUntil || null,
+            });
+            toast.success("Storage released");
+            setReleasing(null);
+            revalidator.revalidate();
+          }}
+        />
+      )}
     </PageWrap>
   );
 }

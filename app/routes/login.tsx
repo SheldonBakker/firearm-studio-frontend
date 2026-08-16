@@ -23,7 +23,6 @@ export function meta({ location }: Route.MetaArgs) {
 }
 
 export async function clientLoader() {
-  // Already signed in? Skip the form.
   const user = await getSessionUser();
   if (user) throw redirect("/dashboard");
   return null;

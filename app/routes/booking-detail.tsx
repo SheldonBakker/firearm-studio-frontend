@@ -10,6 +10,7 @@ import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { EMDASH, fmtDate, fmtDateTime, fmtMoney } from "~/lib/utils/format";
 import { getSessionUser, useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
+import { todayInSast } from "~/lib/utils/sast";
 import { PageWrap, BackLink, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { StatusBadge } from "~/components/common/status-badge";
@@ -43,10 +44,6 @@ const ORIGIN_LABELS: Record<FirearmOrigin, string> = {
   [FirearmOrigin.RangeRental]: "Range rental",
 };
 
-function todaySouthAfrica(): string {
-  const saMs = Date.now() + 2 * 60 * 60 * 1000;
-  return new Date(saMs).toISOString().slice(0, 10);
-}
 
 type DepositState = "DepositDue" | "DepositPaid" | "DepositExpired";
 
@@ -107,7 +104,7 @@ function BookingView({ data }: { data: BookingDetailData }) {
   const canCheckIn =
     writable &&
     isConfirmed &&
-    booking.bookingDate === todaySouthAfrica() &&
+    booking.bookingDate === todayInSast() &&
     !booking.checkedInAt;
 
   const [checkInOpen, setCheckInOpen] = useState(false);
