@@ -2,7 +2,7 @@ const WAHA_BASE_URL = process.env.WAHA_BASE_URL ?? "";
 const WAHA_SESSION_ID = process.env.WAHA_SESSION_ID ?? "";
 const WAHA_API_KEY = process.env.WAHA_API_KEY ?? "";
 
-const INBOUND_DIRECTION = "INBOUND";
+const INBOUND_DIRECTION = "incoming";
 
 export function chatIdFor(phoneE164: string): string {
   return `${phoneE164.replace(/^\+/, "")}@c.us`;
