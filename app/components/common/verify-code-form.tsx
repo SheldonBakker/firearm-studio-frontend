@@ -9,7 +9,8 @@ interface VerifyCodeFormProps {
   email: string;
   submitLabel?: string;
   onSubmit: (code: string) => Promise<{ error: string | null }>;
-  onResend: () => Promise<{ error: string | null }>;
+  onResend?: () => Promise<{ error: string | null }>;
+  allowResend?: boolean;
   children?: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ export function VerifyCodeForm({
   submitLabel = "Verify",
   onSubmit,
   onResend,
+  allowResend = true,
   children,
 }: VerifyCodeFormProps) {
   const [code, setCode] = useState("");
@@ -25,12 +27,13 @@ export function VerifyCodeForm({
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+  const resendEnabled = allowResend && Boolean(onResend);
 
   useEffect(() => {
-    if (cooldown <= 0) return;
+    if (!resendEnabled || cooldown <= 0) return;
     const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(id);
-  }, [cooldown]);
+  }, [cooldown, resendEnabled]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +52,7 @@ export function VerifyCodeForm({
   }
 
   async function resend() {
+    if (!onResend) return;
     setError(null);
     setNotice(null);
     setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -102,14 +106,16 @@ export function VerifyCodeForm({
         {loading ? "Checking…" : submitLabel}
       </Button>
 
-      <button
-        type="button"
-        onClick={resend}
-        disabled={cooldown > 0}
-        className="text-[13px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
-      >
-        {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
-      </button>
+      {resendEnabled && (
+        <button
+          type="button"
+          onClick={resend}
+          disabled={cooldown > 0}
+          className="text-[13px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
+        >
+          {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
+        </button>
+      )}
     </form>
   );
 }
