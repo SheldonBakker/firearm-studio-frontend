@@ -87,11 +87,6 @@ export default function Login() {
       <AuthShell
         title="Enter your code"
         subtitle="Two-factor authentication is on for this account"
-        footer={
-          <Link to="/signup" className="font-semibold text-primary hover:underline">
-            Create one
-          </Link>
-        }
       >
         <VerifyCodeForm
           destination={email}
