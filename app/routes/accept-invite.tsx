@@ -9,8 +9,10 @@ import { AuthShell } from "~/components/common/auth-shell";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { PasswordInput } from "~/components/common/password-input";
+import { PhoneInput } from "~/components/common/phone-input";
 import { VerifyCodeForm } from "~/components/common/verify-code-form";
 import { requiredEmailSchema } from "~/lib/utils/validation";
+import { optionalPhoneSchema } from "~/lib/utils/phone";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -29,6 +31,7 @@ export default function AcceptInvite() {
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [phone, setPhone] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function validate(): boolean {
@@ -37,12 +40,13 @@ export default function AcceptInvite() {
         email: requiredEmailSchema,
         password: z.string().min(12, "Password must be at least 12 characters."),
         confirm: z.string().min(1, "Confirm your password."),
+        phone: optionalPhoneSchema,
       })
       .refine((data) => data.password === data.confirm, {
         message: "Passwords do not match.",
         path: ["confirm"],
       })
-      .safeParse({ email, password, confirm });
+      .safeParse({ email, password, confirm, phone });
 
     if (result.success) {
       setFieldErrors({});
@@ -77,7 +81,7 @@ export default function AcceptInvite() {
           if (!validate()) {
             return { error: "Check the highlighted fields and try again." };
           }
-          const result = await acceptInvite(email, code, password);
+          const result = await acceptInvite(email, code, password, phone || null);
           if (!result.error) {
             toast.success("Welcome aboard.");
             navigate("/dashboard", { replace: true });
@@ -136,6 +140,21 @@ export default function AcceptInvite() {
           {fieldErrors.confirm && (
             <p className="text-[12px] font-medium text-destructive">
               {fieldErrors.confirm}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="invite-phone">Phone number (optional)</Label>
+          <PhoneInput
+            id="invite-phone"
+            value={phone}
+            onValueChange={setPhone}
+            aria-invalid={Boolean(fieldErrors.phone)}
+          />
+          {fieldErrors.phone && (
+            <p className="text-[12px] font-medium text-destructive">
+              {fieldErrors.phone}
             </p>
           )}
         </div>

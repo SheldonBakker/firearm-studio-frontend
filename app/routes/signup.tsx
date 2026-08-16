@@ -9,7 +9,9 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { PasswordInput } from "~/components/common/password-input";
+import { PhoneInput } from "~/components/common/phone-input";
 import { requiredEmailSchema } from "~/lib/utils/validation";
+import { optionalPhoneSchema } from "~/lib/utils/phone";
 import { VerifyCodeForm } from "~/components/common/verify-code-form";
 
 export function meta({ location }: Route.MetaArgs) {
@@ -32,6 +34,7 @@ export default function Signup() {
   const { signUp, verifyEmail, resendCode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,8 +47,9 @@ export default function Signup() {
       .object({
         email: requiredEmailSchema,
         password: z.string().min(12, "Password must be at least 12 characters."),
+        phone: optionalPhoneSchema,
       })
-      .safeParse({ email, password });
+      .safeParse({ email, password, phone });
 
     if (!result.success) {
       const errors: Record<string, string> = {};
@@ -61,7 +65,11 @@ export default function Signup() {
 
     setFieldErrors({});
     setLoading(true);
-    const { error } = await signUp(result.data.email, result.data.password);
+    const { error } = await signUp(
+      result.data.email,
+      result.data.password,
+      result.data.phone || null,
+    );
     setLoading(false);
     if (error) {
       setError(error);
@@ -177,6 +185,29 @@ export default function Signup() {
           {fieldErrors.password && (
             <p id="signup-password-error" className="text-[12px] font-medium text-destructive">
               {fieldErrors.password}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="signup-phone">Phone number (optional)</Label>
+          <PhoneInput
+            id="signup-phone"
+            value={phone}
+            onValueChange={(value) => {
+              setPhone(value);
+              setFieldErrors((previous) => {
+                if (!previous.phone) return previous;
+                const next = { ...previous };
+                delete next.phone;
+                return next;
+              });
+            }}
+            aria-invalid={Boolean(fieldErrors.phone)}
+            aria-describedby={fieldErrors.phone ? "signup-phone-error" : undefined}
+          />
+          {fieldErrors.phone && (
+            <p id="signup-phone-error" className="text-[12px] font-medium text-destructive">
+              {fieldErrors.phone}
             </p>
           )}
         </div>
