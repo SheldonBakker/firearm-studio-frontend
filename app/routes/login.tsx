@@ -11,6 +11,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { PasswordInput } from "~/components/common/password-input";
 import { requiredEmailSchema } from "~/lib/utils/validation";
+import { VerifyCodeForm } from "~/components/common/verify-code-form";
 
 export function meta({ location }: Route.MetaArgs) {
   return pageMeta({
@@ -30,7 +31,7 @@ export async function clientLoader() {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, verifyLoginCode } = useAuth();
   const [params] = useSearchParams();
   const next = params.get("next");
   const [email, setEmail] = useState("");
@@ -38,6 +39,7 @@ export default function Login() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [preAuthToken, setPreAuthToken] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,13 +65,61 @@ export default function Login() {
 
     setFieldErrors({});
     setLoading(true);
-    const { error } = await signIn(result.data.email, result.data.password);
+    const { error, preAuthToken: challenge } = await signIn(
+      result.data.email,
+      result.data.password,
+    );
     if (error) {
       setError(error);
       setLoading(false);
       return;
     }
+    if (challenge) {
+      setPreAuthToken(challenge);
+      setLoading(false);
+      return;
+    }
     navigate(next ? decodeURIComponent(next) : "/dashboard", { replace: true });
+  }
+
+  if (preAuthToken) {
+    return (
+      <AuthShell
+        title="Enter your code"
+        subtitle="Two-factor authentication is on for this account"
+        footer={
+          <Link to="/signup" className="font-semibold text-primary hover:underline">
+            Create one
+          </Link>
+        }
+      >
+        <VerifyCodeForm
+          email={email}
+          submitLabel="Verify and sign in"
+          allowResend={false}
+          onSubmit={async (code) => {
+            const { error } = await verifyLoginCode(preAuthToken, code);
+            if (!error) {
+              navigate(next ? decodeURIComponent(next) : "/dashboard", {
+                replace: true,
+              });
+            }
+            return { error };
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setPreAuthToken(null);
+            setPassword("");
+            setError(null);
+          }}
+          className="mt-3 w-full text-center text-[13px] font-medium text-primary hover:underline"
+        >
+          Start over
+        </button>
+      </AuthShell>
+    );
   }
 
   return (
