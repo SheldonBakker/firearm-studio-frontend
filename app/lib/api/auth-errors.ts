@@ -27,8 +27,6 @@ const CODE_COPY: Record<string, string> = {
   "Auth.PhoneMissing": "There's no phone change in progress.",
   "Auth.NoPendingPhoneChange":
     "There's no pending phone change to confirm. Start again.",
-  "Auth.PhoneChannelUnavailable":
-    "We couldn't send a code to that number right now. Try again shortly.",
 };
 
 export function messageForApiError(err: unknown): string {
