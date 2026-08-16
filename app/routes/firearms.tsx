@@ -20,10 +20,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { FirearmStatus, enumKey } from "~/lib/types/enums";
-import type {
-  FirearmResponse,
-  FirearmResponsePaginatedResponse,
-} from "~/lib/api/firearms/types";
+import type { FirearmResponse } from "~/lib/api/firearms/types";
 
 const PAGE_SIZE = 20;
 
@@ -48,17 +45,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       ? requestedStatus
       : undefined;
 
-  const firearmsP = firearmsApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, status })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies FirearmResponsePaginatedResponse,
-    );
+  const firearmsP = firearmsApi.list({ pageNumber, pageSize: PAGE_SIZE, status });
   return { data: firearmsP };
 }
 
@@ -208,123 +195,123 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                   </div>
                 </div>
               )}
-
-              <FormDialog
-                open={exportOpen}
-                onOpenChange={setExportOpen}
-                title="Export firearms register"
-                submitLabel="Export"
-                fields={[
-                  { name: "from", label: "From", type: "date", required: true },
-                  { name: "to", label: "To", type: "date", required: true },
-                  {
-                    name: "format",
-                    label: "Format",
-                    type: "select",
-                    required: true,
-                    options: [
-                      { value: "0", label: "PDF" },
-                      { value: "1", label: "CSV" },
-                    ],
-                  },
-                ]}
-                onSubmit={async (v) => {
-                  await firearmsApi.exportRegister({
-                    from: v.from,
-                    to: v.to,
-                    format: Number(v.format),
-                  });
-                }}
-              />
-
-              <FormDialog
-                open={addOpen}
-                onOpenChange={setAddOpen}
-                title="Add firearm"
-                description="Register a firearm to a customer."
-                submitLabel="Add firearm"
-                fields={[
-                  {
-                    name: "customerId",
-                    label: "Customer",
-                    type: "search-select",
-                    required: true,
-                    full: true,
-                    placeholder: "Search by name, email, or phone…",
-                    searchDebounceMs: 600,
-                    searchMinChars: 3,
-                    defaultSearchType: "name",
-                    searchTypes: [
-                      { value: "name", label: "Name" },
-                      { value: "email", label: "Email" },
-                      { value: "phone", label: "Phone" },
-                    ],
-                    onSearch: async (query, searchType) => {
-                      const results = await customersApi.list({
-                        [searchType]: query,
-                      });
-                      return (results.items ?? []).map((c) => ({
-                        value: c.id,
-                        label: customerLabel(c),
-                        description: [
-                          c.email,
-                          c.phone ? formatPhoneForDisplay(c.phone, "ZA") : null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · "),
-                      }));
-                    },
-                  },
-                  { name: "make", label: "Make", required: true },
-                  { name: "model", label: "Model", required: true },
-                  { name: "calibre", label: "Calibre" },
-                  {
-                    name: "firearmType",
-                    label: "Type",
-                    type: "select",
-                    options: [
-                      { value: "Pistol", label: "Pistol" },
-                      { value: "Revolver", label: "Revolver" },
-                      { value: "Rifle", label: "Rifle" },
-                      { value: "Shotgun", label: "Shotgun" },
-                      { value: "Carbine", label: "Carbine" },
-                      { value: "Combination Gun", label: "Combination Gun" },
-                      { value: "Muzzleloader", label: "Muzzleloader" },
-                      { value: "Submachine Gun", label: "Submachine Gun" },
-                      { value: "Machine Gun", label: "Machine Gun" },
-                    ],
-                  },
-                  { name: "serialNumber", label: "Serial number", full: true },
-                  {
-                    name: "internalReference",
-                    label: "Internal reference",
-                  },
-                  {
-                    name: "notes",
-                    label: "Notes",
-                    type: "textarea",
-                    full: true,
-                  },
-                ]}
-                onSubmit={async (v) => {
-                  await firearmsApi.create({
-                    customerId: v.customerId,
-                    make: v.make || null,
-                    model: v.model || null,
-                    calibre: v.calibre || null,
-                    firearmType: v.firearmType || null,
-                    serialNumber: v.serialNumber || null,
-                    internalReference: v.internalReference || null,
-                    notes: v.notes || null,
-                  });
-                  toast.success("Firearm added");
-                  revalidator.revalidate();
-                }}
-              />
             </>
           );
         }}
       </Resolve>
+
+      <FormDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Export firearms register"
+        submitLabel="Export"
+        fields={[
+          { name: "from", label: "From", type: "date", required: true },
+          { name: "to", label: "To", type: "date", required: true },
+          {
+            name: "format",
+            label: "Format",
+            type: "select",
+            required: true,
+            options: [
+              { value: "0", label: "PDF" },
+              { value: "1", label: "CSV" },
+            ],
+          },
+        ]}
+        onSubmit={async (v) => {
+          await firearmsApi.exportRegister({
+            from: v.from,
+            to: v.to,
+            format: Number(v.format),
+          });
+        }}
+      />
+
+      <FormDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        title="Add firearm"
+        description="Register a firearm to a customer."
+        submitLabel="Add firearm"
+        fields={[
+          {
+            name: "customerId",
+            label: "Customer",
+            type: "search-select",
+            required: true,
+            full: true,
+            placeholder: "Search by name, email, or phone…",
+            searchDebounceMs: 600,
+            searchMinChars: 3,
+            defaultSearchType: "name",
+            searchTypes: [
+              { value: "name", label: "Name" },
+              { value: "email", label: "Email" },
+              { value: "phone", label: "Phone" },
+            ],
+            onSearch: async (query, searchType) => {
+              const results = await customersApi.list({
+                [searchType]: query,
+              });
+              return (results.items ?? []).map((c) => ({
+                value: c.id,
+                label: customerLabel(c),
+                description: [
+                  c.email,
+                  c.phone ? formatPhoneForDisplay(c.phone, "ZA") : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · "),
+              }));
+            },
+          },
+          { name: "make", label: "Make", required: true },
+          { name: "model", label: "Model", required: true },
+          { name: "calibre", label: "Calibre" },
+          {
+            name: "firearmType",
+            label: "Type",
+            type: "select",
+            options: [
+              { value: "Pistol", label: "Pistol" },
+              { value: "Revolver", label: "Revolver" },
+              { value: "Rifle", label: "Rifle" },
+              { value: "Shotgun", label: "Shotgun" },
+              { value: "Carbine", label: "Carbine" },
+              { value: "Combination Gun", label: "Combination Gun" },
+              { value: "Muzzleloader", label: "Muzzleloader" },
+              { value: "Submachine Gun", label: "Submachine Gun" },
+              { value: "Machine Gun", label: "Machine Gun" },
+            ],
+          },
+          { name: "serialNumber", label: "Serial number", full: true },
+          {
+            name: "internalReference",
+            label: "Internal reference",
+          },
+          {
+            name: "notes",
+            label: "Notes",
+            type: "textarea",
+            full: true,
+          },
+        ]}
+        onSubmit={async (v) => {
+          await firearmsApi.create({
+            customerId: v.customerId,
+            make: v.make || null,
+            model: v.model || null,
+            calibre: v.calibre || null,
+            firearmType: v.firearmType || null,
+            serialNumber: v.serialNumber || null,
+            internalReference: v.internalReference || null,
+            notes: v.notes || null,
+          });
+          toast.success("Firearm added");
+          revalidator.revalidate();
+        }}
+      />
     </PageWrap>
   );
 }

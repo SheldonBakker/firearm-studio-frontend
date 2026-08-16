@@ -41,7 +41,6 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     requireAuth(request),
     hasCompanyAccess(),
   ]);
-  // Already part of a company? Skip onboarding.
   if (companyOk) throw redirect("/dashboard");
   return null;
 }

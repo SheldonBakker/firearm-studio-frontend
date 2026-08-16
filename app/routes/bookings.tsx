@@ -30,10 +30,7 @@ import { BookingFormDialog } from "~/components/modals/booking-form-dialog";
 import { ShareCalendarDialog } from "~/components/modals/share-calendar-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { BookingSource, BookingStatus, enumKey } from "~/lib/types/enums";
-import type {
-  BookingListItemDto,
-  BookingListItemDtoPaginatedResponse,
-} from "~/lib/api/bookings/types";
+import type { BookingListItemDto } from "~/lib/api/bookings/types";
 
 const PAGE_SIZE = 20;
 
@@ -68,25 +65,15 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedTo = searchParams.get("dateTo") ?? "";
   const dateTo = DATE_PATTERN.test(requestedTo) ? requestedTo : undefined;
 
-  const bookingsP = bookingsApi
-    .list({
-      pageNumber,
-      pageSize: PAGE_SIZE,
-      sortOrder: "desc",
-      status,
-      rangeId,
-      dateFrom,
-      dateTo,
-    })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies BookingListItemDtoPaginatedResponse,
-    );
+  const bookingsP = bookingsApi.list({
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    sortOrder: "desc",
+    status,
+    rangeId,
+    dateFrom,
+    dateTo,
+  });
   const rangesP = rangesApi.all().catch(() => []);
   const packagesP = packagesApi.all().catch(() => []);
   const companyP = companyApi.get().catch(() => null);
@@ -349,27 +336,47 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
         }}
       </Resolve>
 
-      <Resolve resolve={loaderData.ranges} fallback={null}>
-        {(ranges) => (
-          <Resolve resolve={loaderData.packages} fallback={null}>
-            {(packages) => (
-              <BookingFormDialog
-                open={addOpen}
-                onOpenChange={setAddOpen}
-                ranges={ranges}
-                packages={packages}
-                onCreated={(id) => {
-                  toast.success("Booking created");
-                  if (id) navigate(`/bookings/${id}`);
-                  else revalidator.revalidate();
-                }}
-              />
-            )}
-          </Resolve>
+      <Resolve
+        resolve={Promise.all([loaderData.ranges, loaderData.packages])}
+        fallback={
+          <BookingFormDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            ranges={[]}
+            packages={[]}
+            onCreated={(id) => {
+              toast.success("Booking created");
+              if (id) navigate(`/bookings/${id}`);
+              else revalidator.revalidate();
+            }}
+          />
+        }
+      >
+        {([ranges, packages]) => (
+          <BookingFormDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            ranges={ranges}
+            packages={packages}
+            onCreated={(id) => {
+              toast.success("Booking created");
+              if (id) navigate(`/bookings/${id}`);
+              else revalidator.revalidate();
+            }}
+          />
         )}
       </Resolve>
 
-      <Resolve resolve={loaderData.company} fallback={null}>
+      <Resolve
+        resolve={loaderData.company}
+        fallback={
+          <ShareCalendarDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            companyId={null}
+          />
+        }
+      >
         {(company) => (
           <ShareCalendarDialog
             open={shareOpen}

@@ -16,10 +16,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { LicenceStatus, enumKey } from "~/lib/types/enums";
-import type {
-  LicenceListItemDtoPaginatedResponse,
-  LicenceResponse,
-} from "~/lib/api/licences/types";
+import type { LicenceResponse } from "~/lib/api/licences/types";
 
 const PAGE_SIZE = 20;
 
@@ -51,17 +48,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const licenceNumber =
     searchParams.get("licenceNumber")?.trim() || undefined;
 
-  const licencesP = licencesApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies LicenceListItemDtoPaginatedResponse,
-    );
+  const licencesP = licencesApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", licenceNumber, status });
   return { data: licencesP };
 }
 
@@ -229,65 +216,66 @@ export default function Licences({ loaderData }: Route.ComponentProps) {
                 </div>
               )}
 
-              {editing && (
-                <FormDialog
-                  open={!!editing}
-                  onOpenChange={(open) => !open && setEditing(null)}
-                  title="Edit licence"
-                  submitLabel="Save changes"
-                  fields={[
-                    {
-                      name: "licenceNumber",
-                      label: "Licence number",
-                      full: true,
-                      defaultValue: editing.licenceNumber ?? "",
-                    },
-                    {
-                      name: "issuedOn",
-                      label: "Issued on",
-                      type: "date",
-                      defaultValue: dateInputValue(editing.issuedOn),
-                    },
-                    {
-                      name: "expiresOn",
-                      label: "Expires on",
-                      type: "date",
-                      required: true,
-                      defaultValue: dateInputValue(editing.expiresOn),
-                    },
-                    {
-                      name: "status",
-                      label: "Status",
-                      type: "select",
-                      required: true,
-                      defaultValue:
-                        enumKey(LicenceStatus, editing.status) ?? "Unknown",
-                      options: LICENCE_STATUS_NAMES.map((status) => ({
-                        value: status,
-                        label: status.replace(/([A-Z])/g, " $1").trim(),
-                      })),
-                    },
-                  ]}
-                  onSubmit={async (values) => {
-                    await licencesApi.update(editing.id, {
-                      licenceNumber: values.licenceNumber || null,
-                      issuedOn: values.issuedOn || null,
-                      expiresOn: values.expiresOn,
-                      status:
-                        LicenceStatus[
-                          values.status as keyof typeof LicenceStatus
-                        ],
-                    });
-                    toast.success("Licence updated");
-                    setEditing(null);
-                    revalidator.revalidate();
-                  }}
-                />
-              )}
             </>
           );
         }}
       </Resolve>
+
+      {editing && (
+        <FormDialog
+          open={!!editing}
+          onOpenChange={(open) => !open && setEditing(null)}
+          title="Edit licence"
+          submitLabel="Save changes"
+          fields={[
+            {
+              name: "licenceNumber",
+              label: "Licence number",
+              full: true,
+              defaultValue: editing.licenceNumber ?? "",
+            },
+            {
+              name: "issuedOn",
+              label: "Issued on",
+              type: "date",
+              defaultValue: dateInputValue(editing.issuedOn),
+            },
+            {
+              name: "expiresOn",
+              label: "Expires on",
+              type: "date",
+              required: true,
+              defaultValue: dateInputValue(editing.expiresOn),
+            },
+            {
+              name: "status",
+              label: "Status",
+              type: "select",
+              required: true,
+              defaultValue:
+                enumKey(LicenceStatus, editing.status) ?? "Unknown",
+              options: LICENCE_STATUS_NAMES.map((status) => ({
+                value: status,
+                label: status.replace(/([A-Z])/g, " $1").trim(),
+              })),
+            },
+          ]}
+          onSubmit={async (values) => {
+            await licencesApi.update(editing.id, {
+              licenceNumber: values.licenceNumber || null,
+              issuedOn: values.issuedOn || null,
+              expiresOn: values.expiresOn,
+              status:
+                LicenceStatus[
+                  values.status as keyof typeof LicenceStatus
+                ],
+            });
+            toast.success("Licence updated");
+            setEditing(null);
+            revalidator.revalidate();
+          }}
+        />
+      )}
     </PageWrap>
   );
 }

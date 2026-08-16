@@ -20,7 +20,6 @@ and the Firearm Studio API (`swagger.json`).
 
    | Variable                    | Description                                       |
    | ---------------------------- | -------------------------------------------------- |
-   | `VITE_API_KEY`               | Shared API key sent as the `X-Api-Key` header      |
    | `VITE_API_BASE_URL`          | Firearm Studio API base URL (leave empty for same-origin `/api`, see below) |
    | `VITE_TURNSTILE_SITEKEY`     | Cloudflare Turnstile site key (contact form)       |
    | `VITE_TURNSTILE_WORKER_URL`  | Worker endpoint that verifies the Turnstile token  |
@@ -28,6 +27,9 @@ and the Firearm Studio API (`swagger.json`).
    > `VITE_*` variables are compiled into the client bundle at build time and
    > shipped to the browser. They are **not secret** - never put a value in a
    > `VITE_*` variable that must stay private.
+
+   The `X-Api-Key` header is injected by the Worker (not the client bundle). Set
+   it as a Worker secret - see the deploy steps below.
 
 3. Run the dev server (`http://localhost:5173`):
 
@@ -113,8 +115,11 @@ Keep `VITE_API_BASE_URL` **empty** in `.env` so the client calls same-origin
 ```bash
 npx wrangler login                      # or: export CLOUDFLARE_API_TOKEN=...
 npx wrangler secret put API_BASE_URL    # paste your production API URL
+npx wrangler secret put API_KEY         # paste your shared API key
 npm run deploy
 ```
+
+For local dev (`npm run dev`), add `API_KEY=your-api-key` to `.dev.vars` alongside `API_BASE_URL`.
 
 > Notes
 > - The backend at `API_BASE_URL` must accept the proxied requests (forwarded

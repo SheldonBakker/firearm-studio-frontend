@@ -12,6 +12,7 @@ import { ApiError } from "~/lib/api/http";
 import { meApi } from "~/lib/api/me/me";
 import { companyApi } from "~/lib/api/company/company";
 import { normalizeRoles, type SessionUser } from "~/lib/utils/rbac";
+import { clearAllCarts } from "~/lib/booking/cart";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -86,6 +87,7 @@ async function resolveSessionUser(): Promise<SessionUser | null> {
 
 let inflight: Promise<SessionUser | null> | null = null;
 let resolved = false;
+let sessionSeq = 0;
 
 export function getSessionUser(options?: {
   refresh?: boolean;
@@ -93,8 +95,10 @@ export function getSessionUser(options?: {
   if (resolved && !options?.refresh && !inflight) {
     return Promise.resolve(snapshot.user);
   }
+  const seq = sessionSeq;
   inflight ??= resolveSessionUser()
     .then((user) => {
+      if (sessionSeq !== seq) return snapshot.user;
       resolved = true;
       publish(user);
       return user;
@@ -123,40 +127,13 @@ export async function refreshSession(): Promise<void> {
 let companyAccess: boolean | null = null;
 let companyProbe: Promise<boolean> | null = null;
 
-const COMPANY_OK_KEY = "fs-company-ok";
-
-function readPersistedCompanyAccess(userId: string): boolean {
-  try {
-    return window.localStorage.getItem(COMPANY_OK_KEY) === userId;
-  } catch {
-    return false;
-  }
-}
-
-function persistCompanyAccess(userId: string | undefined) {
-  if (!userId) return;
-  try {
-    window.localStorage.setItem(COMPANY_OK_KEY, userId);
-  } catch {
-  }
-}
-
-function clearPersistedCompanyAccess() {
-  try {
-    window.localStorage.removeItem(COMPANY_OK_KEY);
-  } catch {
-  }
-}
-
 export function grantCompanyAccess() {
   companyAccess = true;
-  persistCompanyAccess(snapshot.user?.id);
 }
 
 function resetCompanyAccess() {
   companyAccess = null;
   companyProbe = null;
-  clearPersistedCompanyAccess();
 }
 
 async function probeCompanyAccess(): Promise<boolean | null> {
@@ -189,17 +166,10 @@ async function probeCompanyAccess(): Promise<boolean | null> {
 export function hasCompanyAccess(): Promise<boolean> {
   if (companyAccess !== null) return Promise.resolve(companyAccess);
 
-  const userId = snapshot.user?.id;
-  if (userId && readPersistedCompanyAccess(userId)) {
-    companyAccess = true;
-    return Promise.resolve(true);
-  }
-
   companyProbe ??= probeCompanyAccess()
     .then((ok) => {
-      if (ok === null) return true;
+      if (ok === null) return false;
       companyAccess = ok;
-      if (ok) persistCompanyAccess(snapshot.user?.id);
       return ok;
     })
     .finally(() => {
@@ -210,7 +180,10 @@ export function hasCompanyAccess(): Promise<boolean> {
 }
 
 export async function signOutUser(): Promise<void> {
+  sessionSeq++;
+  inflight = null;
   resetCompanyAccess();
+  clearAllCarts();
   resolved = false;
   publish(null);
   await authApi.logout();

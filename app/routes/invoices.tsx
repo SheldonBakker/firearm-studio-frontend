@@ -19,10 +19,7 @@ import {
 } from "~/components/ui/select";
 import { Resolve } from "~/components/common/skeletons";
 import { InvoiceStatus } from "~/lib/types/enums";
-import type {
-  InvoiceListItemDtoPaginatedResponse,
-  InvoiceResponse,
-} from "~/lib/api/invoices/types";
+import type { InvoiceResponse } from "~/lib/api/invoices/types";
 
 const PAGE_SIZE = 20;
 
@@ -70,25 +67,15 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const invoiceNumber = searchParams.get("invoiceNumber")?.trim() || undefined;
   const customerName = searchParams.get("customerName")?.trim() || undefined;
 
-  const invoicesP = invoicesApi
-    .list({
-      pageNumber,
-      pageSize: PAGE_SIZE,
-      sortBy,
-      sortOrder,
-      status,
-      invoiceNumber,
-      customerName,
-    })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies InvoiceListItemDtoPaginatedResponse,
-    );
+  const invoicesP = invoicesApi.list({
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    sortBy,
+    sortOrder,
+    status,
+    invoiceNumber,
+    customerName,
+  });
   return { data: invoicesP };
 }
 

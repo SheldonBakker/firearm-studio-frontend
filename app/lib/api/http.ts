@@ -1,5 +1,5 @@
 import { clearTokens, getAccessToken, refreshTokens } from "./auth";
-import { API_KEY, apiUrl } from "./config";
+import { apiUrl } from "./config";
 import { ApiError, extractErrorMessage } from "./error";
 
 export { ApiError };
@@ -19,7 +19,6 @@ function buildUrl(path: string, query?: RequestOptions["query"]): URL {
 async function authHeaders(): Promise<Record<string, string>> {
   const token = await getAccessToken();
   const headers: Record<string, string> = {};
-  if (API_KEY) headers["X-Api-Key"] = API_KEY;
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
@@ -54,7 +53,8 @@ export async function request<T>(
   if (res.status === 401 && !opts.skipAuthRedirect) {
     clearTokens();
     if (typeof window !== "undefined") window.location.assign("/login");
-    throw new ApiError(401, "Unauthorized");
+    const { message, code, body } = await extractErrorMessage(res);
+    throw new ApiError(401, message, body, code);
   }
 
   if (!res.ok) {
@@ -105,7 +105,8 @@ export async function requestBlob(
   if (res.status === 401 && !opts.skipAuthRedirect) {
     clearTokens();
     if (typeof window !== "undefined") window.location.assign("/login");
-    throw new ApiError(401, "Unauthorized");
+    const { message, code, body } = await extractErrorMessage(res);
+    throw new ApiError(401, message, body, code);
   }
 
   if (!res.ok) {

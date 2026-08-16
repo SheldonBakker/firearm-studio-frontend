@@ -2,8 +2,6 @@ const BASE_URL = (
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
 ).replace(/\/$/, "");
 
-export const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
-
 export function apiUrl(
   path: string,
   query?: Record<string, string | number | undefined>,

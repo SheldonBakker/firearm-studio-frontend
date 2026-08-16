@@ -21,7 +21,6 @@ import { PackageFormDialog } from "~/components/modals/package-form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import type {
   PackageListItemDto,
-  PackageListItemDtoPaginatedResponse,
   PackageResponse,
 } from "~/lib/api/packages/types";
 
@@ -47,23 +46,13 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       ? requestedActive === "true"
       : undefined;
 
-  const packagesP = packagesApi
-    .list({
-      pageNumber,
-      pageSize: PAGE_SIZE,
-      sortBy: "name",
-      sortOrder: "asc",
-      isActive,
-    })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies PackageListItemDtoPaginatedResponse,
-    );
+  const packagesP = packagesApi.list({
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    sortBy: "name",
+    sortOrder: "asc",
+    isActive,
+  });
   return { data: packagesP };
 }
 

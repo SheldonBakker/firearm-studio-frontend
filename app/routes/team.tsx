@@ -3,8 +3,9 @@ import { redirect, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/team";
 import { usersApi } from "~/lib/api/users/users";
-import { requireAuth } from "~/context/auth-context";
-import { canSeeNav } from "~/lib/utils/rbac";
+import { ApiError } from "~/lib/api/http";
+import { requireAuth, useSessionUser } from "~/context/auth-context";
+import { can, canSeeNav } from "~/lib/utils/rbac";
 import { initials } from "~/lib/utils/format";
 import { PageWrap } from "~/components/common/misc";
 import { PageActions } from "~/context/page-actions";
@@ -23,10 +24,7 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { useConfirm } from "~/context/confirm-context";
 import { Resolve } from "~/components/common/skeletons";
 import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
-import type {
-  AppUserResponsePaginatedResponse,
-  UserResponse,
-} from "~/lib/api/users/types";
+import type { UserResponse } from "~/lib/api/users/types";
 
 const PAGE_SIZE = 20;
 
@@ -37,15 +35,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   return {
-    users: usersApi.list({ pageNumber, pageSize: PAGE_SIZE }).catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies AppUserResponsePaginatedResponse,
-    ),
+    users: usersApi.list({ pageNumber, pageSize: PAGE_SIZE }),
   };
 }
 
@@ -54,6 +44,8 @@ const ROLES = enumNames(AppRole);
 export default function Team({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const confirm = useConfirm();
+  const user = useSessionUser();
+  const canManageTeam = can(user, "team:manage");
   const [searchParams, setSearchParams] = useSearchParams();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleFor, setRoleFor] = useState<UserResponse | null>(null);
@@ -73,9 +65,13 @@ export default function Team({ loaderData }: Route.ComponentProps) {
       destructive: true,
     });
     if (!confirmed) return;
-    await usersApi.deactivate(u.id);
-    toast.success("User deactivated");
-    revalidator.revalidate();
+    try {
+      await usersApi.deactivate(u.id);
+      toast.success("User deactivated");
+      revalidator.revalidate();
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Could not deactivate user");
+    }
   }
 
   const columns: Column<UserResponse>[] = [
@@ -118,37 +114,40 @@ export default function Team({ loaderData }: Route.ComponentProps) {
       header: "",
       align: "right",
       width: "48px",
-      cell: (r) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex justify-end text-dim hover:text-foreground">
-              <Icon name="dots" size={18} />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setRoleFor(r)}>
-              Change role
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => deactivate(r)}
-            >
-              Deactivate
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      cell: (r) =>
+        canManageTeam ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex justify-end text-dim hover:text-foreground">
+                <Icon name="dots" size={18} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setRoleFor(r)}>
+                Change role
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => deactivate(r)}
+              >
+                Deactivate
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null,
     },
   ];
 
   return (
     <PageWrap>
-      <PageActions>
-        <Button onClick={() => setInviteOpen(true)}>
-          <Icon name="plus" size={16} />
-          Invite user
-        </Button>
-      </PageActions>
+      {canManageTeam && (
+        <PageActions>
+          <Button onClick={() => setInviteOpen(true)}>
+            <Icon name="plus" size={16} />
+            Invite user
+          </Button>
+        </PageActions>
+      )}
       <Resolve
         resolve={loaderData.users}
         fallback={
@@ -204,50 +203,52 @@ export default function Team({ loaderData }: Route.ComponentProps) {
         }}
       </Resolve>
 
-      <FormDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-        title="Invite user"
-        description="Send an invitation email with an assigned role."
-        submitLabel="Send invite"
-        fields={[
-          {
-            name: "email",
-            label: "Email",
-            type: "email",
-            required: true,
-            full: true,
-          },
-          { name: "fullName", label: "Full name", full: true },
-          {
-            name: "phoneNumber",
-            label: "Phone number (optional)",
-            type: "tel",
-            full: true,
-          },
-          {
-            name: "role",
-            label: "Role",
-            type: "select",
-            required: true,
-            full: true,
-            defaultValue: "Staff",
-            options: ROLES.map((r) => ({ value: r, label: r })),
-          },
-        ]}
-        onSubmit={async (v) => {
-          await usersApi.invite({
-            email: v.email,
-            fullName: v.fullName || null,
-            role: AppRole[v.role as keyof typeof AppRole],
-            phoneNumber: v.phoneNumber || null,
-          });
-          toast.success("Invitation sent");
-          revalidator.revalidate();
-        }}
-      />
+      {canManageTeam && (
+        <FormDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          title="Invite user"
+          description="Send an invitation email with an assigned role."
+          submitLabel="Send invite"
+          fields={[
+            {
+              name: "email",
+              label: "Email",
+              type: "email",
+              required: true,
+              full: true,
+            },
+            { name: "fullName", label: "Full name", full: true },
+            {
+              name: "phoneNumber",
+              label: "Phone number (optional)",
+              type: "tel",
+              full: true,
+            },
+            {
+              name: "role",
+              label: "Role",
+              type: "select",
+              required: true,
+              full: true,
+              defaultValue: "Staff",
+              options: ROLES.map((r) => ({ value: r, label: r })),
+            },
+          ]}
+          onSubmit={async (v) => {
+            await usersApi.invite({
+              email: v.email,
+              fullName: v.fullName || null,
+              role: AppRole[v.role as keyof typeof AppRole],
+              phoneNumber: v.phoneNumber || null,
+            });
+            toast.success("Invitation sent");
+            revalidator.revalidate();
+          }}
+        />
+      )}
 
-      {roleFor && (
+      {canManageTeam && roleFor && (
         <FormDialog
           open={!!roleFor}
           onOpenChange={(o) => !o && setRoleFor(null)}

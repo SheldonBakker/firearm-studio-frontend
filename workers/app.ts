@@ -20,7 +20,14 @@ export default {
         return new Response("API_BASE_URL is not configured", { status: 502 });
       }
       const target = base + url.pathname + url.search;
-      return fetch(new Request(target, request));
+      const proxyHeaders = new Headers(request.headers);
+      if (env.API_KEY) proxyHeaders.set("X-Api-Key", env.API_KEY);
+      return fetch(target, {
+        method: request.method,
+        headers: proxyHeaders,
+        body: request.body,
+        redirect: "follow",
+      });
     }
 
     return requestHandler(request);

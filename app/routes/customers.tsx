@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator } from "react-router";
+import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customers";
 import { customersApi } from "~/lib/api/customers/customers";
@@ -18,10 +18,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { CustomerType, enumKey } from "~/lib/types/enums";
-import type {
-  CustomerListItemDto,
-  CustomerListItemDtoPaginatedResponse,
-} from "~/lib/api/customers/types";
+import type { CustomerListItemDto } from "~/lib/api/customers/types";
 
 const PAGE_SIZE = 20;
 
@@ -29,25 +26,23 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const requestedPage = Number(new URL(request.url).searchParams.get("page"));
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const customersP = customersApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies CustomerListItemDtoPaginatedResponse,
-    );
+  const customersP = customersApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" });
   return { data: customersP };
 }
 
 export default function Customers({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+  const [searchParams, setSearchParams] = useSearchParams();
   const user = useSessionUser();
   const [addOpen, setAddOpen] = useState(false);
+
+  const navigatePage = (newPage: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (newPage <= 1) next.delete("page");
+    else next.set("page", String(newPage));
+    setSearchParams(next);
+  };
 
   const columns: Column<CustomerListItemDto>[] = [
     {
@@ -165,9 +160,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                       type="button"
                       variant="outline"
                       disabled={customerPage.pageNumber <= 1}
-                      onClick={() =>
-                        navigate(`/customers?page=${customerPage.pageNumber - 1}`)
-                      }
+                      onClick={() => navigatePage(customerPage.pageNumber - 1)}
                     >
                       Previous
                     </Button>
@@ -178,9 +171,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                         customerPage.pageNumber * customerPage.pageSize >=
                         customerPage.totalCount
                       }
-                      onClick={() =>
-                        navigate(`/customers?page=${customerPage.pageNumber + 1}`)
-                      }
+                      onClick={() => navigatePage(customerPage.pageNumber + 1)}
                     >
                       Next
                     </Button>

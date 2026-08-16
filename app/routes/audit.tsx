@@ -16,10 +16,7 @@ import {
   StorageStatus,
   enumKey,
 } from "~/lib/types/enums";
-import type {
-  AuditLogListItemDtoPaginatedResponse,
-  AuditLogResponse,
-} from "~/lib/api/audit/types";
+import type { AuditLogResponse } from "~/lib/api/audit/types";
 
 const PAGE_SIZE = 20;
 const MAX_DETAIL_FIELDS = 4;
@@ -56,24 +53,14 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const createdOn = searchParams.get("createdOn")?.trim() || undefined;
 
   return {
-    logs: auditApi
-      .list({
-        pageNumber,
-        pageSize: PAGE_SIZE,
-        fullName,
-        action,
-        entityType,
-        createdOn,
-      })
-      .catch(
-        () =>
-          ({
-            items: [],
-            pageNumber,
-            pageSize: PAGE_SIZE,
-            totalCount: 0,
-          }) satisfies AuditLogListItemDtoPaginatedResponse,
-      ),
+    logs: auditApi.list({
+      pageNumber,
+      pageSize: PAGE_SIZE,
+      fullName,
+      action,
+      entityType,
+      createdOn,
+    }),
   };
 }
 

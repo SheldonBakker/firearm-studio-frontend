@@ -6,19 +6,19 @@ export type Role = "Admin" | "Manager" | "Staff" | "Viewer";
 export interface InviteUserRequest {
   email?: string | null;
   fullName?: string | null;
-  role?: AppRole | null;
+  role: AppRole;
   phoneNumber?: string | null;
 }
 
 export interface UpdateUserRoleRequest {
-  role?: AppRole | null;
+  role: AppRole;
 }
 
 export interface UserResponse {
   id: string;
   email: string;
   fullName: string | null;
-  role: AppRole | string;
+  role: AppRole;
   isActive: boolean;
   isLinked: boolean;
   phoneNumber: string | null;

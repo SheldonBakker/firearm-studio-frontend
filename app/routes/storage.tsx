@@ -15,10 +15,7 @@ import { Button } from "~/components/ui/button";
 import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { StorageStatus, enumKey } from "~/lib/types/enums";
-import type {
-  StorageRecordDtoPaginatedResponse,
-  StorageRecordResponse,
-} from "~/lib/api/storage/types";
+import type { StorageRecordResponse } from "~/lib/api/storage/types";
 
 const PAGE_SIZE = 20;
 
@@ -44,17 +41,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const serialNumber = searchParams.get("serialNumber")?.trim() || undefined;
   const customerName = searchParams.get("customerName")?.trim() || undefined;
 
-  const storageP = storageApi
-    .listActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies StorageRecordDtoPaginatedResponse,
-    );
+  const storageP = storageApi.listActive({ pageNumber, pageSize: PAGE_SIZE, storageStatus, serialNumber, customerName });
   return { data: storageP };
 }
 
@@ -248,36 +235,37 @@ export default function Storage({ loaderData }: Route.ComponentProps) {
                 </div>
               )}
 
-              {releasing && (
-                <FormDialog
-                  open={!!releasing}
-                  onOpenChange={(v) => !v && setReleasing(null)}
-                  title="Release from storage"
-                  description={`${releasing.serialNumber ?? "Firearm"} - confirm release date.`}
-                  submitLabel="Release"
-                  fields={[
-                    {
-                      name: "storedUntil",
-                      label: "Released on",
-                      type: "date",
-                      full: true,
-                    },
-                  ]}
-                  onSubmit={async (v) => {
-                    await storageApi.update(releasing.id, {
-                      storageStatus: StorageStatus.Released,
-                      storedUntil: v.storedUntil || null,
-                    });
-                    toast.success("Storage released");
-                    setReleasing(null);
-                    revalidator.revalidate();
-                  }}
-                />
-              )}
             </>
           );
         }}
       </Resolve>
+
+      {releasing && (
+        <FormDialog
+          open={!!releasing}
+          onOpenChange={(v) => !v && setReleasing(null)}
+          title="Release from storage"
+          description={`${releasing.serialNumber ?? "Firearm"} - confirm release date.`}
+          submitLabel="Release"
+          fields={[
+            {
+              name: "storedUntil",
+              label: "Released on",
+              type: "date",
+              full: true,
+            },
+          ]}
+          onSubmit={async (v) => {
+            await storageApi.update(releasing.id, {
+              storageStatus: StorageStatus.Released,
+              storedUntil: v.storedUntil || null,
+            });
+            toast.success("Storage released");
+            setReleasing(null);
+            revalidator.revalidate();
+          }}
+        />
+      )}
     </PageWrap>
   );
 }

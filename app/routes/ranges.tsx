@@ -20,7 +20,6 @@ import { RangeFormDialog } from "~/components/modals/range-form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import type {
   ShootingRangeListItemDto,
-  ShootingRangeListItemDtoPaginatedResponse,
   ShootingRangeResponse,
 } from "~/lib/api/ranges/types";
 
@@ -46,17 +45,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
       ? requestedActive === "true"
       : undefined;
 
-  const rangesP = rangesApi
-    .list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", isActive })
-    .catch(
-      () =>
-        ({
-          items: [],
-          pageNumber,
-          pageSize: PAGE_SIZE,
-          totalCount: 0,
-        }) satisfies ShootingRangeListItemDtoPaginatedResponse,
-    );
+  const rangesP = rangesApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc", isActive });
   return { data: rangesP };
 }
 
