@@ -8,13 +8,17 @@
     "typecheck": "react-router typegen && wrangler types && tsc && tsc -p tsconfig.cloudflare.json",
     "cf-typegen": "wrangler types",
     "preview": "npm run build && wrangler dev -c build/server/wrangler.json",
-    "deploy": "npm run build && wrangler deploy -c build/server/wrangler.json"
+    "deploy": "npm run build && wrangler deploy -c build/server/wrangler.json",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@react-router/serve": "8.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "isbot": "^5.1.36",
+    "libphonenumber-js": "^1.13.11",
     "lucide-react": "^1.21.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.6.0",
@@ -30,11 +34,13 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.42.3",
     "@cloudflare/workers-types": "^4.20260628.1",
+    "@playwright/test": "^1.62.1",
     "@react-router/dev": "8.0.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "dotenv": "^17.4.2",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "vite": "^8.0.3",

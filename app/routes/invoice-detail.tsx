@@ -6,6 +6,7 @@ import { ApiError } from "~/lib/api/http";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { customerLabel } from "~/lib/utils/entities";
 import { fmtDate, fmtMoney } from "~/lib/utils/format";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { useSessionUser } from "~/context/auth-context";
 import { useConfirm } from "~/context/confirm-context";
 import { can } from "~/lib/utils/rbac";
@@ -241,7 +242,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetailDto }) {
                 { k: "Full name", v: customer.fullName || "—" },
                 { k: "Company", v: customer.companyName || "—" },
                 { k: "Email", v: customer.email || "—" },
-                { k: "Phone", v: customer.phone || "—" },
+                { k: "Phone", v: formatPhoneForDisplay(customer.phone, "ZA") },
                 { k: "Status", v: customer.isActive ? "Active" : "Inactive" },
                 { k: "Notes", v: customer.notes || "—", full: true },
               ]}

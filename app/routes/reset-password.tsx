@@ -71,7 +71,7 @@ export default function ResetPassword() {
       }
     >
       <VerifyCodeForm
-        email={email}
+        destination={email}
         submitLabel="Update password"
         onSubmit={async (code) => {
           if (!validate()) {

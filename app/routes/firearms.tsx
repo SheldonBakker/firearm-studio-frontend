@@ -6,6 +6,7 @@ import type { Route } from "./+types/firearms";
 import { firearmsApi } from "~/lib/api/firearms/firearms";
 import { customersApi } from "~/lib/api/customers/customers";
 import { customerLabel } from "~/lib/utils/entities";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { PageWrap } from "~/components/common/misc";
@@ -265,7 +266,10 @@ export default function Firearms({ loaderData }: Route.ComponentProps) {
                       return (results.items ?? []).map((c) => ({
                         value: c.id,
                         label: customerLabel(c),
-                        description: [c.email, c.phone]
+                        description: [
+                          c.email,
+                          c.phone ? formatPhoneForDisplay(c.phone, "ZA") : null,
+                        ]
                           .filter(Boolean)
                           .join(" · "),
                       }));

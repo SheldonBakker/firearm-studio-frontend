@@ -1,4 +1,5 @@
 import type { PublicCompanyResponse } from "~/lib/api/public/types";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 
 export function CompanyHeader({
   company,
@@ -38,7 +39,7 @@ export function CompanyHeader({
             href={`tel:${company.phone}`}
             className="hover:text-foreground hover:underline"
           >
-            {company.phone}
+            {formatPhoneForDisplay(company.phone, "ZA")}
           </a>
         )}
         {addressLines.length > 0 && <span>{addressLines.join(", ")}</span>}

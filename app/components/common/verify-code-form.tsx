@@ -6,18 +6,20 @@ import { Label } from "~/components/ui/label";
 const RESEND_COOLDOWN_SECONDS = 60;
 
 interface VerifyCodeFormProps {
-  email: string;
+  destination: string;
   submitLabel?: string;
   onSubmit: (code: string) => Promise<{ error: string | null }>;
-  onResend: () => Promise<{ error: string | null }>;
+  onResend?: () => Promise<{ error: string | null }>;
+  allowResend?: boolean;
   children?: React.ReactNode;
 }
 
 export function VerifyCodeForm({
-  email,
+  destination,
   submitLabel = "Verify",
   onSubmit,
   onResend,
+  allowResend = true,
   children,
 }: VerifyCodeFormProps) {
   const [code, setCode] = useState("");
@@ -25,12 +27,13 @@ export function VerifyCodeForm({
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+  const resendEnabled = allowResend && Boolean(onResend);
 
   useEffect(() => {
-    if (cooldown <= 0) return;
+    if (!resendEnabled || cooldown <= 0) return;
     const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(id);
-  }, [cooldown]);
+  }, [cooldown, resendEnabled]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +41,7 @@ export function VerifyCodeForm({
     setNotice(null);
 
     if (!/^\d{6}$/.test(code)) {
-      setError("Enter the six-digit code from your email.");
+      setError("Enter the six-digit code we sent you.");
       return;
     }
 
@@ -49,6 +52,7 @@ export function VerifyCodeForm({
   }
 
   async function resend() {
+    if (!onResend) return;
     setError(null);
     setNotice(null);
     setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -56,7 +60,7 @@ export function VerifyCodeForm({
     setNotice(
       result.error
         ? null
-        : "If that address can receive a code, a new one is on its way.",
+        : "If that destination can receive a code, a new one is on its way.",
     );
     if (result.error) setError(result.error);
   }
@@ -65,7 +69,7 @@ export function VerifyCodeForm({
     <form noValidate onSubmit={submit} className="flex flex-col gap-4">
       <p className="text-center text-[13px] leading-relaxed text-muted-foreground">
         We sent a six-digit code to{" "}
-        <span className="text-foreground">{email}</span>. It expires in 15 minutes.
+        <span className="text-foreground">{destination}</span>. It expires in 15 minutes.
       </p>
 
       <div className="flex flex-col gap-2">
@@ -102,14 +106,16 @@ export function VerifyCodeForm({
         {loading ? "Checking…" : submitLabel}
       </Button>
 
-      <button
-        type="button"
-        onClick={resend}
-        disabled={cooldown > 0}
-        className="text-[13px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
-      >
-        {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
-      </button>
+      {resendEnabled && (
+        <button
+          type="button"
+          onClick={resend}
+          disabled={cooldown > 0}
+          className="text-[13px] font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
+        >
+          {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
+        </button>
+      )}
     </form>
   );
 }

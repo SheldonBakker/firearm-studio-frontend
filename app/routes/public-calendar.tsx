@@ -16,7 +16,7 @@ import {
   requiredEmailSchema,
   requiredTextSchema,
 } from "~/lib/utils/validation";
-import { requiredSouthAfricanPhoneSchema } from "~/lib/utils/phone";
+import { requiredPhoneSchema } from "~/lib/utils/phone";
 import {
   cartReducer,
   cartTotal,
@@ -56,7 +56,7 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
 const contactSchema = z.object({
   fullName: requiredTextSchema("Full name"),
   email: requiredEmailSchema,
-  phone: requiredSouthAfricanPhoneSchema,
+  phone: requiredPhoneSchema,
 });
 
 export default function PublicCalendar({ loaderData }: Route.ComponentProps) {

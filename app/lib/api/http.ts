@@ -58,8 +58,8 @@ export async function request<T>(
   }
 
   if (!res.ok) {
-    const { message, body } = await extractErrorMessage(res);
-    throw new ApiError(res.status, message, body);
+    const { message, code, body } = await extractErrorMessage(res);
+    throw new ApiError(res.status, message, body, code);
   }
 
   if (res.status === 204) return undefined as T;
@@ -109,8 +109,8 @@ export async function requestBlob(
   }
 
   if (!res.ok) {
-    const { message, body } = await extractErrorMessage(res);
-    throw new ApiError(res.status, message, body);
+    const { message, code, body } = await extractErrorMessage(res);
+    throw new ApiError(res.status, message, body, code);
   }
 
   const blob = await res.blob();
