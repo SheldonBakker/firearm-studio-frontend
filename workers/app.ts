@@ -19,9 +19,12 @@ export default {
       if (!base) {
         return new Response("API_BASE_URL is not configured", { status: 502 });
       }
+      if (!env.API_KEY) {
+        return new Response("API_KEY is not configured", { status: 502 });
+      }
       const target = base + url.pathname + url.search;
       const proxyHeaders = new Headers(request.headers);
-      if (env.API_KEY) proxyHeaders.set("X-Api-Key", env.API_KEY);
+      proxyHeaders.set("X-Api-Key", env.API_KEY);
       return fetch(target, {
         method: request.method,
         headers: proxyHeaders,
