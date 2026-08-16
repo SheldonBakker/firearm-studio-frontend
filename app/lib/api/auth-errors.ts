@@ -38,7 +38,10 @@ export function messageForApiError(err: unknown): string {
       : "Something went wrong. Try again.";
   }
   if (err.status === 429) {
-    return "Too many codes requested recently. Try again shortly.";
+    if (err.code === "Auth.ChallengeUnavailable") {
+      return CODE_COPY[err.code];
+    }
+    return "Too many requests. Wait a moment and try again.";
   }
   if (err.status === 502) {
     return "We couldn't send a code to that number right now. Please try again.";
