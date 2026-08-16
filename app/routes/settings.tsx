@@ -206,12 +206,13 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-foreground">
-                    {me.pendingPhoneNumber}
+                    {formatPhoneForDisplay(me.pendingPhoneNumber, "ZA")}
                   </span>
                   <Badge variant="destructive">Awaiting confirmation</Badge>
                 </div>
                 <p className="text-[12px] text-muted-foreground">
-                  You started changing your number to {me.pendingPhoneNumber} but
+                  You started changing your number to{" "}
+                  {formatPhoneForDisplay(me.pendingPhoneNumber, "ZA")} but
                   haven't confirmed it yet.
                 </p>
                 <div className="flex gap-2">
@@ -239,7 +240,9 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
             ) : me.phoneNumber ? (
               <>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground">{me.phoneNumber}</span>
+                  <span className="text-sm text-foreground">
+                    {formatPhoneForDisplay(me.phoneNumber, "ZA")}
+                  </span>
                   <Badge variant={me.phoneNumberConfirmed ? "secondary" : "destructive"}>
                     {me.phoneNumberConfirmed ? "Confirmed" : "Unconfirmed"}
                   </Badge>
