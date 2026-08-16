@@ -220,6 +220,12 @@ export default function Team({ loaderData }: Route.ComponentProps) {
           },
           { name: "fullName", label: "Full name", full: true },
           {
+            name: "phoneNumber",
+            label: "Phone number (optional)",
+            type: "tel",
+            full: true,
+          },
+          {
             name: "role",
             label: "Role",
             type: "select",
@@ -234,6 +240,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
             email: v.email,
             fullName: v.fullName || null,
             role: AppRole[v.role as keyof typeof AppRole],
+            phoneNumber: v.phoneNumber || null,
           });
           toast.success("Invitation sent");
           revalidator.revalidate();
