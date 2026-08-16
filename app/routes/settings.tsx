@@ -3,7 +3,7 @@ import { Link, redirect, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/settings";
 import { companyApi } from "~/lib/api/company/company";
-import { sageApi } from "~/lib/api/sage/sage";
+import { accountingApi } from "~/lib/api/accounting/accounting";
 import { meApi } from "~/lib/api/me/me";
 import type { CurrentUserResponse } from "~/lib/api/me/types";
 import { ApiError } from "~/lib/api/http";
@@ -28,7 +28,7 @@ import { Label } from "~/components/ui/label";
 import { PhoneInput } from "~/components/common/phone-input";
 import { VerifyCodeForm } from "~/components/common/verify-code-form";
 import type { CompanyDetailsResponse } from "~/lib/api/company/types";
-import type { SageConnectionDetailsResponse } from "~/lib/api/sage/types";
+import type { AccountingConnectionDetailsResponse } from "~/lib/api/accounting/types";
 import { SOUTH_AFRICAN_BANKS, BANK_ACCOUNT_TYPES } from "~/lib/constants/banking";
 import { DepositMode } from "~/lib/types/enums";
 import { fmtMoney } from "~/lib/utils/format";
@@ -38,7 +38,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   if (!canSeeNav(user, "settings")) throw redirect("/dashboard");
   return {
     company: companyApi.get().catch(() => null),
-    sage: sageApi.connection().catch(() => null),
+    accounting: accountingApi.connection().catch(() => null),
     me: meApi.me().catch(() => null),
   };
 }
@@ -74,7 +74,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
 
           <div className="rounded-2xl border border-border bg-card p-6">
             <Resolve
-              resolve={loaderData.sage}
+              resolve={loaderData.accounting}
               fallback={<KeyValueSkeleton rows={5} />}
             >
               {(connection) => <SagePanel connection={connection} />}
@@ -415,7 +415,7 @@ function parseSageCompanyId(value: string): number {
 function SagePanel({
   connection,
 }: {
-  connection: SageConnectionDetailsResponse | null;
+  connection: AccountingConnectionDetailsResponse | null;
 }) {
   const revalidator = useRevalidator();
   const [editOpen, setEditOpen] = useState(false);
@@ -540,7 +540,7 @@ function SagePanel({
           </p>
         }
         onSubmit={async (v) => {
-          await sageApi.register({
+          await accountingApi.register({
             apiKey: v.apiKey || null,
             username: v.username || null,
             password: v.password || null,

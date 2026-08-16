@@ -1,11 +1,11 @@
-export interface RegisterSageConnectionRequest {
+export interface RegisterAccountingConnectionRequest {
   apiKey?: string | null;
   username?: string | null;
   password?: string | null;
   sageCompanyId: number;
 }
 
-export interface SageConnectionDetailsResponse {
+export interface AccountingConnectionDetailsResponse {
   id: string;
   companyId: string;
   apiKey: boolean;
@@ -19,7 +19,7 @@ export interface SageConnectionDetailsResponse {
   updatedAt: string | null;
 }
 
-export interface SageConnectionResponse {
+export interface AccountingConnectionResponse {
   connected: boolean;
   sageCompanyId: number;
   sageCompanyName: string | null;
