@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { redirect, useRevalidator, useSearchParams } from "react-router";
+import { redirect, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/team";
 import { usersApi } from "~/lib/api/users/users";
@@ -25,15 +25,14 @@ import { useConfirm } from "~/context/confirm-context";
 import { Resolve } from "~/components/common/skeletons";
 import { AppRole, enumKey, enumNames } from "~/lib/types/enums";
 import type { UserResponse } from "~/lib/api/users/types";
-
-const PAGE_SIZE = 20;
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireAuth(request);
   if (!canSeeNav(user, "team")) throw redirect("/dashboard");
-  const requestedPage = Number(new URL(request.url).searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageNumber = parsePage(new URL(request.url).searchParams);
   return {
     users: usersApi.list({ pageNumber, pageSize: PAGE_SIZE }),
   };
@@ -46,16 +45,9 @@ export default function Team({ loaderData }: Route.ComponentProps) {
   const confirm = useConfirm();
   const user = useSessionUser();
   const canManageTeam = can(user, "team:manage");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { navigatePage } = usePagedSearchParams();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleFor, setRoleFor] = useState<UserResponse | null>(null);
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
-    setSearchParams(next);
-  };
 
   async function deactivate(u: UserResponse) {
     const confirmed = await confirm({
@@ -164,40 +156,7 @@ export default function Team({ loaderData }: Route.ComponentProps) {
                 empty="No team members yet."
               />
 
-              {usersPage.totalCount > usersPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(usersPage.pageNumber - 1) * usersPage.pageSize + 1}–
-                    {Math.min(
-                      usersPage.pageNumber * usersPage.pageSize,
-                      usersPage.totalCount,
-                    )}{" "}
-                    of {usersPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={usersPage.pageNumber <= 1}
-                      onClick={() => navigatePage(usersPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        usersPage.pageNumber * usersPage.pageSize >=
-                        usersPage.totalCount
-                      }
-                      onClick={() => navigatePage(usersPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={usersPage} onPage={navigatePage} />
             </>
           );
         }}

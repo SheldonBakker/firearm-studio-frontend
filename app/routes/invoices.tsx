@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import type { Route } from "./+types/invoices";
 import { invoicesApi } from "~/lib/api/invoices/invoices";
 import { inv } from "~/lib/utils/entities";
@@ -20,8 +20,9 @@ import {
 import { Resolve } from "~/components/common/skeletons";
 import { InvoiceStatus } from "~/lib/types/enums";
 import type { InvoiceResponse } from "~/lib/api/invoices/types";
-
-const PAGE_SIZE = 20;
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
@@ -46,10 +47,7 @@ const DEFAULT_SORT_ORDER = "desc";
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
+  const pageNumber = parsePage(searchParams);
   const requestedStatus = searchParams.get("status");
   const status =
     requestedStatus && INVOICE_STATUSES.has(requestedStatus)
@@ -81,7 +79,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 
 export default function Invoices({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
 
   const activeStatus = INVOICE_STATUSES.has(searchParams.get("status") ?? "")
     ? searchParams.get("status")!
@@ -112,13 +110,6 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
     else next.set("sortBy", nextSortBy);
     if (nextSortOrder === DEFAULT_SORT_ORDER) next.delete("sortOrder");
     else next.set("sortOrder", nextSortOrder);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -228,44 +219,7 @@ export default function Invoices({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {invoicesPage.totalCount > invoicesPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(invoicesPage.pageNumber - 1) * invoicesPage.pageSize + 1}–
-                    {Math.min(
-                      invoicesPage.pageNumber * invoicesPage.pageSize,
-                      invoicesPage.totalCount,
-                    )}{" "}
-                    of {invoicesPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={invoicesPage.pageNumber <= 1}
-                      onClick={() =>
-                        navigatePage(invoicesPage.pageNumber - 1)
-                      }
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        invoicesPage.pageNumber * invoicesPage.pageSize >=
-                        invoicesPage.totalCount
-                      }
-                      onClick={() =>
-                        navigatePage(invoicesPage.pageNumber + 1)
-                      }
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={invoicesPage} onPage={navigatePage} />
             </>
           );
         }}

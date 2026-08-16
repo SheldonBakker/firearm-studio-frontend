@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
-import { MarketingLogo } from "~/components/marketing/site-header";
+import { BrandMark } from "~/components/common/brand";
 import {
   organizationLd,
   pageMeta,
@@ -8,6 +8,7 @@ import {
   websiteLd,
 } from "~/lib/utils/seo";
 import { useAuth } from "~/context/auth-context";
+import { Button } from "~/components/ui/button";
 
 export function meta({ location }: Route.MetaArgs) {
   return [
@@ -23,12 +24,12 @@ export function meta({ location }: Route.MetaArgs) {
   ];
 }
 
-const BLUE = "#4c8df0";
-const GREEN = "#3fb68b";
-const RED = "#e5484d";
-const AMBER = "#e8973c";
-const PURPLE = "#9a7cf0";
-const TEAL = "#2bb3c0";
+const BLUE = "var(--status-blue)";
+const GREEN = "var(--status-green)";
+const RED = "var(--destructive)";
+const AMBER = "var(--primary)";
+const PURPLE = "var(--status-purple)";
+const TEAL = "var(--status-teal)";
 
 const chip = (c: string, pct = 14) =>
   `color-mix(in srgb, ${c} ${pct}%, transparent)`;
@@ -193,7 +194,7 @@ const eyebrow: React.CSSProperties = {
   fontWeight: 600,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#e8973c",
+  color: "var(--primary)",
 };
 const h2: React.CSSProperties = {
   margin: "14px 0 0",
@@ -201,18 +202,18 @@ const h2: React.CSSProperties = {
   lineHeight: 1.1,
   fontWeight: 700,
   letterSpacing: "-0.02em",
-  color: "#e6eaf0",
+  color: "var(--foreground)",
   textWrap: "balance",
 };
 const lede: React.CSSProperties = {
   margin: "16px 0 0",
   fontSize: "clamp(15px,1.6vw,17px)",
   lineHeight: 1.6,
-  color: "#8a93a2",
+  color: "var(--muted-foreground)",
   textWrap: "pretty",
 };
 const arrow = (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1a1206" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--primary-foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14" />
     <path d="M13 6l6 6-6 6" />
   </svg>
@@ -243,7 +244,7 @@ function StatusPill({ inv, big = false }: { inv: Invoice; big?: boolean }) {
 export default function Home() {
   const { isLoggedIn } = useAuth();
   return (
-    <div style={{ background: "#0e1116", overflow: "hidden" }}>
+    <div style={{ background: "var(--background)", overflow: "hidden" }}>
       <section id="top" style={{ position: "relative" }}>
         <div
           style={{
@@ -254,7 +255,7 @@ export default function Home() {
             width: "min(900px,120vw)",
             height: 520,
             background:
-              "radial-gradient(ellipse at center, rgba(232,151,60,0.16), rgba(232,151,60,0) 68%)",
+              "radial-gradient(ellipse at center, color-mix(in srgb, var(--primary) 16%, transparent), transparent 68%)",
             pointerEvents: "none",
           }}
         />
@@ -271,7 +272,7 @@ export default function Home() {
             alignItems: "center",
           }}
         >
-          <div className="mk-fade-up" style={{ flex: "1 1 420px", minWidth: 300 }}>
+          <div className="animate-fade-up-slow" style={{ flex: "1 1 420px", minWidth: 300 }}>
             <div
               style={{
                 display: "inline-flex",
@@ -279,13 +280,13 @@ export default function Home() {
                 gap: 8,
                 padding: "6px 12px",
                 borderRadius: 999,
-                border: "1px solid #333b49",
-                background: "#14181f",
+                border: "1px solid var(--border2)",
+                background: "var(--card)",
                 marginBottom: 22,
               }}
             >
-              <span style={{ width: 6, height: 6, borderRadius: 999, background: "#3fb68b", boxShadow: "0 0 8px #3fb68b" }} />
-              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", color: "#8a93a2" }}>
+              <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--status-green)", boxShadow: "0 0 8px var(--status-green)" }} />
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", color: "var(--muted-foreground)" }}>
                 SAPS-aligned compliance, built in
               </span>
             </div>
@@ -296,7 +297,7 @@ export default function Home() {
                 lineHeight: 1.04,
                 fontWeight: 700,
                 letterSpacing: "-0.025em",
-                color: "#e6eaf0",
+                color: "var(--foreground)",
                 textWrap: "balance",
               }}
             >
@@ -309,86 +310,34 @@ export default function Home() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
               {isLoggedIn ? (
-                <Link
-                  to="/dashboard"
-                  prefetch="viewport"
-                  className="mk-cta-lg"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    height: 46,
-                    padding: "0 24px",
-                    borderRadius: 11,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: "#1a1206",
-                    background: "#e8973c",
-                    boxShadow: "0 8px 24px rgba(232,151,60,.28)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Go to Dashboard
-                  {arrow}
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/signup"
-                    prefetch="viewport"
-                    className="mk-cta-lg"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                      height: 46,
-                      padding: "0 24px",
-                      borderRadius: 11,
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#1a1206",
-                      background: "#e8973c",
-                      boxShadow: "0 8px 24px rgba(232,151,60,.28)",
-                      textDecoration: "none",
-                    }}
-                  >
-                    Start Free
+                <Button asChild className="h-[46px] rounded-[11px] px-6 text-[15px]" style={{ boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 28%, transparent)" }}>
+                  <Link to="/dashboard" prefetch="viewport">
+                    Go to Dashboard
                     {arrow}
                   </Link>
-                  <Link
-                    to="/login"
-                    prefetch="viewport"
-                    className="mk-ghost-lg"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: 46,
-                      padding: "0 24px",
-                      borderRadius: 11,
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#e6eaf0",
-                      background: "#1a1f28",
-                      border: "1px solid #333b49",
-                      textDecoration: "none",
-                    }}
-                  >
-                    Sign in
-                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild className="h-[46px] rounded-[11px] px-6 text-[15px]" style={{ boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 28%, transparent)" }}>
+                    <Link to="/signup" prefetch="viewport">
+                      Start Free
+                      {arrow}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-[46px] rounded-[11px] px-6 text-[15px]">
+                    <Link to="/login" prefetch="viewport">Sign in</Link>
+                  </Button>
                 </>
               )}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px", marginTop: 30 }}>
-              <span style={{ fontSize: 12.5, color: "#5c6573" }}>
+              <span style={{ fontSize: 12.5, color: "var(--dim)" }}>
                 Trusted by dealers, gunsmiths &amp; secure facilities
               </span>
               <span style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
                 {["Set up in minutes", "Fully SAPS-aligned"].map((t) => (
-                  <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#8a93a2" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3fb68b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--muted-foreground)" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-green)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
                     {t}
@@ -398,45 +347,45 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mk-fade-up-delayed" style={{ flex: "1 1 440px", minWidth: 300 }}>
-            <div style={{ border: "1px solid #262d38", borderRadius: 16, background: "#14181f", boxShadow: "0 30px 80px rgba(0,0,0,.55)", overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
+          <div className="animate-fade-up-slow-delayed" style={{ flex: "1 1 440px", minWidth: 300 }}>
+            <div style={{ border: "1px solid var(--border)", borderRadius: 16, background: "var(--card)", boxShadow: "0 30px 80px rgba(0,0,0,.55)", overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", borderBottom: "1px solid var(--line)", background: "var(--panel)" }}>
                 <span style={{ display: "flex", gap: 6 }}>
                   {[0, 1, 2].map((i) => (
-                    <span key={i} style={{ width: 10, height: 10, borderRadius: 999, background: "#333b49" }} />
+                    <span key={i} style={{ width: 10, height: 10, borderRadius: 999, background: "var(--border2)" }} />
                   ))}
                 </span>
-                <span style={{ marginLeft: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "#5c6573" }}>
+                <span style={{ marginLeft: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "var(--dim)" }}>
                   app.firearmstudio.com/dashboard
                 </span>
               </div>
               <div style={{ padding: "clamp(14px,2vw,20px)" }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#e6eaf0" }}>Good morning</div>
-                <div style={{ marginTop: 2, fontSize: 11.5, color: "#8a93a2" }}>Friday, 27 June 2025</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--foreground)" }}>Good morning</div>
+                <div style={{ marginTop: 2, fontSize: 11.5, color: "var(--muted-foreground)" }}>Friday, 27 June 2025</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 }}>
                   {heroStats.map((s) => (
-                    <div key={s.label} style={{ border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", padding: 13 }}>
+                    <div key={s.label} style={{ border: "1px solid var(--border)", borderRadius: 14, background: "var(--background)", padding: 13 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 600, color: "#8a93a2" }}>{s.label}</span>
+                        <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--muted-foreground)" }}>{s.label}</span>
                         <span style={{ width: 24, height: 24, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", color: s.color, background: chip(s.color) }}>
                           <Glyph d={s.svg} size={14} sw={1.8} />
                         </span>
                       </div>
-                      <div style={{ marginTop: 9, fontFamily: "'IBM Plex Mono',monospace", fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em", color: "#e6eaf0" }}>{s.value}</div>
-                      <div style={{ marginTop: 3, fontSize: 10, color: "#5c6573" }}>{s.sub}</div>
+                      <div style={{ marginTop: 9, fontFamily: "'IBM Plex Mono',monospace", fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--foreground)" }}>{s.value}</div>
+                      <div style={{ marginTop: 3, fontSize: 10, color: "var(--dim)" }}>{s.sub}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ marginTop: 14, border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", overflow: "hidden" }}>
-                  <div style={{ padding: "11px 14px", borderBottom: "1px solid #1f252e", fontSize: 11.5, fontWeight: 700, color: "#e6eaf0" }}>Recent invoices</div>
+                <div style={{ marginTop: 14, border: "1px solid var(--border)", borderRadius: 14, background: "var(--background)", overflow: "hidden" }}>
+                  <div style={{ padding: "11px 14px", borderBottom: "1px solid var(--line)", fontSize: 11.5, fontWeight: 700, color: "var(--foreground)" }}>Recent invoices</div>
                   {heroInvoices.map((r) => (
-                    <div key={r.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid #1f252e" }}>
+                    <div key={r.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--line)" }}>
                       <span style={{ minWidth: 0 }}>
-                        <span style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 600, color: "#e6eaf0" }}>{r.num}</span>
-                        <span style={{ display: "block", fontSize: 10, color: "#5c6573" }}>{r.name}</span>
+                        <span style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 600, color: "var(--foreground)" }}>{r.num}</span>
+                        <span style={{ display: "block", fontSize: 10, color: "var(--dim)" }}>{r.name}</span>
                       </span>
                       <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 600, color: "#e6eaf0" }}>{r.total}</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 600, color: "var(--foreground)" }}>{r.total}</span>
                         <StatusPill inv={r} />
                       </span>
                     </div>
@@ -448,12 +397,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e", background: "#0b0e12" }}>
+      <section style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", background: "var(--deep)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(24px,4vw,36px) clamp(18px,5vw,40px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 24, textAlign: "center" }}>
           {metrics.map((m) => (
             <div key={m.label}>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: "clamp(26px,3.4vw,34px)", fontWeight: 700, letterSpacing: "-0.02em", color: "#e8973c" }}>{m.value}</div>
-              <div style={{ marginTop: 5, fontSize: 13, color: "#8a93a2" }}>{m.label}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: "clamp(26px,3.4vw,34px)", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--primary)" }}>{m.value}</div>
+              <div style={{ marginTop: 5, fontSize: 13, color: "var(--muted-foreground)" }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -471,12 +420,12 @@ export default function Home() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, marginTop: "clamp(32px,4vw,48px)" }}>
           {features.map((f) => (
-            <div key={f.title} className="mk-card" style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", padding: 24 }}>
+            <div key={f.title} className="transition-[transform,border-color] duration-[180ms] hover:-translate-y-[3px] hover:border-border2" style={{ border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", padding: 24 }}>
               <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", color: f.color, background: chip(f.color) }}>
                 <Glyph d={f.svg} size={22} />
               </span>
-              <h3 style={{ margin: "18px 0 0", fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em", color: "#e6eaf0" }}>{f.title}</h3>
-              <p style={{ margin: "9px 0 0", fontSize: 14, lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>{f.body}</p>
+              <h3 style={{ margin: "18px 0 0", fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em", color: "var(--foreground)" }}>{f.title}</h3>
+              <p style={{ margin: "9px 0 0", fontSize: 14, lineHeight: 1.6, color: "var(--muted-foreground)", textWrap: "pretty" }}>{f.body}</p>
             </div>
           ))}
         </div>
@@ -500,8 +449,8 @@ export default function Home() {
                   </svg>
                 </span>
                 <span>
-                  <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "#e6eaf0" }}>{p.title}</span>
-                  <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>{p.body}</span>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "var(--foreground)" }}>{p.title}</span>
+                  <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "var(--muted-foreground)" }}>{p.body}</span>
                 </span>
               </div>
             ))}
@@ -509,38 +458,38 @@ export default function Home() {
         </div>
 
         <div style={{ flex: "1 1 380px", minWidth: 300 }}>
-          <div style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
+          <div style={{ border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid var(--line)", background: "var(--panel)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 9, color: TEAL }}>
                 <Glyph d={ic.calendar} size={17} sw={1.7} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>New booking</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>New booking</span>
               </span>
-              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#5c6573" }}>FRI 27 JUN</span>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "var(--dim)" }}>FRI 27 JUN</span>
             </div>
             <div style={{ padding: "clamp(14px,2vw,18px)" }}>
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5c6573" }}>Available slots</div>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--dim)" }}>Available slots</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 10 }}>
                 {bookingSlots.map((s) => {
                   const active = s.state === "active";
                   const full = s.state === "full";
                   return (
-                    <div key={s.time} style={{ borderRadius: 10, padding: "9px 10px", border: `1px solid ${active ? TEAL : "#262d38"}`, background: active ? chip(TEAL, 16) : "#0e1116", opacity: full ? 0.45 : 1 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: active ? TEAL : "#e6eaf0" }}>{s.time}</div>
-                      <div style={{ marginTop: 3, fontSize: 10, color: active ? TEAL : "#5c6573" }}>{s.note}</div>
+                    <div key={s.time} style={{ borderRadius: 10, padding: "9px 10px", border: `1px solid ${active ? TEAL : "var(--border)"}`, background: active ? chip(TEAL, 16) : "var(--background)", opacity: full ? 0.45 : 1 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: active ? TEAL : "var(--foreground)" }}>{s.time}</div>
+                      <div style={{ marginTop: 3, fontSize: 10, color: active ? TEAL : "var(--dim)" }}>{s.note}</div>
                     </div>
                   );
                 })}
               </div>
 
-              <div style={{ marginTop: 16, border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", overflow: "hidden" }}>
-                <div style={{ padding: "11px 14px", borderBottom: "1px solid #1f252e", fontSize: 11.5, fontWeight: 700, color: "#e6eaf0" }}>Today's bookings</div>
+              <div style={{ marginTop: 16, border: "1px solid var(--border)", borderRadius: 14, background: "var(--background)", overflow: "hidden" }}>
+                <div style={{ padding: "11px 14px", borderBottom: "1px solid var(--line)", fontSize: 11.5, fontWeight: 700, color: "var(--foreground)" }}>Today's bookings</div>
                 {bookingUpcoming.map((b) => (
-                  <div key={b.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid #1f252e" }}>
+                  <div key={b.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--line)" }}>
                     <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                       <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11.5, fontWeight: 700, color: TEAL, flexShrink: 0 }}>{b.time}</span>
                       <span style={{ minWidth: 0 }}>
-                        <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#e6eaf0" }}>{b.num}</span>
-                        <span style={{ display: "block", fontSize: 10, color: "#5c6573" }}>{b.name}</span>
+                        <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>{b.num}</span>
+                        <span style={{ display: "block", fontSize: 10, color: "var(--dim)" }}>{b.name}</span>
                       </span>
                     </span>
                     <StatusPill inv={b} />
@@ -571,8 +520,8 @@ export default function Home() {
                     </svg>
                   </span>
                   <span>
-                    <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "#e6eaf0" }}>{p.title}</span>
-                    <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>{p.body}</span>
+                    <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "var(--foreground)" }}>{p.title}</span>
+                    <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "var(--muted-foreground)" }}>{p.body}</span>
                   </span>
                 </div>
               ))}
@@ -580,24 +529,24 @@ export default function Home() {
           </div>
 
           <div style={{ flex: "1 1 380px", minWidth: 300 }}>
-            <div style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid #1f252e", background: "#11151b" }}>
+            <div style={{ border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid var(--line)", background: "var(--panel)" }}>
                 <span style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#e5484d" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#e8973c" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "#3fb68b" }} />
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "var(--destructive)" }} />
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "var(--primary)" }} />
+                  <span style={{ width: 10, height: 10, borderRadius: 999, background: "var(--status-green)" }} />
                 </span>
-                <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, minWidth: 0, height: 26, padding: "0 12px", borderRadius: 7, border: "1px solid #262d38", background: "#0e1116" }}>
-                  <span style={{ color: "#5c6573", display: "flex", flexShrink: 0 }}>
+                <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, minWidth: 0, height: 26, padding: "0 12px", borderRadius: 7, border: "1px solid var(--border)", background: "var(--background)" }}>
+                  <span style={{ color: "var(--dim)", display: "flex", flexShrink: 0 }}>
                     <Glyph d={ic.globe} size={13} sw={1.7} />
                   </span>
-                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "#8a93a2", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>yourrange.co.za/book-now</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "var(--muted-foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>yourrange.co.za/book-now</span>
                 </span>
               </div>
               <div style={{ padding: "clamp(14px,2vw,18px)" }}>
-                <div style={{ border: "1px dashed #333b49", borderRadius: 14, background: "#0e1116", padding: 16 }}>
+                <div style={{ border: "1px dashed var(--border2)", borderRadius: 14, background: "var(--background)", padding: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#e6eaf0" }}>Book a session</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--foreground)" }}>Book a session</span>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, color: PURPLE, padding: "2px 8px", borderRadius: 999, background: chip(PURPLE, 14) }}>EMBEDDED</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 12 }}>
@@ -605,9 +554,9 @@ export default function Home() {
                       const active = s.state === "active";
                       const full = s.state === "full";
                       return (
-                        <div key={s.time} style={{ borderRadius: 10, padding: "8px 9px", border: `1px solid ${active ? PURPLE : "#262d38"}`, background: active ? chip(PURPLE, 16) : "#11151b", opacity: full ? 0.45 : 1 }}>
-                          <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 700, color: active ? PURPLE : "#e6eaf0" }}>{s.time}</div>
-                          <div style={{ marginTop: 2, fontSize: 9.5, color: active ? PURPLE : "#5c6573" }}>{s.note}</div>
+                        <div key={s.time} style={{ borderRadius: 10, padding: "8px 9px", border: `1px solid ${active ? PURPLE : "var(--border)"}`, background: active ? chip(PURPLE, 16) : "var(--panel)", opacity: full ? 0.45 : 1 }}>
+                          <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 700, color: active ? PURPLE : "var(--foreground)" }}>{s.time}</div>
+                          <div style={{ marginTop: 2, fontSize: 9.5, color: active ? PURPLE : "var(--dim)" }}>{s.note}</div>
                         </div>
                       );
                     })}
@@ -616,25 +565,25 @@ export default function Home() {
 
                 <div style={{ marginTop: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5c6573" }}>Embed code</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--dim)" }}>Embed code</span>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10.5, fontWeight: 600, color: PURPLE }}>
                       <Glyph d={ic.code} size={12} sw={2} />
                       Copy embed code
                     </span>
                   </div>
-                  <div style={{ border: "1px solid #262d38", borderRadius: 10, background: "#0b0e12", padding: "11px 13px", overflowX: "auto" }}>
-                    <code style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, lineHeight: 1.6, color: "#8a93a2", whiteSpace: "pre" }}>{'<iframe\n  src="…/book/{id}?embed=1"\n  width="100%" height="760"\n  style="border:0" loading="lazy">\n</iframe>'}</code>
+                  <div style={{ border: "1px solid var(--border)", borderRadius: 10, background: "var(--deep)", padding: "11px 13px", overflowX: "auto" }}>
+                    <code style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, lineHeight: 1.6, color: "var(--muted-foreground)", whiteSpace: "pre" }}>{'<iframe\n  src="…/book/{id}?embed=1"\n  width="100%" height="760"\n  style="border:0" loading="lazy">\n</iframe>'}</code>
                   </div>
                 </div>
 
-                <div style={{ marginTop: 14, border: "1px solid #262d38", borderRadius: 14, background: "#0e1116", padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+                <div style={{ marginTop: 14, border: "1px solid var(--border)", borderRadius: 14, background: "var(--background)", padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                     <span style={{ width: 70, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
                       <img src="/assets/sage.png" alt="Sage Accounting" style={{ width: 58, height: "auto", display: "block" }} />
                     </span>
                     <span style={{ minWidth: 0 }}>
-                      <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: "#e6eaf0" }}>Sage Accounting</span>
-                      <span style={{ display: "block", marginTop: 2, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#8a93a2", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Connected - Sentinel Range</span>
+                      <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--foreground)" }}>Sage Accounting</span>
+                      <span style={{ display: "block", marginTop: 2, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "var(--muted-foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Connected - Sentinel Range</span>
                     </span>
                   </span>
                   <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, color: GREEN, padding: "2px 8px", borderRadius: 999, background: chip(GREEN, 14), flexShrink: 0 }}>READY</span>
@@ -644,14 +593,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ marginTop: "clamp(32px,4vw,48px)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, border: "1px solid #333b49", borderRadius: 18, background: chip(AMBER, 10), padding: "clamp(20px,3vw,28px)" }}>
+        <div style={{ marginTop: "clamp(32px,4vw,48px)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20, border: "1px solid var(--border2)", borderRadius: 18, background: chip(AMBER, 10), padding: "clamp(20px,3vw,28px)" }}>
           <div style={{ display: "flex", gap: 16, alignItems: "flex-start", minWidth: 260, flex: "1 1 420px" }}>
             <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: AMBER, background: chip(AMBER, 18) }}>
               <Glyph d={ic.tag} size={20} />
             </span>
             <span>
-              <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "#e6eaf0" }}>Sage is built in, custom work is quote-based</span>
-              <span style={{ display: "block", marginTop: 5, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>
+              <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "var(--foreground)" }}>Sage is built in, custom work is quote-based</span>
+              <span style={{ display: "block", marginTop: 5, fontSize: 13.5, lineHeight: 1.55, color: "var(--muted-foreground)" }}>
                 The public link, website embed, and Sage Accounting connection
                 are included. Bespoke website or platform integrations are
                 priced per project - the quote varies
@@ -659,13 +608,15 @@ export default function Home() {
               </span>
             </span>
           </div>
-          <Link to="/contact" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 46, padding: "0 26px", borderRadius: 12, fontSize: 14.5, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none", flexShrink: 0 }}>
-            Get a quote {arrow}
-          </Link>
+          <Button asChild className="h-[46px] rounded-[12px] px-[26px] text-[14.5px] flex-shrink-0" style={{ boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 30%, transparent)" }}>
+            <Link to="/contact" prefetch="viewport">
+              Get a quote {arrow}
+            </Link>
+          </Button>
         </div>
       </section>
 
-      <section style={{ background: "#0b0e12", borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e" }}>
+      <section style={{ background: "var(--deep)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
           <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto" }}>
             <div style={eyebrow}>The dashboard</div>
@@ -675,68 +626,68 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ marginTop: "clamp(32px,4vw,48px)", border: "1px solid #262d38", borderRadius: 18, background: "#14181f", boxShadow: "0 30px 90px rgba(0,0,0,.5)", overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "13px 18px", borderBottom: "1px solid #1f252e", background: "#11151b", flexWrap: "wrap" }}>
+          <div style={{ marginTop: "clamp(32px,4vw,48px)", border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", boxShadow: "0 30px 90px rgba(0,0,0,.5)", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "13px 18px", borderBottom: "1px solid var(--line)", background: "var(--panel)", flexWrap: "wrap" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                <MarketingLogo size={15} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>Dashboard</span>
+                <BrandMark size={27} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Dashboard</span>
               </span>
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 30, padding: "0 12px", borderRadius: 8, border: "1px solid #262d38", background: "#0e1116", fontSize: 12, color: "#5c6573" }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5c6573" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 30, padding: "0 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--background)", fontSize: 12, color: "var(--dim)" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="7" />
                     <path d="M21 21l-4.3-4.3" />
                   </svg>
                   Search registry…
                 </span>
-                <span style={{ width: 30, height: 30, borderRadius: 999, background: "#222834", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 700, color: "#e8973c" }}>JM</span>
+                <span style={{ width: 30, height: 30, borderRadius: 999, background: "var(--raised)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 700, color: "var(--primary)" }}>JM</span>
               </span>
             </div>
 
             <div style={{ padding: "clamp(16px,2.6vw,28px)" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 14 }}>
                 {stats.map((s) => (
-                  <div key={s.label} style={{ border: "1px solid #262d38", borderRadius: 16, background: "#0e1116", padding: 17 }}>
+                  <div key={s.label} style={{ border: "1px solid var(--border)", borderRadius: 16, background: "var(--background)", padding: 17 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: "#8a93a2" }}>{s.label}</span>
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--muted-foreground)" }}>{s.label}</span>
                       <span style={{ width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: s.color, background: chip(s.color) }}>
                         <Glyph d={s.svg} size={16} />
                       </span>
                     </div>
-                    <div style={{ marginTop: 13, fontFamily: "'IBM Plex Mono',monospace", fontSize: "clamp(22px,2.4vw,27px)", fontWeight: 700, letterSpacing: "-0.02em", color: "#e6eaf0" }}>{s.value}</div>
-                    <div style={{ marginTop: 5, fontSize: 11.5, color: "#5c6573" }}>{s.sub}</div>
+                    <div style={{ marginTop: 13, fontFamily: "'IBM Plex Mono',monospace", fontSize: "clamp(22px,2.4vw,27px)", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--foreground)" }}>{s.value}</div>
+                    <div style={{ marginTop: 5, fontSize: 11.5, color: "var(--dim)" }}>{s.sub}</div>
                   </div>
                 ))}
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 18, marginTop: 18 }}>
-                <div style={{ border: "1px solid #262d38", borderRadius: 16, background: "#0e1116", overflow: "hidden" }}>
-                  <div style={{ padding: "13px 16px", borderBottom: "1px solid #1f252e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>Recent invoices</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: "#5c6573" }}>View all →</span>
+                <div style={{ border: "1px solid var(--border)", borderRadius: 16, background: "var(--background)", overflow: "hidden" }}>
+                  <div style={{ padding: "13px 16px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Recent invoices</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--dim)" }}>View all →</span>
                   </div>
                   {invoices.map((r) => (
-                    <div key={r.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #1f252e" }}>
+                    <div key={r.num} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
                       <span style={{ minWidth: 0 }}>
-                        <span style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 600, color: "#e6eaf0" }}>{r.num}</span>
-                        <span style={{ display: "block", marginTop: 1, fontSize: 11, color: "#5c6573" }}>{r.name}</span>
+                        <span style={{ display: "block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 600, color: "var(--foreground)" }}>{r.num}</span>
+                        <span style={{ display: "block", marginTop: 1, fontSize: 11, color: "var(--dim)" }}>{r.name}</span>
                       </span>
                       <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 600, color: "#e6eaf0" }}>{r.total}</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12.5, fontWeight: 600, color: "var(--foreground)" }}>{r.total}</span>
                         <StatusPill inv={r} big />
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div style={{ border: "1px solid #262d38", borderRadius: 16, background: "#0e1116", overflow: "hidden" }}>
-                  <div style={{ padding: "13px 16px", borderBottom: "1px solid #1f252e", fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>Needs attention</div>
+                <div style={{ border: "1px solid var(--border)", borderRadius: 16, background: "var(--background)", overflow: "hidden" }}>
+                  <div style={{ padding: "13px 16px", borderBottom: "1px solid var(--line)", fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Needs attention</div>
                   {attention.map((a, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: "1px solid #1f252e" }}>
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
                       <span style={{ width: 8, height: 8, borderRadius: 999, flexShrink: 0, background: a.color, boxShadow: `0 0 7px ${a.color}` }} />
                       <span style={{ minWidth: 0, flex: 1 }}>
-                        <span style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#e6eaf0" }}>{a.title}</span>
-                        <span style={{ display: "block", marginTop: 1, fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "#8a93a2" }}>{a.detail}</span>
+                        <span style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "var(--foreground)" }}>{a.title}</span>
+                        <span style={{ display: "block", marginTop: 1, fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: "var(--muted-foreground)" }}>{a.detail}</span>
                       </span>
                       <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 700, flexShrink: 0, color: a.color }}>{a.tag}</span>
                     </div>
@@ -760,14 +711,14 @@ export default function Home() {
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
             {trust.map((t) => (
               <div key={t.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: "#3fb68b", background: "rgba(63,182,139,.13)" }}>
+                <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--status-green)", background: chip("var(--status-green)", 13) }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 </span>
                 <span>
-                  <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "#e6eaf0" }}>{t.title}</span>
-                  <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "#8a93a2" }}>{t.body}</span>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "var(--foreground)" }}>{t.title}</span>
+                  <span style={{ display: "block", marginTop: 3, fontSize: 13.5, lineHeight: 1.55, color: "var(--muted-foreground)" }}>{t.body}</span>
                 </span>
               </div>
             ))}
@@ -775,36 +726,36 @@ export default function Home() {
         </div>
 
         <div style={{ flex: "1 1 340px", minWidth: 300 }}>
-          <div style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
-            <div style={{ padding: 18, borderBottom: "1px solid #1f252e", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#11151b" }}>
+          <div style={{ border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", overflow: "hidden", boxShadow: "0 24px 70px rgba(0,0,0,.45)" }}>
+            <div style={{ padding: 18, borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--panel)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e8973c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z" />
                   <path d="M14 3v5h5" />
                   <path d="M9 13h6" />
                   <path d="M9 17h4" />
                 </svg>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#e6eaf0" }}>Audit trail</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Audit trail</span>
               </span>
-              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#5c6573" }}>LAST 24H</span>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "var(--dim)" }}>LAST 24H</span>
             </div>
             {audit.map((e, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, padding: "13px 18px", borderBottom: "1px solid #1f252e" }}>
+              <div key={i} style={{ display: "flex", gap: 12, padding: "13px 18px", borderBottom: "1px solid var(--line)" }}>
                 <span style={{ flexShrink: 0, width: 7, height: 7, marginTop: 5, borderRadius: 999, background: e.color }} />
                 <span style={{ minWidth: 0, flex: 1 }}>
-                  <span style={{ display: "block", fontSize: 12.5, color: "#e6eaf0" }}>
+                  <span style={{ display: "block", fontSize: 12.5, color: "var(--foreground)" }}>
                     <b style={{ fontWeight: 600 }}>{e.who}</b> {e.action}
                   </span>
-                  <span style={{ display: "block", marginTop: 2, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#5c6573" }}>{e.target}</span>
+                  <span style={{ display: "block", marginTop: 2, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "var(--dim)" }}>{e.target}</span>
                 </span>
-                <span style={{ flexShrink: 0, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "#5c6573" }}>{e.time}</span>
+                <span style={{ flexShrink: 0, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10.5, color: "var(--dim)" }}>{e.time}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how" style={{ background: "#0b0e12", borderTop: "1px solid #1f252e", borderBottom: "1px solid #1f252e" }}>
+      <section id="how" style={{ background: "var(--deep)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
           <div style={{ maxWidth: 620 }}>
             <div style={eyebrow}>How it works</div>
@@ -812,15 +763,15 @@ export default function Home() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 18, marginTop: "clamp(32px,4vw,48px)" }}>
             {steps.map((st) => (
-              <div key={st.n} style={{ border: "1px solid #262d38", borderRadius: 18, background: "#14181f", padding: 24 }}>
+              <div key={st.n} style={{ border: "1px solid var(--border)", borderRadius: 18, background: "var(--card)", padding: 24 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: "#1a1206", background: "#e8973c", width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>{st.n}</span>
-                  <span style={{ color: "#222834" }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: "var(--primary-foreground)", background: "var(--primary)", width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>{st.n}</span>
+                  <span style={{ color: "var(--raised)" }}>
                     <Glyph d={st.svg} size={22} />
                   </span>
                 </div>
-                <h3 style={{ margin: "18px 0 0", fontSize: 16, fontWeight: 700, color: "#e6eaf0" }}>{st.title}</h3>
-                <p style={{ margin: "8px 0 0", fontSize: 13.5, lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>{st.body}</p>
+                <h3 style={{ margin: "18px 0 0", fontSize: 16, fontWeight: 700, color: "var(--foreground)" }}>{st.title}</h3>
+                <p style={{ margin: "8px 0 0", fontSize: 13.5, lineHeight: 1.6, color: "var(--muted-foreground)", textWrap: "pretty" }}>{st.body}</p>
               </div>
             ))}
           </div>
@@ -828,29 +779,29 @@ export default function Home() {
       </section>
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(56px,8vw,96px) clamp(18px,5vw,40px)" }}>
-        <div style={{ position: "relative", border: "1px solid #333b49", borderRadius: 24, background: "linear-gradient(135deg,#1a1f28,#14181f)", padding: "clamp(36px,6vw,64px) clamp(24px,5vw,56px)", textAlign: "center", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", width: 600, height: 360, background: "radial-gradient(ellipse at center, rgba(232,151,60,0.18), rgba(232,151,60,0) 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative", border: "1px solid var(--border2)", borderRadius: 24, background: "linear-gradient(135deg,var(--secondary),var(--card))", padding: "clamp(36px,6vw,64px) clamp(24px,5vw,56px)", textAlign: "center", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", width: 600, height: 360, background: "radial-gradient(ellipse at center, color-mix(in srgb, var(--primary) 18%, transparent), transparent 70%)", pointerEvents: "none" }} />
           <div style={{ position: "relative" }}>
-            <h2 style={{ margin: 0, fontSize: "clamp(28px,4.4vw,44px)", lineHeight: 1.08, fontWeight: 700, letterSpacing: "-0.025em", color: "#e6eaf0", textWrap: "balance" }}>
+            <h2 style={{ margin: 0, fontSize: "clamp(28px,4.4vw,44px)", lineHeight: 1.08, fontWeight: 700, letterSpacing: "-0.025em", color: "var(--foreground)", textWrap: "balance" }}>
               Ready to bring order to your storage operation?
             </h2>
-            <p style={{ margin: "16px auto 0", maxWidth: 520, fontSize: "clamp(15px,1.7vw,18px)", lineHeight: 1.6, color: "#8a93a2", textWrap: "pretty" }}>
+            <p style={{ margin: "16px auto 0", maxWidth: 520, fontSize: "clamp(15px,1.7vw,18px)", lineHeight: 1.6, color: "var(--muted-foreground)", textWrap: "pretty" }}>
               Start your free trial today - be compliant and invoicing before
               the day is out.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 30 }}>
               {isLoggedIn ? (
-                <Link to="/dashboard" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
-                  Go to Dashboard
-                </Link>
+                <Button asChild className="h-[48px] rounded-[12px] px-7 text-[15px]" style={{ boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 30%, transparent)" }}>
+                  <Link to="/dashboard" prefetch="viewport">Go to Dashboard</Link>
+                </Button>
               ) : (
                 <>
-                  <Link to="/signup" prefetch="viewport" className="mk-cta-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#1a1206", background: "#e8973c", boxShadow: "0 8px 24px rgba(232,151,60,.3)", textDecoration: "none" }}>
-                    Start Free
-                  </Link>
-                  <Link to="/login" prefetch="viewport" className="mk-ghost-lg" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, padding: "0 28px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#e6eaf0", background: "transparent", border: "1px solid #333b49", textDecoration: "none" }}>
-                    Talk to sales
-                  </Link>
+                  <Button asChild className="h-[48px] rounded-[12px] px-7 text-[15px]" style={{ boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 30%, transparent)" }}>
+                    <Link to="/signup" prefetch="viewport">Start Free</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-[48px] rounded-[12px] px-7 text-[15px]">
+                    <Link to="/login" prefetch="viewport">Talk to sales</Link>
+                  </Button>
                 </>
               )}
             </div>

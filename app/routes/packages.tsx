@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRevalidator, useSearchParams } from "react-router";
+import { useRevalidator } from "react-router";
 import { toast } from "sonner";
 import { Trash2Icon } from "lucide-react";
 import type { Route } from "./+types/packages";
@@ -23,8 +23,9 @@ import type {
   PackageListItemDto,
   PackageResponse,
 } from "~/lib/api/packages/types";
-
-const PAGE_SIZE = 20;
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 const ACTIVE_FILTERS = [
   { id: "all", label: "All" },
@@ -36,10 +37,7 @@ const ACTIVE_VALUES = new Set(ACTIVE_FILTERS.slice(1).map(({ id }) => id));
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
+  const pageNumber = parsePage(searchParams);
   const requestedActive = searchParams.get("active");
   const isActive =
     requestedActive && ACTIVE_VALUES.has(requestedActive)
@@ -57,7 +55,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 }
 
 export default function Packages({ loaderData }: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const revalidator = useRevalidator();
   const confirm = useConfirm();
   const user = useSessionUser();
@@ -75,13 +73,6 @@ export default function Packages({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (value === "all") next.delete("active");
     else next.set("active", value);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -233,40 +224,7 @@ export default function Packages({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {packagesPage.totalCount > packagesPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(packagesPage.pageNumber - 1) * packagesPage.pageSize + 1}–
-                    {Math.min(
-                      packagesPage.pageNumber * packagesPage.pageSize,
-                      packagesPage.totalCount,
-                    )}{" "}
-                    of {packagesPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={packagesPage.pageNumber <= 1}
-                      onClick={() => navigatePage(packagesPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        packagesPage.pageNumber * packagesPage.pageSize >=
-                        packagesPage.totalCount
-                      }
-                      onClick={() => navigatePage(packagesPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={packagesPage} onPage={navigatePage} />
             </>
           );
         }}

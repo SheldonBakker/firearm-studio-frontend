@@ -8,6 +8,7 @@ import {
   requiredTextSchema,
 } from "~/lib/utils/validation";
 import { contactApi } from "~/lib/api/contact/contact";
+import { Button } from "~/components/ui/button";
 
 const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as
   string | undefined;
@@ -34,8 +35,8 @@ export function meta({ location }: Route.MetaArgs) {
   });
 }
 
-const GREEN = "#3fb68b";
-const AMBER = "#e8973c";
+const GREEN = "var(--status-green)";
+const AMBER = "var(--primary)";
 const chip = (c: string) => `color-mix(in srgb, ${c} 14%, transparent)`;
 
 const ic = {
@@ -65,16 +66,16 @@ const inputStyle: React.CSSProperties = {
   height: 42,
   padding: "0 13px",
   borderRadius: 10,
-  border: "1px solid #333b49",
-  background: "#0e1116",
-  color: "#e6eaf0",
+  border: "1px solid var(--border2)",
+  background: "var(--background)",
+  color: "var(--foreground)",
   fontSize: 14,
   fontFamily: "inherit",
 };
 const labelText: React.CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
-  color: "#e6eaf0",
+  color: "var(--foreground)",
 };
 
 export default function Contact() {
@@ -268,7 +269,7 @@ export default function Contact() {
   }
 
   return (
-    <div style={{ background: "#0e1116", overflow: "hidden" }}>
+    <div style={{ background: "var(--background)", overflow: "hidden" }}>
       <section style={{ position: "relative" }}>
         <div
           style={{
@@ -279,7 +280,7 @@ export default function Contact() {
             width: "min(800px,120vw)",
             height: 420,
             background:
-              "radial-gradient(ellipse at center, rgba(232,151,60,0.12), rgba(232,151,60,0) 68%)",
+              "radial-gradient(ellipse at center, color-mix(in srgb, var(--primary) 12%, transparent), transparent 68%)",
             pointerEvents: "none",
           }}
         />
@@ -300,7 +301,7 @@ export default function Contact() {
               fontWeight: 600,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "#e8973c",
+              color: "var(--primary)",
             }}
           >
             Contact
@@ -312,7 +313,7 @@ export default function Contact() {
               lineHeight: 1.06,
               fontWeight: 700,
               letterSpacing: "-0.025em",
-              color: "#e6eaf0",
+              color: "var(--foreground)",
               textWrap: "balance",
             }}
           >
@@ -324,7 +325,7 @@ export default function Contact() {
               maxWidth: 540,
               fontSize: "clamp(15px,1.7vw,18px)",
               lineHeight: 1.6,
-              color: "#8a93a2",
+              color: "var(--muted-foreground)",
               textWrap: "pretty",
             }}
           >
@@ -358,11 +359,11 @@ export default function Contact() {
           {methods.map((m) => (
             <div
               key={m.title}
-              className="mk-method"
+              className="transition-[border-color] duration-[180ms] hover:border-border2"
               style={{
-                border: "1px solid #262d38",
+                border: "1px solid var(--border)",
                 borderRadius: 16,
-                background: "#14181f",
+                background: "var(--card)",
                 padding: 18,
                 display: "flex",
                 gap: 14,
@@ -400,7 +401,7 @@ export default function Contact() {
                     display: "block",
                     fontSize: 14.5,
                     fontWeight: 700,
-                    color: "#e6eaf0",
+                    color: "var(--foreground)",
                   }}
                 >
                   {m.title}
@@ -411,7 +412,7 @@ export default function Contact() {
                     marginTop: 3,
                     fontSize: 13,
                     lineHeight: 1.5,
-                    color: "#8a93a2",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {m.detail}
@@ -423,7 +424,7 @@ export default function Contact() {
                     fontFamily: "'IBM Plex Mono',monospace",
                     fontSize: 12.5,
                     fontWeight: 600,
-                    color: "#e8973c",
+                    color: "var(--primary)",
                   }}
                 >
                   {m.value}
@@ -439,9 +440,9 @@ export default function Contact() {
             noValidate
             onSubmit={onSubmit}
             style={{
-              border: "1px solid #262d38",
+              border: "1px solid var(--border)",
               borderRadius: 20,
-              background: "#14181f",
+              background: "var(--card)",
               padding: "clamp(22px,3vw,32px)",
               boxShadow: "0 24px 70px rgba(0,0,0,.4)",
             }}
@@ -451,12 +452,12 @@ export default function Contact() {
                 fontSize: 18,
                 fontWeight: 700,
                 letterSpacing: "-0.01em",
-                color: "#e6eaf0",
+                color: "var(--foreground)",
               }}
             >
               Send us a message
             </div>
-            <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8a93a2" }}>
+            <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--muted-foreground)" }}>
               We typically reply within one business day.
             </p>
 
@@ -470,8 +471,8 @@ export default function Contact() {
                   padding: 16,
                   borderRadius: 12,
                   border:
-                    "1px solid color-mix(in srgb,#3fb68b 30%,transparent)",
-                  background: "color-mix(in srgb,#3fb68b 12%,transparent)",
+                    "1px solid color-mix(in srgb,var(--status-green) 30%,transparent)",
+                  background: "color-mix(in srgb,var(--status-green) 12%,transparent)",
                 }}
               >
                 <svg
@@ -479,14 +480,14 @@ export default function Contact() {
                   height="22"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#3fb68b"
+                  stroke="var(--status-green)"
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                <span style={{ fontSize: 14, color: "#e6eaf0" }}>
+                <span style={{ fontSize: 14, color: "var(--foreground)" }}>
                   Thanks - your message is on its way. We'll be in touch
                   shortly.
                 </span>
@@ -508,10 +509,10 @@ export default function Contact() {
                 <input
                   id="contact-full-name"
                   name="fullName"
-                  className="mk-input"
                   type="text"
                   required
                   placeholder="Jane Mokoena"
+                  className="transition-[border-color,background] duration-150 focus:outline-none focus:border-primary focus:bg-background placeholder:text-dim"
                   style={inputStyle}
                   aria-invalid={Boolean(fieldErrors.fullName)}
                   aria-describedby={
@@ -522,7 +523,7 @@ export default function Contact() {
                 {fieldErrors.fullName && (
                   <span
                     id="contact-name-error"
-                    style={{ fontSize: 12, color: "#ef6b73" }}
+                    style={{ fontSize: 12, color: "var(--error-text)" }}
                   >
                     {fieldErrors.fullName}
                   </span>
@@ -535,10 +536,10 @@ export default function Contact() {
                 <input
                   id="contact-email"
                   name="email"
-                  className="mk-input"
                   type="email"
                   required
                   placeholder="you@company.co.za"
+                  className="transition-[border-color,background] duration-150 focus:outline-none focus:border-primary focus:bg-background placeholder:text-dim"
                   style={inputStyle}
                   value={email}
                   onChange={(event) => {
@@ -563,7 +564,7 @@ export default function Contact() {
                 {fieldErrors.email && (
                   <span
                     id="contact-email-error"
-                    style={{ fontSize: 12, color: "#ef6b73" }}
+                    style={{ fontSize: 12, color: "var(--error-text)" }}
                   >
                     {fieldErrors.email}
                   </span>
@@ -580,15 +581,15 @@ export default function Contact() {
             >
               <span style={labelText}>
                 Company{" "}
-                <span style={{ color: "#5c6573", fontWeight: 400 }}>
+                <span style={{ color: "var(--dim)", fontWeight: 400 }}>
                   (optional)
                 </span>
               </span>
               <input
                 name="company"
-                className="mk-input"
                 type="text"
                 placeholder="Your storage facility"
+                className="transition-[border-color,background] duration-150 focus:outline-none focus:border-primary focus:bg-background placeholder:text-dim"
                 style={inputStyle}
               />
             </label>
@@ -604,10 +605,10 @@ export default function Contact() {
               <textarea
                 id="contact-message"
                 name="message"
-                className="mk-input"
                 rows={4}
                 required
                 placeholder="Tell us a little about your operation and what you're looking for…"
+                className="transition-[border-color,background] duration-150 focus:outline-none focus:border-primary focus:bg-background placeholder:text-dim"
                 style={{
                   ...inputStyle,
                   height: "auto",
@@ -623,7 +624,7 @@ export default function Contact() {
               {fieldErrors.message && (
                 <span
                   id="contact-message-error"
-                  style={{ fontSize: 12, color: "#ef6b73" }}
+                  style={{ fontSize: 12, color: "var(--error-text)" }}
                 >
                   {fieldErrors.message}
                 </span>
@@ -636,41 +637,30 @@ export default function Contact() {
                   display: "block",
                   marginTop: 8,
                   fontSize: 12,
-                  color: "#ef6b73",
+                  color: "var(--error-text)",
                 }}
               >
                 {fieldErrors.turnstile}
               </span>
             )}
-            <button
-              className="mk-cta-lg"
+            <Button
               type="submit"
               disabled={submitting}
+              className="mt-5 h-[46px] w-full rounded-[12px] text-[15px]"
               style={{
-                marginTop: 20,
-                width: "100%",
-                height: 46,
-                border: "none",
-                borderRadius: 12,
-                fontSize: 15,
-                fontWeight: 600,
-                color: "#1a1206",
-                background: "#e8973c",
-                boxShadow: "0 8px 24px rgba(232,151,60,.25)",
-                cursor: submitting ? "not-allowed" : "pointer",
+                boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 25%, transparent)",
                 opacity: submitting ? 0.7 : 1,
-                fontFamily: "inherit",
               }}
             >
               {submitting ? "Verifying…" : "Send message"}
-            </button>
+            </Button>
             {fieldErrors.submit && (
               <span
                 style={{
                   display: "block",
                   marginTop: 10,
                   fontSize: 12.5,
-                  color: "#ef6b73",
+                  color: "var(--error-text)",
                   textAlign: "center",
                 }}
               >
@@ -682,12 +672,12 @@ export default function Contact() {
                 margin: "14px 0 0",
                 fontSize: 11.5,
                 lineHeight: 1.5,
-                color: "#5c6573",
+                color: "var(--dim)",
                 textAlign: "center",
               }}
             >
               By submitting, you agree to our{" "}
-              <Link to="/privacy" style={{ color: "#8a93a2" }}>
+              <Link to="/privacy" style={{ color: "var(--muted-foreground)" }}>
                 Privacy Policy
               </Link>
               . Your details are handled in line with POPIA.

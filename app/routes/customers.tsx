@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useRevalidator, useSearchParams } from "react-router";
+import { useNavigate, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/customers";
 import { customersApi } from "~/lib/api/customers/customers";
@@ -19,13 +19,12 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { Resolve } from "~/components/common/skeletons";
 import { CustomerType, enumKey } from "~/lib/types/enums";
 import type { CustomerListItemDto } from "~/lib/api/customers/types";
-
-const PAGE_SIZE = 20;
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
 export function clientLoader({ request }: Route.ClientLoaderArgs) {
-  const requestedPage = Number(new URL(request.url).searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageNumber = parsePage(new URL(request.url).searchParams);
   const customersP = customersApi.list({ pageNumber, pageSize: PAGE_SIZE, sortOrder: "asc" });
   return { data: customersP };
 }
@@ -33,16 +32,9 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
 export default function Customers({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { navigatePage } = usePagedSearchParams();
   const user = useSessionUser();
   const [addOpen, setAddOpen] = useState(false);
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
-    setSearchParams(next);
-  };
 
   const columns: Column<CustomerListItemDto>[] = [
     {
@@ -143,41 +135,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                 onRowClick={(r) => navigate(`/customers/${r.id}`)}
                 empty="No customers yet."
               />
-              {customerPage.totalCount > customerPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(customerPage.pageNumber - 1) * customerPage.pageSize + 1}
-                    –
-                    {Math.min(
-                      customerPage.pageNumber * customerPage.pageSize,
-                      customerPage.totalCount,
-                    )}{" "}
-                    of {customerPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={customerPage.pageNumber <= 1}
-                      onClick={() => navigatePage(customerPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        customerPage.pageNumber * customerPage.pageSize >=
-                        customerPage.totalCount
-                      }
-                      onClick={() => navigatePage(customerPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={customerPage} onPage={navigatePage} />
             </>
           );
         }}

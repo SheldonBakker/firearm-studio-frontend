@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { redirect, useSearchParams } from "react-router";
+import { redirect } from "react-router";
 import { toast } from "sonner";
 import { DownloadIcon } from "lucide-react";
 import type { Route } from "./+types/register";
@@ -25,8 +25,10 @@ import {
 import { Resolve } from "~/components/common/skeletons";
 import { FirearmOrigin, enumKey } from "~/lib/types/enums";
 import type { RegisterRowDto } from "~/lib/api/register/types";
+import { Pagination } from "~/components/common/pagination";
+import { usePagedSearchParams } from "~/hooks/use-paged-search-params";
+import { PAGE_SIZE, parsePage } from "~/lib/utils/list-params";
 
-const PAGE_SIZE = 20;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -34,10 +36,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   if (!canSeeNav(user, "register")) throw redirect("/dashboard");
 
   const searchParams = new URL(request.url).searchParams;
-  const requestedPage = Number(searchParams.get("page"));
-  const pageNumber =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
+  const pageNumber = parsePage(searchParams);
   const rangeId = searchParams.get("rangeId")?.trim() || undefined;
   const requestedFrom = searchParams.get("dateFrom") ?? "";
   const dateFrom = DATE_PATTERN.test(requestedFrom) ? requestedFrom : undefined;
@@ -56,7 +55,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
 }
 
 export default function Register({ loaderData }: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams, navigatePage } = usePagedSearchParams();
   const user = useSessionUser();
   const canExport = can(user, "bookings:export-register");
   const [exporting, setExporting] = useState(false);
@@ -71,13 +70,6 @@ export default function Register({ loaderData }: Route.ComponentProps) {
     next.delete("page");
     if (value) next.set(key, value);
     else next.delete(key);
-    setSearchParams(next);
-  };
-
-  const navigatePage = (newPage: number) => {
-    const next = new URLSearchParams(searchParams);
-    if (newPage <= 1) next.delete("page");
-    else next.set("page", String(newPage));
     setSearchParams(next);
   };
 
@@ -281,40 +273,7 @@ export default function Register({ loaderData }: Route.ComponentProps) {
                 }
               />
 
-              {registerPage.totalCount > registerPage.pageSize && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[12.5px] text-muted-foreground">
-                    Showing{" "}
-                    {(registerPage.pageNumber - 1) * registerPage.pageSize + 1}–
-                    {Math.min(
-                      registerPage.pageNumber * registerPage.pageSize,
-                      registerPage.totalCount,
-                    )}{" "}
-                    of {registerPage.totalCount}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={registerPage.pageNumber <= 1}
-                      onClick={() => navigatePage(registerPage.pageNumber - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={
-                        registerPage.pageNumber * registerPage.pageSize >=
-                        registerPage.totalCount
-                      }
-                      onClick={() => navigatePage(registerPage.pageNumber + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Pagination page={registerPage} onPage={navigatePage} />
             </>
           );
         }}
