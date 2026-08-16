@@ -185,7 +185,7 @@ export default function Onboarding() {
                         return next;
                       });
                     }}
-                    autoComplete="tel"
+                    autoComplete="tel-national"
                     placeholder="68 150 1196"
                     aria-invalid={Boolean(fieldErrors.phone)}
                     aria-describedby={
