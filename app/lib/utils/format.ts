@@ -71,6 +71,10 @@ const STATUS: Record<string, StatusMeta> = {
   DepositDue: { color: "var(--status-amber)", label: "Deposit due" },
   DepositPaid: { color: "var(--status-green)", label: "Deposit paid" },
   DepositExpired: { color: "var(--status-red)", label: "Deposit expired" },
+  // phone verification
+  PhoneVerified: { color: "var(--status-green)", label: "Verified" },
+  PhonePending: { color: "var(--status-amber)", label: "Pending" },
+  PhoneUnverified: { color: "var(--status-red)", label: "Not verified" },
   // customer type
   Individual: { color: "var(--status-teal)", label: "Individual" },
   Company: { color: "var(--status-purple)", label: "Company" },

@@ -23,6 +23,7 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { DepositPolicyFormDialog } from "~/components/modals/deposit-policy-form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
 import { Badge } from "~/components/ui/badge";
+import { StatusBadge } from "~/components/common/status-badge";
 import { Label } from "~/components/ui/label";
 import { PhoneInput } from "~/components/common/phone-input";
 import { VerifyCodeForm } from "~/components/common/verify-code-form";
@@ -208,7 +209,7 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
                   <span className="text-sm text-foreground">
                     {formatPhoneForDisplay(me.pendingPhoneNumber, "ZA")}
                   </span>
-                  <Badge variant="destructive">Awaiting confirmation</Badge>
+                  <StatusBadge status="PhonePending" />
                 </div>
                 <p className="text-[12px] text-muted-foreground">
                   You started changing your number to{" "}
@@ -243,9 +244,11 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
                   <span className="text-sm text-foreground">
                     {formatPhoneForDisplay(me.phoneNumber, "ZA")}
                   </span>
-                  <Badge variant={me.phoneNumberConfirmed ? "secondary" : "destructive"}>
-                    {me.phoneNumberConfirmed ? "Confirmed" : "Unconfirmed"}
-                  </Badge>
+                  <StatusBadge
+                    status={
+                      me.phoneNumberConfirmed ? "PhoneVerified" : "PhoneUnverified"
+                    }
+                  />
                 </div>
                 <div>
                   <Button
@@ -262,6 +265,9 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
               </>
             ) : (
               <>
+                <div>
+                  <StatusBadge status="PhoneUnverified" />
+                </div>
                 <p className="text-[12px] text-muted-foreground">
                   Add a WhatsApp number to receive verification codes.
                 </p>
