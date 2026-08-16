@@ -174,7 +174,8 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
               Two-factor authentication
             </div>
             <div className="mt-0.5 text-[12px] text-muted-foreground">
-              A WhatsApp code on each sign-in.
+              A code by email on each sign-in, plus WhatsApp too if you
+              have a verified phone number.
             </div>
           </div>
           {me.twoFactorEnabled ? (
