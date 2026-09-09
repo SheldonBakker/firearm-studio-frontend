@@ -12,7 +12,7 @@ import { requireAuth } from "~/context/auth-context";
 import { canSeeNav, primaryRole } from "~/lib/utils/rbac";
 import { useSessionUser } from "~/context/auth-context";
 import { fmtDate } from "~/lib/utils/format";
-import { formatPhoneForDisplay, requiredPhoneSchema } from "~/lib/utils/phone";
+import { formatPhoneForDisplay } from "~/lib/utils/phone";
 import { PageWrap, SectionTitle } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { Button } from "~/components/ui/button";
@@ -23,10 +23,6 @@ import { FormDialog } from "~/components/modals/form-dialog";
 import { DepositPolicyFormDialog } from "~/components/modals/deposit-policy-form-dialog";
 import { Resolve, KeyValueSkeleton } from "~/components/common/skeletons";
 import { Badge } from "~/components/ui/badge";
-import { StatusBadge } from "~/components/common/status-badge";
-import { Label } from "~/components/ui/label";
-import { PhoneInput } from "~/components/common/phone-input";
-import { VerifyCodeForm } from "~/components/common/verify-code-form";
 import type { CompanyDetailsResponse } from "~/lib/api/company/types";
 import type { AccountingConnectionDetailsResponse } from "~/lib/api/accounting/types";
 import { SOUTH_AFRICAN_BANKS, BANK_ACCOUNT_TYPES } from "~/lib/constants/banking";
@@ -123,11 +119,6 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
   const revalidator = useRevalidator();
   const [twoFaBusy, setTwoFaBusy] = useState(false);
   const [disableOpen, setDisableOpen] = useState(false);
-  const [phoneStep, setPhoneStep] = useState<"idle" | "entry" | "verify">("idle");
-  const [phoneInput, setPhoneInput] = useState("");
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [phoneBusy, setPhoneBusy] = useState(false);
-  const [pendingNumber, setPendingNumber] = useState("");
 
   async function enableTwoFactor() {
     setTwoFaBusy(true);
@@ -142,28 +133,6 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
     }
   }
 
-  async function sendPhoneCode() {
-    const parsed = requiredPhoneSchema.safeParse(phoneInput);
-    if (!parsed.success) {
-      setPhoneError(
-        parsed.error.issues[0]?.message ?? "Enter a valid phone number.",
-      );
-      return;
-    }
-    setPhoneError(null);
-    setPhoneBusy(true);
-    try {
-      await meApi.updatePhone(parsed.data);
-      toast.success("We sent a code to that number.");
-      setPendingNumber(parsed.data);
-      setPhoneStep("verify");
-    } catch (err) {
-      toast.error(messageForApiError(err));
-    } finally {
-      setPhoneBusy(false);
-    }
-  }
-
   return (
     <>
       <SectionTitle>Security</SectionTitle>
@@ -175,8 +144,7 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
               Two-factor authentication
             </div>
             <div className="mt-0.5 text-[12px] text-muted-foreground">
-              A code by email on each sign-in, plus WhatsApp too if you
-              have a verified phone number.
+              A code sent by email on each sign-in.
             </div>
           </div>
           {me.twoFactorEnabled ? (
@@ -196,170 +164,6 @@ function SecurityPanel({ me }: { me: CurrentUserResponse }) {
             </Button>
           )}
         </div>
-      </div>
-
-      <div className="border-t border-line pt-4">
-        <div className="text-sm font-semibold text-foreground">Phone number</div>
-
-        {phoneStep === "idle" && (
-          <div className="mt-2 flex flex-col gap-2">
-            {me.pendingPhoneNumber ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground">
-                    {formatPhoneForDisplay(me.pendingPhoneNumber, "ZA")}
-                  </span>
-                  <StatusBadge status="PhonePending" />
-                </div>
-                <p className="text-[12px] text-muted-foreground">
-                  You started changing your number to{" "}
-                  {formatPhoneForDisplay(me.pendingPhoneNumber, "ZA")} but
-                  haven't confirmed it yet.
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setPendingNumber(me.pendingPhoneNumber ?? "");
-                      setPhoneStep("verify");
-                    }}
-                  >
-                    Enter code
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPhoneInput("");
-                      setPhoneStep("entry");
-                    }}
-                  >
-                    Use a different number
-                  </Button>
-                </div>
-              </>
-            ) : me.phoneNumber ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground">
-                    {formatPhoneForDisplay(me.phoneNumber, "ZA")}
-                  </span>
-                  <StatusBadge
-                    status={
-                      me.phoneNumberConfirmed ? "PhoneVerified" : "PhoneUnverified"
-                    }
-                  />
-                </div>
-                <div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPhoneInput("");
-                      setPhoneStep("entry");
-                    }}
-                  >
-                    {me.phoneNumberConfirmed ? "Change number" : "Verify number"}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <StatusBadge status="PhoneUnverified" />
-                </div>
-                <p className="text-[12px] text-muted-foreground">
-                  Add a WhatsApp number to receive verification codes.
-                </p>
-                <div>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setPhoneInput("");
-                      setPhoneStep("entry");
-                    }}
-                  >
-                    Add a phone number
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {phoneStep === "entry" && (
-          <div className="mt-2 flex flex-col gap-2">
-            <Label htmlFor="security-phone">Phone number</Label>
-            <PhoneInput
-              id="security-phone"
-              value={phoneInput}
-              onValueChange={(value) => {
-                setPhoneInput(value);
-                setPhoneError(null);
-              }}
-              aria-invalid={Boolean(phoneError)}
-              aria-describedby={phoneError ? "security-phone-error" : undefined}
-            />
-            {phoneError && (
-              <p id="security-phone-error" className="text-[12px] font-medium text-destructive">
-                {phoneError}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <Button size="sm" disabled={phoneBusy} onClick={sendPhoneCode}>
-                {phoneBusy ? "Sending…" : "Send code"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPhoneStep("idle");
-                  setPhoneError(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {phoneStep === "verify" && (
-          <div className="mt-2 flex flex-col gap-2">
-            <VerifyCodeForm
-              destination={pendingNumber}
-              submitLabel="Confirm number"
-              onSubmit={async (code) => {
-                try {
-                  await meApi.verifyPhone(code);
-                } catch (err) {
-                  return { error: messageForApiError(err) };
-                }
-                toast.success("Phone number confirmed.");
-                setPhoneStep("idle");
-                revalidator.revalidate();
-                return { error: null };
-              }}
-              onResend={async () => {
-                try {
-                  await meApi.updatePhone(pendingNumber);
-                } catch (err) {
-                  return { error: messageForApiError(err) };
-                }
-                return { error: null };
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setPhoneInput("");
-                setPhoneStep("entry");
-              }}
-              className="text-[13px] font-medium text-primary hover:underline"
-            >
-              Use a different number
-            </button>
-          </div>
-        )}
       </div>
 
       <FormDialog

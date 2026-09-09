@@ -14,15 +14,4 @@ export const meApi = {
       body: { password },
     }),
 
-  updatePhone: (phoneNumber: string) =>
-    request<void>("/api/v1/users/me/phone", {
-      method: "POST",
-      body: { phoneNumber },
-    }),
-
-  verifyPhone: (code: string) =>
-    request<void>("/api/v1/users/me/phone/verify", {
-      method: "POST",
-      body: { code },
-    }),
 };

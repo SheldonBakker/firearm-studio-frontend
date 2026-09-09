@@ -24,9 +24,6 @@ const CODE_COPY: Record<string, string> = {
     "Your sign-in attempt has expired. Enter your email and password again.",
   "Auth.TwoFactorNotEnabled":
     "Two-factor authentication isn't enabled on this account.",
-  "Auth.PhoneMissing": "There's no phone change in progress.",
-  "Auth.NoPendingPhoneChange":
-    "There's no pending phone change to confirm. Start again.",
 };
 
 export function messageForApiError(err: unknown): string {
@@ -40,9 +37,6 @@ export function messageForApiError(err: unknown): string {
       return CODE_COPY[err.code];
     }
     return "Too many requests. Wait a moment and try again.";
-  }
-  if (err.status === 502) {
-    return "We couldn't send a code to that number right now. Please try again.";
   }
   if (err.code && CODE_COPY[err.code]) {
     return CODE_COPY[err.code];

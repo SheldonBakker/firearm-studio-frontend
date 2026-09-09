@@ -39,7 +39,7 @@ and the Firearm Studio API (`swagger.json`).
 
 ## How it works
 
-- **Auth** - email/password (plus optional WhatsApp-based two-factor) against
+- **Auth** - email/password (plus optional email-based two-factor) against
   the Firearm Studio API, not a third-party auth provider. `app/lib/api/auth.ts`
   handles login/register/refresh/2FA and stores the access/refresh token pair;
   `app/lib/auth/session-store.ts` exposes the current session (a subscribable
