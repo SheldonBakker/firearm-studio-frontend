@@ -40,6 +40,8 @@ import type {
   ProductSortBy,
 } from "~/lib/api/products/types";
 
+const PRICE_RE = /^\d+(\.\d{1,2})?$/;
+
 const EMPTY_PENDING: Set<string> = new Set();
 
 const STATUS_OPTIONS = [
@@ -60,7 +62,7 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const state = parseProductListParams(sp);
   return {
     data: productsApi.list(productListStateToApiParams(state)),
-    categories: productsApi.categories(),
+    categories: productsApi.categories().catch((): string[] => []),
   };
 }
 
@@ -98,7 +100,7 @@ function ResultCount({ promise }: { promise: Promise<ProductResponsePaginatedRes
   const page = use(promise);
   const n = page.totalCount;
   return (
-    <p className="text-[12.5px] text-muted-foreground">
+    <p className="mb-3 text-[12.5px] text-muted-foreground">
       {n} {n === 1 ? "product" : "products"}
     </p>
   );
@@ -122,29 +124,48 @@ export default function Products({ loaderData }: Route.ComponentProps) {
   const [pending, setPending] = useState<Set<string>>(new Set());
   const paramsKey = searchParams.toString();
   const syncedKey = useRef(paramsKey);
+  const lastWritten = useRef({
+    q: state.q,
+    minPrice: state.minPrice,
+    maxPrice: state.maxPrice,
+  });
+  const requestSeq = useRef(0);
+  const latestRequest = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     if (syncedKey.current === paramsKey) return;
     syncedKey.current = paramsKey;
-    setQDraft(state.q);
-    setMinDraft(state.minPrice);
-    setMaxDraft(state.maxPrice);
+    if (state.q !== lastWritten.current.q) setQDraft(state.q);
+    if (state.minPrice !== lastWritten.current.minPrice) {
+      setMinDraft(state.minPrice);
+    }
+    if (state.maxPrice !== lastWritten.current.maxPrice) {
+      setMaxDraft(state.maxPrice);
+    }
+    lastWritten.current = {
+      q: state.q,
+      minPrice: state.minPrice,
+      maxPrice: state.maxPrice,
+    };
+  }, [paramsKey, state.q, state.minPrice, state.maxPrice]);
+
+  useEffect(() => {
+    latestRequest.current = new Map();
     setOverrides(new Map());
     setPending(new Set());
-  }, [paramsKey, state.q, state.minPrice, state.maxPrice]);
+  }, [loaderData.data]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
       setSearchParams(
         (prev) => {
           const current = parseProductListParams(prev);
-          const priceRe = /^\d+(\.\d{1,2})?$/;
           const nextMin =
-            minDraft.trim() === "" || priceRe.test(minDraft.trim())
+            minDraft.trim() === "" || PRICE_RE.test(minDraft.trim())
               ? minDraft.trim()
               : current.minPrice;
           const nextMax =
-            maxDraft.trim() === "" || priceRe.test(maxDraft.trim())
+            maxDraft.trim() === "" || PRICE_RE.test(maxDraft.trim())
               ? maxDraft.trim()
               : current.maxPrice;
           if (
@@ -154,6 +175,11 @@ export default function Products({ loaderData }: Route.ComponentProps) {
           ) {
             return prev;
           }
+          lastWritten.current = {
+            q: qDraft,
+            minPrice: nextMin,
+            maxPrice: nextMax,
+          };
           return productListStateToSearch({
             ...current,
             q: qDraft,
@@ -202,6 +228,28 @@ export default function Products({ loaderData }: Route.ComponentProps) {
     });
   }
 
+  function clearOverride(id: string, key: keyof ProductResponse) {
+    setOverrides((prev) => {
+      const patch = prev.get(id);
+      if (!patch || !(key in patch)) return prev;
+      const { [key]: _removed, ...rest } = patch;
+      const next = new Map(prev);
+      if (Object.keys(rest).length === 0) next.delete(id);
+      else next.set(id, rest);
+      return next;
+    });
+  }
+
+  function beginRequest(id: string): number {
+    requestSeq.current += 1;
+    latestRequest.current.set(id, requestSeq.current);
+    return requestSeq.current;
+  }
+
+  function isLatest(id: string, token: number): boolean {
+    return latestRequest.current.get(id) === token;
+  }
+
   function markPending(id: string, on: boolean) {
     setPending((prev) => {
       const next = new Set(prev);
@@ -212,36 +260,40 @@ export default function Products({ loaderData }: Route.ComponentProps) {
   }
 
   async function onStockCommit(row: ProductResponse, nextStock: number) {
-    const prevStock = row.stockQuantity;
+    const token = beginRequest(row.id);
     applyOverride(row.id, { stockQuantity: nextStock });
     markPending(row.id, true);
     try {
       const updated = await productsApi.update(row.id, {
         stockQuantity: nextStock,
       });
-      applyOverride(row.id, { stockQuantity: updated.stockQuantity });
+      if (isLatest(row.id, token)) {
+        applyOverride(row.id, { stockQuantity: updated.stockQuantity });
+      }
     } catch (err) {
-      applyOverride(row.id, { stockQuantity: prevStock });
+      if (isLatest(row.id, token)) clearOverride(row.id, "stockQuantity");
       toast.error(mapProductError(err).message);
     } finally {
-      markPending(row.id, false);
+      if (isLatest(row.id, token)) markPending(row.id, false);
     }
   }
 
   async function onActiveToggle(row: ProductResponse, nextActive: boolean) {
-    const prevActive = row.isActive;
+    const token = beginRequest(row.id);
     applyOverride(row.id, { isActive: nextActive });
     markPending(row.id, true);
     try {
       const updated = await productsApi.update(row.id, {
         isActive: nextActive,
       });
-      applyOverride(row.id, { isActive: updated.isActive });
+      if (isLatest(row.id, token)) {
+        applyOverride(row.id, { isActive: updated.isActive });
+      }
     } catch (err) {
-      applyOverride(row.id, { isActive: prevActive });
+      if (isLatest(row.id, token)) clearOverride(row.id, "isActive");
       toast.error(mapProductError(err).message);
     } finally {
-      markPending(row.id, false);
+      if (isLatest(row.id, token)) markPending(row.id, false);
     }
   }
 
@@ -269,6 +321,14 @@ export default function Products({ loaderData }: Route.ComponentProps) {
     if (!ok) return;
     try {
       await productsApi.remove(row.id);
+      latestRequest.current.delete(row.id);
+      setOverrides((prev) => {
+        if (!prev.has(row.id)) return prev;
+        const next = new Map(prev);
+        next.delete(row.id);
+        return next;
+      });
+      markPending(row.id, false);
       toast.success("Product deleted");
       revalidator.revalidate();
     } catch (err) {
@@ -330,9 +390,6 @@ export default function Products({ loaderData }: Route.ComponentProps) {
       )}
 
       <div className="mb-4 flex flex-col gap-3">
-        <Suspense fallback={<Skeleton className="h-4 w-24" />}>
-          <ResultCount promise={loaderData.data} />
-        </Suspense>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative w-full sm:w-85">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
@@ -412,6 +469,9 @@ export default function Products({ loaderData }: Route.ComponentProps) {
         resetKey={loaderData.data}
         onRetry={() => revalidator.revalidate()}
       >
+        <Suspense fallback={<Skeleton className="mb-3 h-4 w-24" />}>
+          <ResultCount promise={loaderData.data} />
+        </Suspense>
         <Suspense fallback={loadingFallback}>
           <ProductsResolved
             promise={loaderData.data}
@@ -518,19 +578,21 @@ function ProductsResolved({
           />
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <Select value={String(state.size)} onValueChange={(v) => onSize(Number(v))}>
-          <SelectTrigger className="w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PRODUCT_PAGE_SIZES.map((size) => (
-              <SelectItem key={size} value={String(size)}>
-                {size} / page
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="mt-4">
+          <Select value={String(state.size)} onValueChange={(v) => onSize(Number(v))}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PRODUCT_PAGE_SIZES.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size} / page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Pagination page={page} onPage={onPage} />
       </div>
     </>
