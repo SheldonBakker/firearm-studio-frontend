@@ -1,9 +1,38 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { loginAsManager, tinyJpeg } from "./helpers/login";
 
 const SEARCH = "Search by name or SKU...";
 
+async function deleteByName(page: Page, name: string) {
+  await page.goto("/products");
+  await page.getByPlaceholder(SEARCH).fill(name);
+  const row = page.locator("tbody tr", { hasText: name });
+  await expect(row.first()).toBeVisible({ timeout: 10_000 });
+  await row.first().getByRole("button", { name: "Product actions" }).click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Delete", exact: true })
+    .click();
+  await expect(page.locator("tbody tr", { hasText: name })).toHaveCount(0, {
+    timeout: 30_000,
+  });
+}
+
 test.describe("products management", () => {
+  let createdName: string | null = null;
+
+  test.afterEach(async ({ page }) => {
+    const name = createdName;
+    createdName = null;
+    if (!name) return;
+    try {
+      await deleteByName(page, name);
+    } catch {
+      return;
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await loginAsManager(page);
   });
@@ -13,6 +42,7 @@ test.describe("products management", () => {
   }) => {
     const unique = Date.now().toString();
     const name = `E2E Product ${unique}`;
+    createdName = name;
 
     await page.goto("/products");
     await expect(page.getByPlaceholder(SEARCH)).toBeVisible();
@@ -33,15 +63,25 @@ test.describe("products management", () => {
 
     await expect(page).toHaveURL(/\/products(\?.*)?$/, { timeout: 30_000 });
     await page.getByPlaceholder(SEARCH).fill(name);
-    const row = page.locator("tr", { hasText: name });
-    await expect(row).toBeVisible({ timeout: 30_000 });
+    const row = page.locator("tbody tr", { hasText: name });
+    await expect(row).toHaveCount(1, { timeout: 30_000 });
+    await expect(row).toBeVisible();
+    await expect(row.getByRole("img", { name })).toBeVisible();
+    await expect(row.getByRole("img", { name })).toHaveAttribute("src", /.+/);
+
+    await page.getByPlaceholder(SEARCH).fill("");
+    await expect
+      .poll(() => page.locator("tbody tr").count(), { timeout: 30_000 })
+      .toBeGreaterThanOrEqual(1);
+    await page.getByPlaceholder(SEARCH).fill(name);
+    await expect(page.locator("tbody tr")).toHaveCount(1, { timeout: 30_000 });
 
     await row.getByRole("button", { name: "Increase stock" }).click();
     await expect(row.getByLabel("Stock quantity")).toHaveValue("8");
 
     await page.reload();
     await page.getByPlaceholder(SEARCH).fill(name);
-    const reloadedRow = page.locator("tr", { hasText: name });
+    const reloadedRow = page.locator("tbody tr", { hasText: name });
     await expect(reloadedRow.getByLabel("Stock quantity")).toHaveValue("8");
 
     await reloadedRow.getByRole("button", { name: "Product actions" }).click();
@@ -50,8 +90,9 @@ test.describe("products management", () => {
       .getByRole("dialog")
       .getByRole("button", { name: "Delete", exact: true })
       .click();
-    await expect(page.locator("tr", { hasText: name })).toHaveCount(0, {
+    await expect(page.locator("tbody tr", { hasText: name })).toHaveCount(0, {
       timeout: 30_000,
     });
+    createdName = null;
   });
 });
