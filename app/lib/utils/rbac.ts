@@ -43,6 +43,7 @@ export type NavKey =
   | "dashboard"
   | "customers"
   | "firearms"
+  | "products"
   | "storage"
   | "licences"
   | "invoices"
@@ -57,6 +58,7 @@ export type NavKey =
 // Discrete write/action capabilities consulted by every mutating control.
 export type Action =
   | "registry:write" // create/edit customers, firearms, storage, licences
+  | "products:write"
   | "registry:export-register" // export firearms register (Manager+)
   | "invoices:write" // generate, record payment, send, cancel
   | "bookings:write" // ranges, packages, bookings + status actions
@@ -82,6 +84,8 @@ export function can(user: SessionUser, action: Action): boolean {
     case "invoices:write":
     case "bookings:write":
       return isAtLeast(user, "Staff");
+    case "products:write":
+      return isAtLeast(user, "Manager");
     case "bookings:delete-attendee":
     case "bookings:export-register":
     case "registry:export-register":
