@@ -5,10 +5,10 @@
     "**/.client/**/*",
     ".react-router/types/**/*"
   ],
-  "exclude": ["workers", "worker-configuration.d.ts", "build", "node_modules"],
+  "exclude": ["workers", "worker-configuration.d.ts", "build", "node_modules", "e2e"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",

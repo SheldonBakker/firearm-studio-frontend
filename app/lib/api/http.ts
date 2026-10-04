@@ -32,13 +32,21 @@ export async function request<T>(
     Accept: "application/json",
     ...(await authHeaders()),
   };
-  if (opts.body !== undefined) headers["Content-Type"] = "application/json";
+  const body = opts.body;
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+  if (body !== undefined && !isFormData)
+    headers["Content-Type"] = "application/json";
 
   const send = (h: Record<string, string>) =>
     fetch(url.toString(), {
       method: opts.method ?? "GET",
       headers: h,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      body:
+        body === undefined
+          ? undefined
+          : isFormData
+            ? body
+            : JSON.stringify(body),
     });
 
   let res = await send(headers);
