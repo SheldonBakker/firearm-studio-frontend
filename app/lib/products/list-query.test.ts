@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_PRODUCT_LIST_STATE,
+  nextProductListState,
   parseProductListParams,
   productListStateToApiParams,
   productListStateToSearch,
@@ -90,5 +91,38 @@ describe("list-query", () => {
     expect("maxPrice" in params).toBe(false);
     expect("minStock" in params).toBe(false);
     expect("maxStock" in params).toBe(false);
+  });
+
+  it("reports no change when the draft already matches the URL", () => {
+    const sp = new URLSearchParams("q=glock&minPrice=10&sort=price");
+    expect(
+      nextProductListState(sp, { q: "glock", minPrice: "10", maxPrice: "" }),
+    ).toBeNull();
+    expect(
+      nextProductListState(new URLSearchParams(), {
+        q: "",
+        minPrice: "",
+        maxPrice: "",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns the next state with the page reset when the draft differs", () => {
+    const sp = new URLSearchParams("q=glock&page=3");
+    const next = nextProductListState(sp, {
+      q: "ammo",
+      minPrice: "",
+      maxPrice: "",
+    });
+    expect(next).not.toBeNull();
+    expect(next?.q).toBe("ammo");
+    expect(next?.page).toBe(1);
+  });
+
+  it("keeps the current price when the draft price is invalid", () => {
+    const sp = new URLSearchParams("minPrice=10");
+    expect(
+      nextProductListState(sp, { q: "", minPrice: "abc", maxPrice: "" }),
+    ).toBeNull();
   });
 });

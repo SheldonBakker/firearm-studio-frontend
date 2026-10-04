@@ -18,6 +18,10 @@ export function StockStepper({
   }, [value]);
 
   function commit(raw: string) {
+    if (raw.trim() === "") {
+      setDraft(String(value));
+      return;
+    }
     const next = Number(raw);
     if (!Number.isInteger(next) || next < 0) {
       setDraft(String(value));

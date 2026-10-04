@@ -9,6 +9,7 @@ import { IMAGE_ACCEPT, IMAGE_MAX_BYTES } from "~/lib/products/constants";
 export interface ProductImageCardProps {
   imageUrl: string | null;
   pendingPreview: string | null;
+  alt: string;
   disabled: boolean;
   busy: boolean;
   error: string | null;
@@ -33,6 +34,7 @@ export function ProductImageCard(props: ProductImageCardProps) {
   const {
     imageUrl,
     pendingPreview,
+    alt,
     disabled,
     busy,
     error,
@@ -46,6 +48,7 @@ export function ProductImageCard(props: ProductImageCardProps) {
   const [localError, setLocalError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const preview = pendingPreview ?? imageUrl;
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
   function handleFile(file: File | undefined) {
     if (!file) return;
@@ -63,23 +66,29 @@ export function ProductImageCard(props: ProductImageCardProps) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <SectionTitle>Image</SectionTitle>
-      {preview ? (
+      {preview !== null && failedSrc !== preview ? (
         <div className="overflow-hidden rounded-xl border border-border bg-secondary">
-          <img src={preview} alt="Product" className="h-48 w-full object-cover" />
+          <img
+            src={preview}
+            alt={alt}
+            className="h-48 w-full object-cover"
+            onError={() => setFailedSrc(preview)}
+          />
+        </div>
+      ) : disabled ? (
+        <div className="flex h-48 w-full items-center justify-center rounded-xl border border-border bg-secondary text-[12.5px] text-muted-foreground">
+          No image
         </div>
       ) : (
         <button
           type="button"
-          disabled={disabled}
           onClick={() => inputRef.current?.click()}
           onDragOver={(e) => {
-            if (disabled) return;
             e.preventDefault();
             setDragging(true);
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={(e) => {
-            if (disabled) return;
             e.preventDefault();
             setDragging(false);
             handleFile(e.dataTransfer.files[0]);
@@ -87,7 +96,6 @@ export function ProductImageCard(props: ProductImageCardProps) {
           className={cn(
             "flex h-48 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-dim transition-colors",
             dragging ? "border-primary bg-secondary" : "border-border",
-            disabled && "pointer-events-none opacity-50",
           )}
         >
           <Icon name="plus" size={22} />

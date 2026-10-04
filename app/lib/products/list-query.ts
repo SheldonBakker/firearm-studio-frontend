@@ -119,3 +119,40 @@ export function productListStateToApiParams(
   if (state.maxPrice) params.maxPrice = Number(state.maxPrice);
   return params;
 }
+
+export interface ProductListDraft {
+  q: string;
+  minPrice: string;
+  maxPrice: string;
+}
+
+export function nextProductListState(
+  current: URLSearchParams,
+  draft: ProductListDraft,
+): ProductListState | null {
+  const state = parseProductListParams(current);
+  const minPrice = resolveDraftPrice(draft.minPrice, state.minPrice);
+  const maxPrice = resolveDraftPrice(draft.maxPrice, state.maxPrice);
+  if (
+    state.q === draft.q &&
+    state.minPrice === minPrice &&
+    state.maxPrice === maxPrice
+  ) {
+    return null;
+  }
+  const next: ProductListState = {
+    ...state,
+    q: draft.q,
+    minPrice,
+    maxPrice,
+    page: 1,
+  };
+  return productListStateToSearch(next).toString() === current.toString()
+    ? null
+    : next;
+}
+
+function resolveDraftPrice(draft: string, fallback: string): string {
+  const trimmed = draft.trim();
+  return trimmed === "" || PRICE_RE.test(trimmed) ? trimmed : fallback;
+}

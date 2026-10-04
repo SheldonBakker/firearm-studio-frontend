@@ -211,6 +211,7 @@ function ProductEditView({
       const outcome = mapProductError(err);
       if (outcome.kind === "sku-conflict") {
         setErrors({ sku: outcome.message });
+        focusFirstError({ sku: outcome.message });
       } else if (outcome.kind === "not-found") {
         toast.error(outcome.message);
         savedRef.current = true;
@@ -290,7 +291,14 @@ function ProductEditView({
       toast.success("Product deleted");
       navigate("/products");
     } catch (err) {
-      toast.error(mapProductError(err).message);
+      const outcome = mapProductError(err);
+      if (outcome.kind === "not-found") {
+        savedRef.current = true;
+        toast.success("Product deleted");
+        navigate("/products");
+      } else {
+        toast.error(outcome.message);
+      }
     }
   }
 
@@ -331,6 +339,7 @@ function ProductEditView({
           <ProductImageCard
             imageUrl={imageUrl}
             pendingPreview={preview}
+            alt={original.name}
             disabled={!canWrite}
             busy={busy}
             error={imageError}

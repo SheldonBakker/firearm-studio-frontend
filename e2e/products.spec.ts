@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { loginAsManager, tinyJpeg } from "./helpers/login";
+import { loginAsManager, makeJpeg } from "./helpers/login";
 
 const SEARCH = "Search by name or SKU...";
 
@@ -57,7 +57,7 @@ test.describe("products management", () => {
     await page.locator('input[type="file"]').setInputFiles({
       name: "sample.jpg",
       mimeType: "image/jpeg",
-      buffer: tinyJpeg(),
+      buffer: await makeJpeg(page),
     });
     await page.getByRole("button", { name: "Create product" }).click();
 
@@ -67,7 +67,13 @@ test.describe("products management", () => {
     await expect(row).toHaveCount(1, { timeout: 30_000 });
     await expect(row).toBeVisible();
     await expect(row.getByRole("img", { name })).toBeVisible();
-    await expect(row.getByRole("img", { name })).toHaveAttribute("src", /.+/);
+    const thumb = row.getByRole("img", { name });
+    await expect(thumb).toHaveAttribute("src", /.+/);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => (el as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
 
     await page.getByPlaceholder(SEARCH).fill("");
     await expect
@@ -76,7 +82,13 @@ test.describe("products management", () => {
     await page.getByPlaceholder(SEARCH).fill(name);
     await expect(page.locator("tbody tr")).toHaveCount(1, { timeout: 30_000 });
 
+    const patch = page.waitForResponse(
+      (r) =>
+        r.request().method() === "PATCH" &&
+        r.url().includes("/api/v1/products/"),
+    );
     await row.getByRole("button", { name: "Increase stock" }).click();
+    await patch;
     await expect(row.getByLabel("Stock quantity")).toHaveValue("8");
 
     await page.reload();

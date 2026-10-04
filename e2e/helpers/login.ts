@@ -15,9 +15,16 @@ export async function loginAsManager(page: Page) {
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
 }
 
-export function tinyJpeg(): Buffer {
-  const header = [0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46];
-  const padding = new Array<number>(512).fill(0x00);
-  const footer = [0xff, 0xd9];
-  return Buffer.from([...header, ...padding, ...footer]);
+export async function makeJpeg(page: Page): Promise<Buffer> {
+  const dataUrl = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 2;
+    canvas.height = 2;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("2d canvas unavailable");
+    ctx.fillStyle = "#3366cc";
+    ctx.fillRect(0, 0, 2, 2);
+    return canvas.toDataURL("image/jpeg", 0.9);
+  });
+  return Buffer.from(dataUrl.split(",")[1], "base64");
 }

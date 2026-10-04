@@ -6,12 +6,16 @@ export function CategoryInput({
   onChange,
   options,
   disabled,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
   disabled?: boolean;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }) {
   const listId = `${id}-list`;
   return (
@@ -22,6 +26,8 @@ export function CategoryInput({
         value={value}
         disabled={disabled}
         autoComplete="off"
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
         onChange={(e) => onChange(e.target.value)}
       />
       <datalist id={listId}>

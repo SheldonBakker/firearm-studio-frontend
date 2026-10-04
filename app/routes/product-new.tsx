@@ -182,6 +182,7 @@ function ProductNewForm({
       const outcome = mapProductError(err);
       if (outcome.kind === "sku-conflict") {
         setErrors({ sku: outcome.message });
+        focusFirstError({ sku: outcome.message });
       } else {
         toast.error(outcome.message);
       }
@@ -227,6 +228,7 @@ function ProductNewForm({
           <ProductImageCard
             imageUrl={null}
             pendingPreview={preview}
+            alt={values.name.trim() || "Product image"}
             disabled={false}
             busy={false}
             error={null}

@@ -79,6 +79,10 @@ export function ProductFormFields(props: ProductFormFieldsProps) {
               value={values.category}
               options={categories}
               disabled={disabled}
+              aria-invalid={Boolean(errors.category)}
+              aria-describedby={
+                errors.category ? "product-category-error" : undefined
+              }
               onChange={(value) => onChange("category", value)}
             />
             <FieldError id="product-category-error" message={errors.category} />

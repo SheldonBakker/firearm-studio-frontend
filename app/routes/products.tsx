@@ -14,6 +14,7 @@ import { productsApi } from "~/lib/api/products/products";
 import { mapProductError } from "~/lib/api/products/errors";
 import {
   DEFAULT_PRODUCT_LIST_STATE,
+  nextProductListState,
   parseProductListParams,
   productListStateToApiParams,
   productListStateToSearch,
@@ -47,8 +48,6 @@ import type {
   ProductResponsePaginatedResponse,
   ProductSortBy,
 } from "~/lib/api/products/types";
-
-const PRICE_RE = /^\d+(\.\d{1,2})?$/;
 
 const EMPTY_PENDING: Set<string> = new Set();
 
@@ -89,7 +88,7 @@ function CategoryFilter({
       value={value || "all"}
       onValueChange={(next) => onChange(next === "all" ? "" : next)}
     >
-      <SelectTrigger className="w-full sm:w-48">
+      <SelectTrigger className="w-full sm:w-48" aria-label="Filter by category">
         <SelectValue placeholder="All categories" />
       </SelectTrigger>
       <SelectContent>
@@ -152,6 +151,10 @@ export default function Products({ loaderData }: Route.ComponentProps) {
   );
   const [pending, setPending] = useState<Set<string>>(new Set());
   const paramsKey = searchParams.toString();
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
   const syncedKey = useRef(paramsKey);
   const lastWritten = useRef({
     q: state.q,
@@ -179,49 +182,32 @@ export default function Products({ loaderData }: Route.ComponentProps) {
   }, [paramsKey, state.q, state.minPrice, state.maxPrice]);
 
   useEffect(() => {
-    latestRequest.current = new Map();
-    setOverrides(new Map());
-    setPending(new Set());
+    const inflight = pendingRef.current;
+    latestRequest.current = new Map(
+      [...latestRequest.current].filter(([id]) => inflight.has(id)),
+    );
+    setOverrides(
+      (prev) => new Map([...prev].filter(([id]) => inflight.has(id))),
+    );
   }, [loaderData.data]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
-      setSearchParams(
-        (prev) => {
-          const current = parseProductListParams(prev);
-          const nextMin =
-            minDraft.trim() === "" || PRICE_RE.test(minDraft.trim())
-              ? minDraft.trim()
-              : current.minPrice;
-          const nextMax =
-            maxDraft.trim() === "" || PRICE_RE.test(maxDraft.trim())
-              ? maxDraft.trim()
-              : current.maxPrice;
-          if (
-            current.q === qDraft &&
-            current.minPrice === nextMin &&
-            current.maxPrice === nextMax
-          ) {
-            return prev;
-          }
-          lastWritten.current = {
-            q: qDraft,
-            minPrice: nextMin,
-            maxPrice: nextMax,
-          };
-          return productListStateToSearch({
-            ...current,
-            q: qDraft,
-            minPrice: nextMin,
-            maxPrice: nextMax,
-            page: 1,
-          });
-        },
-        { replace: true },
-      );
+      const next = nextProductListState(searchParamsRef.current, {
+        q: qDraft,
+        minPrice: minDraft,
+        maxPrice: maxDraft,
+      });
+      if (next === null) return;
+      lastWritten.current = {
+        q: next.q,
+        minPrice: next.minPrice,
+        maxPrice: next.maxPrice,
+      };
+      setSearchParams(productListStateToSearch(next), { replace: true });
     }, 300);
     return () => clearTimeout(handle);
-  }, [qDraft, minDraft, maxDraft, setSearchParams]);
+  }, [qDraft, minDraft, maxDraft]);
 
   useVisibilityRefetch(50 * 60 * 1000, () => revalidator.revalidate());
 
@@ -362,7 +348,15 @@ export default function Products({ loaderData }: Route.ComponentProps) {
       toast.success("Product deleted");
       revalidator.revalidate();
     } catch (err) {
-      toast.error(mapProductError(err).message);
+      const outcome = mapProductError(err);
+      if (outcome.kind === "not-found") {
+        latestRequest.current.delete(row.id);
+        markPending(row.id, false);
+        toast("Product was already deleted");
+        revalidator.revalidate();
+      } else {
+        toast.error(outcome.message);
+      }
     }
   }
 
@@ -433,6 +427,7 @@ export default function Products({ loaderData }: Route.ComponentProps) {
             <input
               type="search"
               autoFocus
+              aria-label="Search products"
               value={qDraft}
               placeholder="Search by name or SKU..."
               onChange={(e) => setQDraft(e.target.value)}
@@ -442,7 +437,10 @@ export default function Products({ loaderData }: Route.ComponentProps) {
           <Suspense
             fallback={
               <Select disabled value="all">
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger
+                  className="w-full sm:w-48"
+                  aria-label="Filter by category"
+                >
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -565,7 +563,15 @@ function ProductsResolved({
   onSize: (size: number) => void;
 }) {
   const page = use(promise);
-  const merged = rows(page.items ?? []);
+  const items = page.items ?? [];
+  const merged = rows(items);
+  const lastPage = Math.max(1, Math.ceil(page.totalCount / state.size));
+  const pastEnd =
+    items.length === 0 && page.totalCount > 0 && state.page > 1;
+
+  useEffect(() => {
+    if (pastEnd) onPage(lastPage);
+  }, [pastEnd, lastPage]);
 
   if (page.totalCount === 0) {
     return (
@@ -613,7 +619,7 @@ function ProductsResolved({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="mt-4">
           <Select value={String(state.size)} onValueChange={(v) => onSize(Number(v))}>
-            <SelectTrigger className="w-28">
+            <SelectTrigger className="w-28" aria-label="Rows per page">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
