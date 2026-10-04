@@ -1,4 +1,12 @@
-import { Suspense, use, useEffect, useRef, useState } from "react";
+import {
+  Component,
+  Suspense,
+  use,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/products";
@@ -96,11 +104,32 @@ function CategoryFilter({
   );
 }
 
+class SilentBoundary extends Component<
+  { resetKey: unknown; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidUpdate(prev: { resetKey: unknown }) {
+    if (prev.resetKey !== this.props.resetKey && this.state.failed) {
+      this.setState({ failed: false });
+    }
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
 function ResultCount({ promise }: { promise: Promise<ProductResponsePaginatedResponse> }) {
   const page = use(promise);
   const n = page.totalCount;
   return (
-    <p className="mb-3 text-[12.5px] text-muted-foreground">
+    <p className="text-[12.5px] text-muted-foreground">
       {n} {n === 1 ? "product" : "products"}
     </p>
   );
@@ -232,7 +261,8 @@ export default function Products({ loaderData }: Route.ComponentProps) {
     setOverrides((prev) => {
       const patch = prev.get(id);
       if (!patch || !(key in patch)) return prev;
-      const { [key]: _removed, ...rest } = patch;
+      const rest = { ...patch };
+      delete rest[key];
       const next = new Map(prev);
       if (Object.keys(rest).length === 0) next.delete(id);
       else next.set(id, rest);
@@ -390,6 +420,11 @@ export default function Products({ loaderData }: Route.ComponentProps) {
       )}
 
       <div className="mb-4 flex flex-col gap-3">
+        <SilentBoundary resetKey={loaderData.data}>
+          <Suspense fallback={<Skeleton className="h-4 w-24" />}>
+            <ResultCount promise={loaderData.data} />
+          </Suspense>
+        </SilentBoundary>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative w-full sm:w-85">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
@@ -469,9 +504,6 @@ export default function Products({ loaderData }: Route.ComponentProps) {
         resetKey={loaderData.data}
         onRetry={() => revalidator.revalidate()}
       >
-        <Suspense fallback={<Skeleton className="mb-3 h-4 w-24" />}>
-          <ResultCount promise={loaderData.data} />
-        </Suspense>
         <Suspense fallback={loadingFallback}>
           <ProductsResolved
             promise={loaderData.data}
