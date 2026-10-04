@@ -16,6 +16,7 @@ export interface ProductImageCardProps {
   onSelectFile: (file: File) => void;
   onRemove: () => void;
   onRetry: () => void;
+  retryOpensPicker?: boolean;
 }
 
 function validate(file: File): string | null {
@@ -39,6 +40,7 @@ export function ProductImageCard(props: ProductImageCardProps) {
     onSelectFile,
     onRemove,
     onRetry,
+    retryOpensPicker = false,
   } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -100,8 +102,15 @@ export function ProductImageCard(props: ProductImageCardProps) {
         <div className="mt-3 flex items-center justify-between gap-2">
           <p className="text-[12px] font-medium text-destructive">{shownError}</p>
           {retryable && (
-            <Button type="button" variant="outline" size="sm" onClick={onRetry}>
-              Retry
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                retryOpensPicker ? inputRef.current?.click() : onRetry()
+              }
+            >
+              {retryOpensPicker ? "Choose the image again" : "Retry"}
             </Button>
           )}
         </div>

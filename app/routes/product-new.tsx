@@ -1,5 +1,5 @@
 import { Suspense, use, useEffect, useRef, useState } from "react";
-import { useBlocker, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/product-new";
 import { productsApi } from "~/lib/api/products/products";
@@ -11,11 +11,11 @@ import {
 } from "~/lib/products/schema";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
-import { useConfirm } from "~/context/confirm-context";
+import { focusFirstError } from "~/lib/products/form-focus";
+import { useUnsavedChangesGuard } from "~/lib/products/use-unsaved-changes-guard";
 import { PageWrap, BackLink } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { Button } from "~/components/ui/button";
-import { Icon } from "~/components/common/icon";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ProductFormFields } from "~/components/products/product-form-fields";
 import { ProductImageCard } from "~/components/products/product-image-card";
@@ -31,24 +31,18 @@ interface DuplicateState {
   isActive: boolean;
 }
 
-const FIELD_IDS: Record<keyof ProductFormValues, string> = {
-  name: "product-name",
-  sku: "product-sku",
-  category: "product-category",
-  description: "product-description",
-  price: "product-price",
-  costPrice: "product-cost",
-  stockQuantity: "product-stock",
-  isActive: "product-active",
-};
-
-function focusFirstError(errors: Partial<Record<keyof ProductFormValues, string>>) {
-  for (const key of Object.keys(FIELD_IDS) as (keyof ProductFormValues)[]) {
-    if (errors[key]) {
-      document.getElementById(FIELD_IDS[key])?.focus();
-      return;
-    }
-  }
+function isDuplicateState(value: unknown): value is DuplicateState {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.name === "string" &&
+    (v.description === null || typeof v.description === "string") &&
+    (v.category === null || typeof v.category === "string") &&
+    typeof v.price === "number" &&
+    (v.costPrice === null || typeof v.costPrice === "number") &&
+    typeof v.stockQuantity === "number" &&
+    typeof v.isActive === "boolean"
+  );
 }
 
 function blankFormValues(): ProductFormValues {
@@ -126,9 +120,8 @@ function ProductNewForm({
 }) {
   const categories = use(categoriesPromise);
   const navigate = useNavigate();
-  const confirm = useConfirm();
   const location = useLocation();
-  const prefill = location.state as DuplicateState | null;
+  const prefill = isDuplicateState(location.state) ? location.state : null;
   const baseline = useRef<ProductFormValues>(
     prefill ? prefillFromDuplicate(prefill) : blankFormValues(),
   );
@@ -152,35 +145,13 @@ function ProductNewForm({
   }, [image]);
 
   const dirty =
-    !savedRef.current &&
     !saving &&
     (JSON.stringify(values) !== JSON.stringify(baseline.current) ||
       image !== null);
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
 
-  const blocker = useBlocker(
-    (args) =>
-      dirty && args.nextLocation.pathname !== args.currentLocation.pathname,
-  );
-
-  useEffect(() => {
-    if (blocker.state !== "blocked") return;
-    let active = true;
-    (async () => {
-      const ok = await confirm({
-        title: "Discard changes?",
-        description: "You have unsaved changes.",
-        confirmLabel: "Discard",
-        cancelLabel: "Keep editing",
-        destructive: true,
-      });
-      if (!active) return;
-      if (ok) blocker.proceed();
-      else blocker.reset();
-    })();
-    return () => {
-      active = false;
-    };
-  }, [blocker, confirm]);
+  useUnsavedChangesGuard({ dirtyRef, savedRef });
 
   function onChange<K extends keyof ProductFormValues>(
     name: K,

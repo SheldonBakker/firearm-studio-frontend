@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useBlocker, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/product-detail";
 import { productsApi } from "~/lib/api/products/products";
@@ -15,6 +15,8 @@ import {
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
 import { useConfirm } from "~/context/confirm-context";
+import { focusFirstError } from "~/lib/products/form-focus";
+import { useUnsavedChangesGuard } from "~/lib/products/use-unsaved-changes-guard";
 import { fmtDate } from "~/lib/utils/format";
 import { useVisibilityRefetch } from "~/hooks/use-visibility-refetch";
 import { PageWrap, BackLink } from "~/components/common/misc";
@@ -26,26 +28,6 @@ import { Icon } from "~/components/common/icon";
 import { ProductFormFields } from "~/components/products/product-form-fields";
 import { ProductImageCard } from "~/components/products/product-image-card";
 import type { ProductResponse } from "~/lib/api/products/types";
-
-const FIELD_IDS: Record<keyof ProductFormValues, string> = {
-  name: "product-name",
-  sku: "product-sku",
-  category: "product-category",
-  description: "product-description",
-  price: "product-price",
-  costPrice: "product-cost",
-  stockQuantity: "product-stock",
-  isActive: "product-active",
-};
-
-function focusFirstError(errors: Partial<Record<keyof ProductFormValues, string>>) {
-  for (const key of Object.keys(FIELD_IDS) as (keyof ProductFormValues)[]) {
-    if (errors[key]) {
-      document.getElementById(FIELD_IDS[key])?.focus();
-      return;
-    }
-  }
-}
 
 function toFormValues(p: ProductResponse): ProductFormValues {
   return {
@@ -94,7 +76,10 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
 function MissingProduct() {
   const navigate = useNavigate();
+  const handled = useRef(false);
   useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
     toast.error("This product no longer exists.");
     navigate("/products", { replace: true });
   }, [navigate]);
@@ -145,6 +130,13 @@ function ProductEditView({
     initialImageError?.kind === "image" ? initialImageError.retryable : false,
   );
   const lastFile = useRef<File | null>(null);
+
+  const consumedState = useRef(false);
+  useEffect(() => {
+    if (consumedState.current || !initialImageError) return;
+    consumedState.current = true;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [initialImageError, location.pathname, navigate]);
   const previewRef = useRef<string | null>(null);
   previewRef.current = preview;
   const busyRef = useRef(false);
@@ -181,32 +173,7 @@ function ProductEditView({
     if (!busyRef.current) void refreshImageUrl();
   });
 
-  const blocker = useBlocker(
-    (args) =>
-      dirtyRef.current &&
-      !savedRef.current &&
-      args.nextLocation.pathname !== args.currentLocation.pathname,
-  );
-
-  useEffect(() => {
-    if (blocker.state !== "blocked") return;
-    let active = true;
-    (async () => {
-      const ok = await confirm({
-        title: "Discard changes?",
-        description: "You have unsaved changes.",
-        confirmLabel: "Discard",
-        cancelLabel: "Keep editing",
-        destructive: true,
-      });
-      if (!active) return;
-      if (ok) blocker.proceed();
-      else blocker.reset();
-    })();
-    return () => {
-      active = false;
-    };
-  }, [blocker, confirm]);
+  useUnsavedChangesGuard({ dirtyRef, savedRef });
 
   function onChange<K extends keyof ProductFormValues>(
     name: K,
@@ -370,6 +337,7 @@ function ProductEditView({
             retryable={retryable}
             onSelectFile={uploadFile}
             onRemove={onRemoveImage}
+            retryOpensPicker={lastFile.current === null}
             onRetry={() => {
               if (lastFile.current) uploadFile(lastFile.current);
             }}
