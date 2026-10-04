@@ -38,7 +38,7 @@ export interface ProductsTableProps {
   loading?: boolean;
 }
 
-const WIDE_CLS = "hidden lg:table-cell";
+const WIDE_CLS = "hidden xl:table-cell";
 
 const WIDE_SKELETON_COLS: ReadonlySet<number> = new Set([4, 5, 8]);
 
