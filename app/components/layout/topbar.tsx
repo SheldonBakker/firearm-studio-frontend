@@ -15,6 +15,7 @@ const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },
   { prefix: "/customers", title: "Customers" },
   { prefix: "/firearms", title: "Firearms" },
+  { prefix: "/products", title: "Products" },
   { prefix: "/storage", title: "Storage Records" },
   { prefix: "/licences", title: "Licences" },
   { prefix: "/invoices", title: "Invoices" },
@@ -98,6 +99,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   const isDashboard = pathname.startsWith("/dashboard");
   const isCustomers = pathname.startsWith("/customers");
   const isFirearms = pathname.startsWith("/firearms");
+  const isProducts = pathname.startsWith("/products");
   const isStorage = pathname.startsWith("/storage");
   const isLicences = pathname.startsWith("/licences");
   const isAudit = pathname.startsWith("/audit");
@@ -371,7 +373,7 @@ export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
         {title}
       </div>
 
-      {!isDashboard && (
+      {!isDashboard && !isProducts && (
       <div className="relative order-last w-full min-w-0 sm:order-none sm:ml-auto sm:w-85">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dim">
           <Icon name="search" size={16} />
