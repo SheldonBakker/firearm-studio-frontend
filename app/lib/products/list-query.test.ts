@@ -7,6 +7,7 @@ import {
   productListStateToSearch,
   type ProductListState,
 } from "./list-query";
+import { PRODUCT_CATEGORIES } from "./categories";
 
 function roundTrip(state: ProductListState): ProductListState {
   return parseProductListParams(productListStateToSearch(state));
@@ -22,7 +23,7 @@ describe("list-query", () => {
   it("round-trips a fully populated state", () => {
     const state: ProductListState = {
       q: "glock",
-      category: "Ammo",
+      category: PRODUCT_CATEGORIES[0],
       status: "inactive",
       stock: "low",
       minPrice: "10",
@@ -117,6 +118,28 @@ describe("list-query", () => {
     expect(next).not.toBeNull();
     expect(next?.q).toBe("ammo");
     expect(next?.page).toBe(1);
+  });
+
+  it("keeps a valid category from the URL", () => {
+    const sp = new URLSearchParams(
+      `category=${encodeURIComponent(PRODUCT_CATEGORIES[1])}`,
+    );
+    const parsed = parseProductListParams(sp);
+    expect(parsed.category).toBe(PRODUCT_CATEGORIES[1]);
+  });
+
+  it("drops an unknown category from the URL, falling back to empty", () => {
+    const sp = new URLSearchParams("category=NotReal");
+    const parsed = parseProductListParams(sp);
+    expect(parsed.category).toBe("");
+  });
+
+  it("omits an unknown category from serialization and api params", () => {
+    const state = parseProductListParams(
+      new URLSearchParams("category=NotReal"),
+    );
+    expect(productListStateToSearch(state).has("category")).toBe(false);
+    expect("category" in productListStateToApiParams(state)).toBe(false);
   });
 
   it("keeps the current price when the draft price is invalid", () => {

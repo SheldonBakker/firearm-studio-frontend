@@ -49,7 +49,6 @@ export function clientLoader({ params }: Route.ClientLoaderArgs) {
       if (outcome.kind === "not-found") return null;
       throw err;
     }),
-    categories: productsApi.categories(),
   };
 }
 
@@ -63,7 +62,6 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
           product ? (
             <ProductEditView
               product={product}
-              categoriesPromise={loaderData.categories}
             />
           ) : (
             <MissingProduct />
@@ -88,10 +86,8 @@ function MissingProduct() {
 
 function ProductEditView({
   product,
-  categoriesPromise,
 }: {
   product: ProductResponse;
-  categoriesPromise: Promise<string[]>;
 }) {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -100,17 +96,6 @@ function ProductEditView({
   const canWrite = can(user, "products:write");
   const initialImageError = (location.state as { imageError?: ProductErrorOutcome } | null)
     ?.imageError;
-
-  const [categories, setCategories] = useState<string[]>([]);
-  useEffect(() => {
-    let active = true;
-    categoriesPromise.then((list) => {
-      if (active) setCategories(list);
-    });
-    return () => {
-      active = false;
-    };
-  }, [categoriesPromise]);
 
   const [original, setOriginal] = useState<ProductResponse>(product);
   const [values, setValues] = useState<ProductFormValues>(toFormValues(product));
@@ -332,7 +317,6 @@ function ProductEditView({
           values={values}
           errors={errors}
           disabled={!canWrite}
-          categories={categories}
           onChange={onChange}
         />
         <div className="mt-6 lg:mt-0">

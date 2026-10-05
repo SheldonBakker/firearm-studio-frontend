@@ -4,6 +4,7 @@ import {
   LOW_STOCK_THRESHOLD,
   PRODUCT_PAGE_SIZES,
 } from "./constants";
+import { isProductCategory } from "./categories";
 import type {
   ProductListParams,
   ProductSortBy,
@@ -61,6 +62,10 @@ function parsePriceParam(value: string | null): string {
   return PRICE_RE.test(value) ? value : "";
 }
 
+function parseCategoryParam(raw: string | null): string {
+  return raw && isProductCategory(raw) ? raw : "";
+}
+
 export function parseProductListParams(sp: URLSearchParams): ProductListState {
   const sizeRaw = Number(sp.get("size"));
   const size = (PRODUCT_PAGE_SIZES as readonly number[]).includes(sizeRaw)
@@ -70,7 +75,7 @@ export function parseProductListParams(sp: URLSearchParams): ProductListState {
   const dirRaw = sp.get("dir");
   return {
     q: sp.get("q") ?? "",
-    category: sp.get("category") ?? "",
+    category: parseCategoryParam(sp.get("category")),
     status: asEnum(sp.get("status"), STATUS_VALUES),
     stock: asEnum(sp.get("stock"), STOCK_VALUES),
     minPrice: parsePriceParam(sp.get("minPrice")),

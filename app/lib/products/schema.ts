@@ -3,6 +3,7 @@ import type {
   ProductResponse,
   UpdateProductRequest,
 } from "~/lib/api/products/types";
+import { isProductCategory } from "./categories";
 
 export interface ProductFormValues {
   name: string;
@@ -18,7 +19,7 @@ export interface ProductFormValues {
 export interface NormalizedProductForm {
   name: string;
   sku: string | null;
-  category: string | null;
+  category: string;
   description: string | null;
   price: number;
   costPrice: number | null;
@@ -105,7 +106,21 @@ export const productFormSchema = z.object({
     .min(1, "Name is required.")
     .max(200, "Name must be 200 characters or fewer."),
   sku: optionalText(64, "SKU must be 64 characters or fewer."),
-  category: optionalText(100, "Category must be 100 characters or fewer."),
+  category: z
+    .string()
+    .trim()
+    .superRefine((value, ctx) => {
+      if (value.length === 0) {
+        ctx.addIssue({ code: "custom", message: "Category is required." });
+        return;
+      }
+      if (!isProductCategory(value)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Choose a category from the list.",
+        });
+      }
+    }),
   description: optionalText(4000, "Description must be 4000 characters or fewer."),
   price: requiredNumber("price"),
   costPrice: optionalNumber("cost price"),
