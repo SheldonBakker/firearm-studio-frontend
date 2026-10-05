@@ -13,7 +13,6 @@ export interface ProductFormFieldsProps {
   values: ProductFormValues;
   errors: Partial<Record<FieldKey, string>>;
   disabled: boolean;
-  categories: string[];
   onChange: <K extends FieldKey>(name: K, value: ProductFormValues[K]) => void;
 }
 
@@ -33,7 +32,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 }
 
 export function ProductFormFields(props: ProductFormFieldsProps) {
-  const { values, errors, disabled, categories, onChange } = props;
+  const { values, errors, disabled, onChange } = props;
   const priceNum = parseMoney(values.price);
   const costNum = parseMoney(values.costPrice);
   let marginLine = "Add a cost price to see margin";
@@ -77,7 +76,6 @@ export function ProductFormFields(props: ProductFormFieldsProps) {
             <CategoryInput
               id="product-category"
               value={values.category}
-              options={categories}
               disabled={disabled}
               aria-invalid={Boolean(errors.category)}
               aria-describedby={

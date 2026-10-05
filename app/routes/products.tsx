@@ -21,6 +21,7 @@ import {
   type ProductListState,
 } from "~/lib/products/list-query";
 import { PRODUCT_PAGE_SIZES } from "~/lib/products/constants";
+import { PRODUCT_CATEGORIES } from "~/lib/products/categories";
 import { useVisibilityRefetch } from "~/hooks/use-visibility-refetch";
 import { useSessionUser } from "~/context/auth-context";
 import { can } from "~/lib/utils/rbac";
@@ -69,20 +70,16 @@ export function clientLoader({ request }: Route.ClientLoaderArgs) {
   const state = parseProductListParams(sp);
   return {
     data: productsApi.list(productListStateToApiParams(state)),
-    categories: productsApi.categories().catch((): string[] => []),
   };
 }
 
 function CategoryFilter({
-  promise,
   value,
   onChange,
 }: {
-  promise: Promise<string[]>;
   value: string;
   onChange: (value: string) => void;
 }) {
-  const categories = use(promise);
   return (
     <Select
       value={value || "all"}
@@ -93,7 +90,7 @@ function CategoryFilter({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All categories</SelectItem>
-        {categories.map((category) => (
+        {PRODUCT_CATEGORIES.map((category) => (
           <SelectItem key={category} value={category}>
             {category}
           </SelectItem>
@@ -434,27 +431,10 @@ export default function Products({ loaderData }: Route.ComponentProps) {
               className="h-10 w-full rounded-[9px] border border-border2 bg-background px-3 pl-9 text-[16px] text-foreground outline-none focus:border-primary sm:h-9.5 sm:text-[13px]"
             />
           </div>
-          <Suspense
-            fallback={
-              <Select disabled value="all">
-                <SelectTrigger
-                  className="w-full sm:w-48"
-                  aria-label="Filter by category"
-                >
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
-                </SelectContent>
-              </Select>
-            }
-          >
-            <CategoryFilter
-              promise={loaderData.categories}
-              value={state.category}
-              onChange={(value) => updateState({ category: value })}
-            />
-          </Suspense>
+          <CategoryFilter
+            value={state.category}
+            onChange={(value) => updateState({ category: value })}
+          />
           <div className="flex items-center gap-2">
             <input
               type="number"

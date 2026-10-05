@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { parseProductForm, type ProductFormValues } from "./schema";
+import { PRODUCT_CATEGORIES } from "./categories";
 
 function values(overrides: Partial<ProductFormValues>): ProductFormValues {
   return {
     name: "Widget",
     sku: "",
-    category: "",
+    category: PRODUCT_CATEGORIES[0],
     description: "",
     price: "10",
     costPrice: "",
@@ -48,12 +49,41 @@ describe("parseProductForm", () => {
     expect(parseProductForm(values({ stockQuantity: "3" })).ok).toBe(true);
   });
 
+  it("accepts a valid PRODUCT_CATEGORIES value for category", () => {
+    const result = parseProductForm(
+      values({ category: PRODUCT_CATEGORIES[0] }),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.data.category).toBe(PRODUCT_CATEGORIES[0]);
+  });
+
+  it("rejects empty category with required message", () => {
+    const result = parseProductForm(values({ category: "" }));
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.fieldErrors.category).toBe("Category is required.");
+    }
+  });
+
+  it("rejects an unknown category with the fixed message", () => {
+    const result = parseProductForm(
+      values({ category: "Not A Real Category" }),
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.fieldErrors.category).toBe(
+        "Choose a category from the list.",
+      );
+    }
+  });
+
   it("normalizes empty optional fields to null", () => {
-    const parsed = parseProductForm(values({}));
+    const parsed = parseProductForm(
+      values({ category: PRODUCT_CATEGORIES[0] }),
+    );
     expect(parsed.ok).toBe(true);
     if (parsed.ok) {
       expect(parsed.data.sku).toBeNull();
-      expect(parsed.data.category).toBeNull();
       expect(parsed.data.description).toBeNull();
       expect(parsed.data.costPrice).toBeNull();
       expect(parsed.data.price).toBe(10);

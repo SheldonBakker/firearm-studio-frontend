@@ -52,6 +52,8 @@ test.describe("products management", () => {
 
     await page.locator("#product-name").fill(name);
     await page.locator("#product-sku").fill(`SKU-${unique}`);
+    await page.locator("#product-category").click();
+    await page.getByRole("option", { name: "Ammunition" }).click();
     await page.locator("#product-price").fill("199.99");
     await page.locator("#product-stock").fill("7");
     await page.locator('input[type="file"]').setInputFiles({

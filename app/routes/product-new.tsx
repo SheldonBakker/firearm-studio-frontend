@@ -1,7 +1,6 @@
-import { Suspense, use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
-import type { Route } from "./+types/product-new";
 import { productsApi } from "~/lib/api/products/products";
 import { mapProductError } from "~/lib/api/products/errors";
 import {
@@ -16,7 +15,6 @@ import { useUnsavedChangesGuard } from "~/lib/products/use-unsaved-changes-guard
 import { PageWrap, BackLink } from "~/components/common/misc";
 import { PageHeader } from "~/components/common/page-header";
 import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
 import { ProductFormFields } from "~/components/products/product-form-fields";
 import { ProductImageCard } from "~/components/products/product-image-card";
 import type { CreateProductRequest } from "~/lib/api/products/types";
@@ -84,11 +82,7 @@ function buildCreateBody(n: NormalizedProductForm): CreateProductRequest {
   };
 }
 
-export function clientLoader() {
-  return { categories: productsApi.categories() };
-}
-
-export default function ProductNew({ loaderData }: Route.ComponentProps) {
+export default function ProductNew() {
   const user = useSessionUser();
   const navigate = useNavigate();
   if (!can(user, "products:write")) {
@@ -106,19 +100,12 @@ export default function ProductNew({ loaderData }: Route.ComponentProps) {
   return (
     <PageWrap>
       <BackLink label="Back to products" onClick={() => navigate("/products")} />
-      <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
-        <ProductNewForm categoriesPromise={loaderData.categories} />
-      </Suspense>
+      <ProductNewForm />
     </PageWrap>
   );
 }
 
-function ProductNewForm({
-  categoriesPromise,
-}: {
-  categoriesPromise: Promise<string[]>;
-}) {
-  const categories = use(categoriesPromise);
+function ProductNewForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefill = isDuplicateState(location.state) ? location.state : null;
@@ -221,7 +208,6 @@ function ProductNewForm({
           values={values}
           errors={errors}
           disabled={false}
-          categories={categories}
           onChange={onChange}
         />
         <div className="mt-6 lg:mt-0">

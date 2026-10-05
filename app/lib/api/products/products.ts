@@ -10,20 +10,6 @@ import type {
 
 const BASE = "/api/v1/products";
 
-export function normalizeCategories(values: (string | null)[]): string[] {
-  const seen = new Map<string, string>();
-  for (const value of values) {
-    if (!value) continue;
-    const trimmed = value.trim();
-    if (!trimmed) continue;
-    const key = trimmed.toLowerCase();
-    if (!seen.has(key)) seen.set(key, trimmed);
-  }
-  return [...seen.values()].sort((a, b) =>
-    a.toLowerCase().localeCompare(b.toLowerCase()),
-  );
-}
-
 async function list(
   params: ProductListParams = {},
 ): Promise<ProductResponsePaginatedResponse> {
@@ -46,20 +32,6 @@ async function list(
   return normalizePage(response, params);
 }
 
-async function categories(): Promise<string[]> {
-  try {
-    const page = await list({
-      pageNumber: 1,
-      pageSize: 200,
-      sortBy: "category",
-      sortDir: "asc",
-    });
-    return normalizeCategories((page.items ?? []).map((item) => item.category));
-  } catch {
-    return [];
-  }
-}
-
 function uploadImage(id: string, file: File): Promise<ProductResponse> {
   const form = new FormData();
   form.append("file", file);
@@ -71,7 +43,6 @@ function uploadImage(id: string, file: File): Promise<ProductResponse> {
 
 export const productsApi = {
   list,
-  categories,
   get: (id: string) => request<ProductResponse>(`${BASE}/${id}`),
   create: (body: CreateProductRequest) =>
     request<ProductResponse>(BASE, { method: "POST", body }),

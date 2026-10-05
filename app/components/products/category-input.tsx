@@ -1,10 +1,19 @@
-import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  PRODUCT_CATEGORIES,
+  isProductCategory,
+} from "~/lib/products/categories";
 
 export function CategoryInput({
   id,
   value,
   onChange,
-  options,
   disabled,
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
@@ -12,29 +21,30 @@ export function CategoryInput({
   id: string;
   value: string;
   onChange: (value: string) => void;
-  options: string[];
   disabled?: boolean;
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;
 }) {
-  const listId = `${id}-list`;
+  const legacy = value && !isProductCategory(value) ? value : null;
+
   return (
-    <>
-      <Input
+    <Select value={value} disabled={disabled} onValueChange={onChange}>
+      <SelectTrigger
         id={id}
-        list={listId}
-        value={value}
-        disabled={disabled}
-        autoComplete="off"
+        className="w-full"
         aria-invalid={ariaInvalid}
         aria-describedby={ariaDescribedBy}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <datalist id={listId}>
-        {options.map((option) => (
-          <option key={option} value={option} />
+      >
+        <SelectValue placeholder="Select a category" />
+      </SelectTrigger>
+      <SelectContent>
+        {PRODUCT_CATEGORIES.map((cat) => (
+          <SelectItem key={cat} value={cat}>
+            {cat}
+          </SelectItem>
         ))}
-      </datalist>
-    </>
+        {legacy && <SelectItem value={legacy}>{legacy}</SelectItem>}
+      </SelectContent>
+    </Select>
   );
 }
