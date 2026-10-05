@@ -28,10 +28,13 @@ const GROUPS: NavGroup[] = [
     items: [
       { key: "customers", label: "Customers", icon: "users", to: "/customers" },
       { key: "firearms", label: "Firearms", icon: "target", to: "/firearms" },
-      { key: "products", label: "Products", icon: "package", to: "/products" },
       { key: "storage", label: "Storage", icon: "box", to: "/storage" },
       { key: "licences", label: "Licences", icon: "shield", to: "/licences" },
     ],
+  },
+  {
+    head: "Product Management",
+    items: [{ key: "products", label: "Products", icon: "package", to: "/products" }],
   },
   {
     head: "Bookings",
